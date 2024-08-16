@@ -2,7 +2,7 @@ import sqlite3
 
 def criar_tabelas():
     # Conectar ao banco de dados (ou criar, se não existir)
-    conn = sqlite3.connect('meu_banco_de_dados.db')
+    conn = sqlite3.connect('siteapostas.db')
     cursor = conn.cursor()
 
     # Criar tabela usuarios
