@@ -1,7 +1,7 @@
 import sqlite3
 import os
 import platform
-from tabulate import tabulate
+from tabulate import tabulate #pip install tabulate
 
 def conectar_db():
     # Atualize o caminho do banco de dados se necessário
