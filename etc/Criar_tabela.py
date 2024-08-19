@@ -2,7 +2,7 @@ import sqlite3
 
 def criar_tabelas():
     # Conectar ao banco de dados (ou criar, se não existir)
-    conn = sqlite3.connect('siteapostas.db')
+    conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
 
     # Criar tabela usuarios
@@ -121,7 +121,28 @@ def criar_tabelas():
     # Fechar a conexão
     conn.close()
 
+def inserir_moderador(nome, email, senha, data_nascimento):
+    # Conectar ao banco de dados
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    # Inserir novo moderador na tabela usuarios
+    cursor.execute('''
+    INSERT INTO usuarios (nome, email, senha, data_nascimento, tipo)
+    VALUES (?, ?, ?, ?, 'moderador')
+    ''', (nome, email, senha, data_nascimento))
+
+    # Confirmar as alterações
+    conn.commit()
+    
+    # Fechar a conexão
+    conn.close()
+
 # Executar a função para criar as tabelas
 if __name__ == '__main__':
     criar_tabelas()
     print("Tabelas criadas com sucesso.")
+
+    # Inserir uma conta de moderador
+    inserir_moderador('ADM_SUPREMO', 'moderadorgatinho@gmail.com', 'coxinha123', '2000-01-01')
+    print("Conta de moderador inserida com sucesso.")
