@@ -1,29 +1,16 @@
+<!-- templates/index.html -->
 <!DOCTYPE html>
-<html lang="pt-br">
-  <head>
-    <title>Top 3 Melhores RPGs de Todos os Tempos Segundo Eu</title>
-    <meta charset="utf-8">
-  </head>
-  <body bgcolor="#A9A9A9">
-    <h1>Top 3 Melhores RPGs de Todos os Tempos Segundo Eu</h1>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Olá, Mundo!</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h1 id="message">Olá, Mundo!</h1>
 
-    <h2>TOP 1: Elder Scrolls Skyrim</h2>
-    <img src="{{ url_for('static', filename='images/skyrim.jpg') }}" alt="Skyrim" width="300" height="200">
-    <p>Um jogo onde você começa como um herói, mas acaba passando mais tempo caçando cabras e coletando ingredientes para poções do que salvando o mundo.</p>
-
-    <h2>TOP 2: Baldur's Gate 3</h2>
-    <img src="{{ url_for('static', filename='images/baldur.jpeg') }}" alt="Baldur's Gate 3" width="300" height="200">
-    <p>Um jogo onde suas decisões morais são testadas, você pode fazer coisas que normalmente não faria na vida real, como matar dragões ou arranjar uma namorada.</p>
-
-    <h2>TOP 3: Old School RuneScape</h2>
-    <img src="{{ url_for('static', filename='images/runescape.jpeg') }}" alt="Old School RuneScape" width="300" height="200">
-    <p>Se você não tem vida social e é desempregado, jogue isso.</p>
-
-    <h3>Onde Jogar e Baixar</h3>
-    <ol>
-      <li><a href="https://store.steampowered.com/app/489830/The_Elder_Scrolls_V_Skyrim_Special_Edition/" target="_blank">Skyrim</a></li>
-      <li><a href="https://store.steampowered.com/app/1086940/Baldurs_Gate_3/" target="_blank">Baldur's Gate 3</a></li>
-      <li><a href="https://oldschool.runescape.com/" target="_blank">Old School RuneScape</a></li>
-    </ol>
-  </body>
+    <!-- Incluindo o JavaScript -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
 </html>
