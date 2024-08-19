@@ -1,11 +1,12 @@
-// main.js
-
-// Funções a serem adicionadas futuramente para o botão "Entrar" e "Novo aqui? Crie uma conta"
-document.querySelector('button').addEventListener('click', function() {
-    alert('Botão Entrar clicado!');
-});
-
+// Simples animação de transição ao clicar no link "Criar conta"
 document.querySelector('.signup-link a').addEventListener('click', function(event) {
     event.preventDefault();
-    alert('Link para criar conta clicado!');
+    
+    // Adiciona a classe shrink para iniciar a animação
+    document.querySelector('.login-container').classList.add('shrink');
+    
+    // Espera 0.5 segundos (a duração da animação) antes de redirecionar
+    setTimeout(function() {
+        window.location.href = 'cadastro.html';
+    }, 500);
 });
