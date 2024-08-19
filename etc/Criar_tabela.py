@@ -1,11 +1,18 @@
+import os
 import sqlite3
 
+# Caminho do banco de dados
+db_path = os.path.join('data', 'database.db')
+
 def criar_tabelas():
+    if not os.path.exists('data'):
+        os.makedirs('data')
+    
     # Conectar ao banco de dados (ou criar, se não existir)
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    # Criar tabela usuarios
+    # Criar as tabelas
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS usuarios (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -18,7 +25,6 @@ def criar_tabelas():
     )
     ''')
 
-    # Criar tabela eventos
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS eventos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,7 +40,6 @@ def criar_tabelas():
     )
     ''')
 
-    # Criar tabela categorias_eventos
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS categorias_eventos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,7 +47,6 @@ def criar_tabelas():
     )
     ''')
 
-    # Criar tabela eventos_categorias
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS eventos_categorias (
         id_evento INTEGER NOT NULL,
@@ -53,7 +57,6 @@ def criar_tabelas():
     )
     ''')
 
-    # Criar tabela carteiras
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS carteiras (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,7 +67,6 @@ def criar_tabelas():
     )
     ''')
 
-    # Criar tabela transacoes
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS transacoes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -77,7 +79,6 @@ def criar_tabelas():
     )
     ''')
 
-    # Criar tabela apostas
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS apostas (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -91,7 +92,6 @@ def criar_tabelas():
     )
     ''')
 
-    # Criar tabela resultados_eventos
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS resultados_eventos (
         id_evento INTEGER PRIMARY KEY,
@@ -101,7 +101,6 @@ def criar_tabelas():
     )
     ''')
 
-    # Criar tabela moderacoes_eventos
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS moderacoes_eventos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -115,34 +114,59 @@ def criar_tabelas():
     )
     ''')
 
-    # Confirmar as alterações
     conn.commit()
-
-    # Fechar a conexão
     conn.close()
+    print("Tabelas criadas com sucesso.")
 
 def inserir_moderador(nome, email, senha, data_nascimento):
-    # Conectar ao banco de dados
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-
-    # Inserir novo moderador na tabela usuarios
     cursor.execute('''
     INSERT INTO usuarios (nome, email, senha, data_nascimento, tipo)
     VALUES (?, ?, ?, ?, 'moderador')
     ''', (nome, email, senha, data_nascimento))
-
-    # Confirmar as alterações
     conn.commit()
-    
-    # Fechar a conexão
     conn.close()
+    print("Moderador inserido com sucesso.")
 
-# Executar a função para criar as tabelas
+def listar_tabelas():
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tabelas = cursor.fetchall()
+    conn.close()
+    if tabelas:
+        print("Tabelas no banco de dados:")
+        for tabela in tabelas:
+            print(tabela[0])
+    else:
+        print("Nenhuma tabela encontrada.")
+
+def menu():
+    while True:
+        print("\nMenu:")
+        print("1. Criar Tabelas")
+        print("2. Inserir Moderador")
+        print("3. Listar Tabelas")
+        print("4. Sair")
+        
+        escolha = input("Escolha uma opção: ")
+
+        if escolha == '1':
+            criar_tabelas()
+        elif escolha == '2':
+            nome = input("Nome do Moderador: ")
+            email = input("Email do Moderador: ")
+            senha = input("Senha do Moderador: ")
+            data_nascimento = input("Data de Nascimento (YYYY-MM-DD): ")
+            inserir_moderador(nome, email, senha, data_nascimento)
+        elif escolha == '3':
+            listar_tabelas()
+        elif escolha == '4':
+            print("Saindo...")
+            break
+        else:
+            print("Opção inválida. Tente novamente.")
+
 if __name__ == '__main__':
-    criar_tabelas()
-    print("Tabelas criadas com sucesso.")
-
-    # Inserir uma conta de moderador
-    inserir_moderador('ADM_SUPREMO', 'moderadorgatinho@gmail.com', 'coxinha123', '2000-01-01')
-    print("Conta de moderador inserida com sucesso.")
+    menu()
