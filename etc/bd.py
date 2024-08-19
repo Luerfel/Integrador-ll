@@ -8,7 +8,7 @@ def conectar_db():
     return sqlite3.connect('data/database.db')
 
 def limpar_terminal():
-    # Detecta o sistema operacional
+    # Detecta o sistema operacional  
     sistema_operacional = platform.system()
 
     if sistema_operacional == "Windows":
