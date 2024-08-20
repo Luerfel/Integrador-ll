@@ -7,6 +7,6 @@ document.querySelector('.signup-link a').addEventListener('click', function(even
     
     // Espera 0.5 segundos (a duração da animação) antes de redirecionar
     setTimeout(function() {
-        window.location.href = 'cadastro.html';
+        window.location.href = 'cadastro';
     }, 500);
 });

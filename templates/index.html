@@ -1,16 +1,39 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Olá, Mundo!</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Tela de Login</title>
+    <!-- Link para o arquivo de estilo CSS -->
+    <link rel="stylesheet" href="static/css/styles.css">
 </head>
 <body>
-    <h1 id="message">Olá, Mundo!</h1>
-
-    <!-- Incluindo o JavaScript -->
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <!-- Contêiner principal da tela de login -->
+    <div class="login-container">
+        <!-- Seção da logo -->
+        <div class="logo">
+            <!-- Imagem da logo, o caminho precisa estar correto para exibição -->
+            <img src="static/images/logo.png" alt="Logo">
+        </div>
+        <!-- Formulário de login -->
+        <form>
+            <!-- Campo para o usuário digitar o email -->
+            <div class="input-container">
+                <input type="text" placeholder="Usuário" required>
+            </div>
+            <!-- Campo para o usuário digitar a senha -->
+            <div class="input-container">
+                <input type="password" placeholder="Senha" required>
+            </div>
+            <!-- Botão para submeter o formulário -->
+            <button type="button">Entrar</button>
+        </form>
+        <!-- Link para criar uma nova conta -->
+        <div class="signup-link">
+            <a href="/cadastro">Novo aqui? Crie uma conta</a>
+        </div>
+    </div>
+    <!-- Link para o arquivo JavaScript -->
+    <script src="static/js/main.js"></script>
 </body>
 </html>
