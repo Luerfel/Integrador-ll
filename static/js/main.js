@@ -1,12 +1,15 @@
-// Simples animação de transição ao clicar no link "Criar conta"
-document.querySelector('.signup-link a').addEventListener('click', function(event) {
+// Função para redirecionar o usuário após o login
+function redirectUser(event) {
+    // Previne o comportamento padrão do formulário (recarregar a página)
     event.preventDefault();
     
-    // Adiciona a classe shrink para iniciar a animação
-    document.querySelector('.login-container').classList.add('shrink');
+    // Obtém os valores dos campos de email e senha
+    const email = document.querySelector('input[name="email"]').value;
+    const senha = document.querySelector('input[name="senha"]').value;
     
-    // Espera 0.5 segundos (a duração da animação) antes de redirecionar
-    setTimeout(function() {
-        window.location.href = 'cadastro';
-    }, 500);
-});
+    // Redireciona para a rota de login com as credenciais na URL
+    window.location.href = `/login/${email}/${senha}`;
+}
+
+// Adiciona um listener para o evento de submissão do formulário
+document.getElementById('loginForm').addEventListener('submit', redirectUser);
