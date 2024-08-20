@@ -3,9 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Olá, Mundo!</title>
+    <title>Cadastro de Usuário</title>
+    <link rel="stylesheet" href="/static/css/styles.css"> <!-- Link para o arquivo de estilos CSS -->
 </head>
 <body>
-    <h1 id="message">Olá, Mundo!</h1>
+    <!-- Container principal para o formulário de cadastro -->
+    <div class="login-container">
+        <h2>Cadastro de Usuário</h2>
+        <!-- Formulário de cadastro -->
+        <form id="cadastroForm" method="POST" action="/cadastro" 
+              {% if error_message %} data-error-message="{{ error_message }}" {% endif %}>
+            <!-- Campo para inserir o nome do usuário -->
+            <div class="input-container">
+                <input type="text" name="nome" placeholder="Nome" required>
+            </div>
+            <!-- Campo para inserir o email do usuário -->
+            <div class="input-container">
+                <input type="text" name="email" placeholder="Email" required>
+                <span id="emailError" class="error-message"></span> <!-- Espaço para exibir a mensagem de erro do email -->
+            </div>
+            <!-- Campo para inserir a senha do usuário -->
+            <div class="input-container">
+                <input type="password" name="senha" placeholder="Senha" required>
+            </div>
+            <!-- Campo para inserir a data de nascimento do usuário -->
+            <div class="input-container">
+                <input type="date" name="data_nascimento" placeholder="Data de Nascimento" required>
+            </div>
+            <!-- Botão para submeter o formulário -->
+            <button type="submit">Cadastrar</button>
+        </form>
+        <!-- Link para redirecionar o usuário à página de login se ele já tiver uma conta -->
+        <div class="signup-link">
+            <a href="/">Já tem uma conta? Faça login</a>
+        </div>
+    </div>
+    <!-- Link para o arquivo JavaScript que controla o comportamento do formulário -->
+    <script src="/static/js/cadastro.js"></script>
 </body>
 </html>
