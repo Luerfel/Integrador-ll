@@ -9,6 +9,16 @@ database_path = os.path.join(os.getcwd(), 'data/database.db')
 
 # Função para verificar as credenciais
 def check_credentials(email, senha):
+    """
+Esta função verifica as credenciais do usuário consultando o banco de dados SQLite.
+Recebe o email e a senha como parâmetros.
+Executa uma consulta no banco de dados para verificar se há uma correspondência.
+Retorna o tipo de usuário ('usuario' ou 'moderador') se as credenciais forem válidas, ou None se
+não forem.
+
+Uso: Esta função é usada para validar as credenciais do usuário durante o processo de login
+"""
+
     # Conecta ao banco de dados
     conn = sqlite3.connect(database_path)
     cursor = conn.cursor()
@@ -27,7 +37,19 @@ def check_credentials(email, senha):
 
 # Rota principal (login)
 @app.route('/', methods=['GET', 'POST'])
+
 def home():
+    """
+Esta função trata tanto requisições GET quanto POST na rota raiz ('/').
+- Se for uma requisição GET, ela simplesmente renderiza a página de login (index.html).
+- Se for uma requisição POST, ela coleta o email e a senha fornecidos, verifica as credenciais no
+banco de dados usando a função check_credentials(), e redireciona o usuário para a página
+correspondente ao seu tipo (usuário ou moderador).
+- Se as credenciais forem inválidas, retorna uma mensagem de erro e o código HTTP 401.
+
+Uso: Esta função é chamada quando o usuário tenta acessar a página de login ou submete o
+formulário de login.
+  """
     if request.method == 'POST':
         # Coleta os dados do formulário de login
         email = request.form['email']
@@ -47,17 +69,38 @@ def home():
 
 # Rota para a área do usuário
 @app.route('/area_usuario')
+
 def area_usuario():
+    """
+Esta função simplesmente renderiza a página HTML correspondente à área do usuário comum
+(area_usuario.html).
+
+Uso: Esta função é chamada quando um usuário comum faz login com sucesso
+"""
     return render_template('area_usuario.html')  # Renderiza a página da área do usuário
 
 # Rota para a área do moderador
 @app.route('/area_moderador')
+
 def area_moderador():
+    """
+Esta função renderiza a página HTML correspondente à área do moderador
+(area_moderador.html).
+
+Uso: Esta função é chamada quando um moderador faz login com sucesso.
+"""
     return render_template('area_moderador.html')  # Renderiza a página da área do moderador
 
 # Rota para a página de cadastro
 @app.route('/cadastro')
+
 def cadastro():
+    """
+Esta função renderiza a página HTML correspondente à área do moderador
+(area_moderador.html).
+
+Uso: Esta função é chamada quando um moderador faz login com sucesso."""
+
     return render_template('cadastro.html')  # Renderiza a página de cadastro
 
 # Servir arquivos estáticos (CSS, JS, imagens)

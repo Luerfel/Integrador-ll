@@ -1,3 +1,14 @@
+
+/* O arquivo main.js contém o código JavaScript que lida com o envio do formulário de login.
+- Ele intercepta o envio do formulário (evento 'submit') para evitar o comportamento padrão de recarregar a página.
+- Coleta os valores de email e senha dos campos de entrada.
+- Envia uma requisição POST para a rota '/', onde os dados são processados no servidor Flask.
+- Se as credenciais forem inválidas, uma mensagem de erro é exibida como uma notificação (via alert()).
+- Se as credenciais forem válidas, o usuário é redirecionado para a página apropriada (área do usuário ou moderador).
+
+Uso: Este script é essencial para o funcionamento da interface de login, manipulando a interação do usuário de forma dinâmica.
+*/
+
 document.getElementById('loginForm').addEventListener('submit', function(event) {
     event.preventDefault();  // Evita o comportamento padrão do formulário (recarregar a página)
 
