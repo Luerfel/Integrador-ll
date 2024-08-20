@@ -4,26 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tela de Login</title>
+    <!-- Link para o arquivo de estilo CSS -->
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
+    <!-- Contêiner principal da tela de login -->
     <div class="login-container">
+        <!-- Seção da logo -->
         <div class="logo">
+            <!-- Imagem da logo -->
             <img src="/static/images/logo.png" alt="Logo">
         </div>
+        <!-- Formulário de login -->
         <form id="loginForm" method="POST" action="/">
+            <!-- Campo para o usuário digitar o email -->
             <div class="input-container">
                 <input type="text" name="email" placeholder="Usuário" required>
             </div>
+            <!-- Campo para o usuário digitar a senha -->
             <div class="input-container">
                 <input type="password" name="senha" placeholder="Senha" required>
             </div>
+            <!-- Botão para submeter o formulário -->
             <button type="submit">Entrar</button>
         </form>
+        <!-- Link para criar uma nova conta -->
         <div class="signup-link">
             <a href="/cadastro">Novo aqui? Crie uma conta</a>
         </div>
     </div>
+    <!-- Link para o arquivo JavaScript -->
     <script src="/static/js/main.js"></script>
 </body>
 </html>

@@ -1,11 +1,11 @@
 document.getElementById('loginForm').addEventListener('submit', function(event) {
-    event.preventDefault();  // Evita o comportamento padrão do formulário
+    event.preventDefault();  // Evita o comportamento padrão do formulário (recarregar a página)
 
     // Coletar os dados do formulário
     const email = document.querySelector('input[name="email"]').value;
     const senha = document.querySelector('input[name="senha"]').value;
 
-    // Enviar a requisição via POST
+    // Enviar a requisição via POST para o servidor
     fetch('/', {
         method: 'POST',
         headers: {
@@ -22,11 +22,11 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
                 return Promise.reject('Credenciais inválidas');
             });
         }
-        return response.text();
+        return response.text();  // Recebe a URL de redirecionamento como texto
     })
     .then(url => {
         console.log('Redirecionando para:', url);
         window.location.href = url;  // Redireciona para a URL recebida do servidor
     })
-    .catch(error => console.error('Erro:', error));
+    .catch(error => console.error('Erro:', error));  // Loga o erro caso ocorra
 });
