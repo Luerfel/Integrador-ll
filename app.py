@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, redirect, url_for, render_template
 import sqlite3
 import os
 
@@ -24,30 +24,35 @@ def check_credentials(email, senha):
     return None
 
 # Rota para a página inicial (login)
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def home():
-    with open('templates/index.html', 'r') as file:
-        return file.read()
+    if request.method == 'POST':
+        email = request.form['email']
+        senha = request.form['senha']
+        tipo_usuario = check_credentials(email, senha)
 
-# Rota para tratar o login
-@app.route('/login/<email>/<senha>')
-def login(email, senha):
-    tipo_usuario = check_credentials(email, senha)
+        if tipo_usuario == 'usuario':
+            return redirect(url_for('area_usuario'))
+        elif tipo_usuario == 'moderador':
+            return redirect(url_for('area_moderador'))
+        else:
+            return 'Credenciais inválidas', 401
+    return render_template('index.html')
 
-    if tipo_usuario == 'usuario':
-        with open('templates/area_usuario.html', 'r') as file:
-            return file.read()
-    elif tipo_usuario == 'moderador':
-        with open('templates/area_moderador.html', 'r') as file:
-            return file.read()
-    else:
-        return 'Credenciais inválidas'
+# Rota para a área do usuário
+@app.route('/area_usuario')
+def area_usuario():
+    return render_template('area_usuario.html')
+
+# Rota para a área do moderador
+@app.route('/area_moderador')
+def area_moderador():
+    return render_template('area_moderador.html')
 
 # Rota para a página de cadastro
 @app.route('/cadastro')
 def cadastro():
-    with open('templates/cadastro.html', 'r') as file:
-        return file.read()
+    return render_template('cadastro.html')
 
 # Servir arquivos estáticos (CSS, JS, imagens)
 @app.route('/static/<path:path>')
