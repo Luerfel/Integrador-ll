@@ -1,11 +1,15 @@
 from flask import Flask
 import sqlite3
+import os
 
 app = Flask(__name__)
 
+# Caminho absoluto para o banco de dados
+database_path = os.path.join(os.getcwd(), 'data/database.db')
+
 # Função para verificar as credenciais
 def check_credentials(email, senha):
-    conn = sqlite3.connect('/data/database.db')
+    conn = sqlite3.connect(database_path)
     cursor = conn.cursor()
 
     # Consulta para verificar o email e a senha
