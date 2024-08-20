@@ -49,7 +49,7 @@ body {
 
 /* Estilo para os campos de texto e senha */
 input[type="text"],
-input[type="password"] {
+input[type="password"],input[type="email"] {
     /* O input ocupa 100% da largura disponível */
     width: 100%;
     
@@ -110,4 +110,10 @@ button:hover {
 /* Efeito de hover para o link */
 .signup-link a:hover {
     text-decoration: underline; /* Sublinha o link ao passar o mouse */
+}
+/* efeito mensagem de erro*/
+.error-message {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 5px;
 }
