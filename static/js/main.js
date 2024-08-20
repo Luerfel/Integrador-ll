@@ -13,13 +13,20 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
         },
         body: `email=${encodeURIComponent(email)}&senha=${encodeURIComponent(senha)}`
     })
-    .then(response => response.text())
-    .then(data => {
-        if (data.includes('Credenciais inválidas')) {
-            alert('Credenciais inválidas');
-        } else {
-            window.location.href = data;
+    .then(response => {
+        // Verifica se a resposta é 401 (não autorizado)
+        if (response.status === 401) {
+            return response.text().then(text => {
+                // Exibe a notificação de erro
+                alert(text);  // Exibe a mensagem de erro como uma notificação
+                return Promise.reject('Credenciais inválidas');
+            });
         }
+        return response.text();
+    })
+    .then(url => {
+        console.log('Redirecionando para:', url);
+        window.location.href = url;  // Redireciona para a URL recebida do servidor
     })
     .catch(error => console.error('Erro:', error));
 });

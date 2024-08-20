@@ -23,7 +23,6 @@ def check_credentials(email, senha):
         return result[0]
     return None
 
-# Rota para a página inicial (login)
 @app.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
@@ -32,12 +31,14 @@ def home():
         tipo_usuario = check_credentials(email, senha)
 
         if tipo_usuario == 'usuario':
-            return redirect(url_for('area_usuario'))
+            return '/area_usuario'
         elif tipo_usuario == 'moderador':
-            return redirect(url_for('area_moderador'))
+            return '/area_moderador'
         else:
-            return 'Credenciais inválidas', 401
+            return 'Credenciais inválidas', 401  # Retorna uma mensagem simples em texto
+
     return render_template('index.html')
+
 
 # Rota para a área do usuário
 @app.route('/area_usuario')
