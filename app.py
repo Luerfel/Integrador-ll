@@ -91,17 +91,43 @@ Uso: Esta função é chamada quando um moderador faz login com sucesso.
 """
     return render_template('area_moderador.html')  # Renderiza a página da área do moderador
 
-# Rota para a página de cadastro
-@app.route('/cadastro')
-
+@app.route('/cadastro', methods=['GET', 'POST'])
+@app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
     """
-Esta função renderiza a página HTML correspondente à área do moderador
-(area_moderador.html).
+    Esta função lida com o processo de cadastro de um novo usuário.
+    - Se o método for GET, renderiza a página de cadastro.
+    - Se o método for POST, coleta os dados fornecidos pelo formulário, insere-os no banco de dados
+      e redireciona o usuário para a página de login.
+    """
+    if request.method == 'POST':
+        nome = request.form['nome']
+        email = request.form['email']
+        senha = request.form['senha']
+        data_nascimento = request.form['data_nascimento']
 
-Uso: Esta função é chamada quando um moderador faz login com sucesso."""
+        # Conectar ao banco de dados e inserir o novo usuário
+        conn = sqlite3.connect(database_path)
+        cursor = conn.cursor()
 
-    return render_template('cadastro.html')  # Renderiza a página de cadastro
+        try:
+            cursor.execute('''
+                INSERT INTO usuarios (nome, email, senha, data_nascimento)
+                VALUES (?, ?, ?, ?)
+            ''', (nome, email, senha, data_nascimento))
+
+            conn.commit()
+            return redirect(url_for('home'))  # Redireciona para a página de login após o cadastro
+
+        except sqlite3.IntegrityError:
+            # Caso o email já esteja cadastrado
+            return 'Erro: Email já cadastrado. Tente novamente com um email diferente.', 400
+
+        finally:
+            conn.close()
+
+    # Se for uma requisição GET, renderiza o template da página de cadastro
+    return render_template('cadastro.html')
 
 # Servir arquivos estáticos (CSS, JS, imagens)
 @app.route('/static/<path:path>')

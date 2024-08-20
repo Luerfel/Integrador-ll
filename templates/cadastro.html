@@ -3,9 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Olá, Mundo!</title>
+    <title>Cadastro de Usuário</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <h1 id="message">Olá, Mundo!</h1>
+    <div class="login-container">
+        <h2>Cadastro de Usuário</h2>
+        <form id="cadastroForm" method="POST" action="/cadastro">
+            <div class="input-container">
+                <input type="text" name="nome" placeholder="Nome" required>
+            </div>
+            <div class="input-container">
+                <input type="text" name="email" placeholder="Email" required>
+            </div>
+            <div class="input-container">
+                <input type="password" name="senha" placeholder="Senha" required>
+            </div>
+            <div class="input-container">
+                <input type="date" name="data_nascimento" placeholder="Data de Nascimento" required>
+            </div>
+            <button type="submit">Cadastrar</button>
+        </form>
+        <div class="signup-link">
+            <a href="/">Já tem uma conta? Faça login</a>
+        </div>
+    </div>
+    <script src="/static/js/main.js"></script>
 </body>
 </html>
