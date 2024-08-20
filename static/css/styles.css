@@ -1,0 +1,113 @@
+/* Remove as margens e preenchimento do body e define a fonte */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    
+    /* Define um fundo gradiente escuro */
+    background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+    
+    /* Configura o layout do body para centralizar o conteúdo */
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Estilo para o contêiner de login */
+.login-container {
+    /* Define a cor de fundo com opacidade para ver o fundo gradiente */
+    background-color: rgba(0, 0, 0, 0.7);
+    
+    /* Adiciona preenchimento e bordas arredondadas */
+    padding: 40px;
+    border-radius: 10px;
+    
+    /* Adiciona sombra ao contêiner */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    
+    /* Centraliza o conteúdo dentro do contêiner */
+    text-align: center;
+    width: 300px;
+}
+
+/* Estilo para a logo */
+.logo img {
+    /* Define o tamanho e formato da imagem da logo */
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    
+    /* Adiciona um espaçamento abaixo da imagem */
+    margin-bottom: 20px;
+}
+
+/* Estilo para o contêiner dos campos de input */
+.input-container {
+    margin-bottom: 20px;
+}
+
+/* Estilo para os campos de texto e senha */
+input[type="text"],
+input[type="password"] {
+    /* O input ocupa 100% da largura disponível */
+    width: 100%;
+    
+    /* Configurações de preenchimento, margens e borda */
+    padding: 10px;
+    margin: 5px 0;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    
+    /* Define a cor de fundo e do texto */
+    background-color: #333;
+    color: #fff;
+    
+    /* Define o tamanho da fonte e remove a borda de foco */
+    font-size: 16px;
+    outline: none;
+    
+    /* Adiciona bordas arredondadas ao campo */
+    border-radius: 5px;
+}
+
+/* Estilo para o botão de "Entrar" */
+button {
+    /* O botão ocupa 100% da largura disponível */
+    width: 100%;
+    
+    /* Configurações de preenchimento, cor de fundo e borda */
+    padding: 10px;
+    background-color: #f0f0f0;
+    border: none;
+    
+    /* Adiciona bordas arredondadas e cursor de mão ao passar o mouse */
+    border-radius: 5px;
+    cursor: pointer;
+    
+    /* Define o tamanho da fonte e a torna negrito */
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* Efeito de hover para o botão */
+button:hover {
+    background-color: #ddd; /* Altera a cor de fundo ao passar o mouse */
+}
+
+/* Estilo para o link de criar conta */
+.signup-link {
+    margin-top: 20px; /* Adiciona um espaço acima do link */
+}
+
+/* Estilo para o link de "Novo aqui? Crie uma conta" */
+.signup-link a {
+    color: #bbb; /* Cor do texto */
+    text-decoration: none; /* Remove o sublinhado do link */
+    font-size: 14px; /* Define o tamanho da fonte */
+}
+
+/* Efeito de hover para o link */
+.signup-link a:hover {
+    text-decoration: underline; /* Sublinha o link ao passar o mouse */
+}
