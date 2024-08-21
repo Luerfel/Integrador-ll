@@ -1,11 +1,75 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Olá, Mundo!</title>
+    <title>Área do Moderador</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/area_moderacao.css') }}">
 </head>
 <body>
-    <h1 id="message">Olá, Mundo!</h1>
+    <header>
+        <h1>Sistema de Moderação</h1>
+        <nav>
+            <a href="#">Logout</a>
+        </nav>
+    </header>
+    
+    <main>
+        <section class="pending-approval">
+            <h2>Eventos Pendentes de Aprovação</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Descrição</th>
+                        <th>Data</th>
+                        <th>Criador</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Exemplo de um evento -->
+                    <tr>
+                        <td>Evento X</td>
+                        <td>Descrição do Evento X...</td>
+                        <td>2024-08-25</td>
+                        <td>Usuário Y</td>
+                        <td>
+                            <button class="approve-btn">Aprovar</button>
+                            <button class="reject-btn">Reprovar</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <section class="events-to-finalize">
+            <h2>Eventos para Finalizar</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Descrição</th>
+                        <th>Data</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Exemplo de um evento -->
+                    <tr>
+                        <td>Evento Z</td>
+                        <td>Descrição do Evento Z...</td>
+                        <td>2024-08-20</td>
+                        <td>Pendente</td>
+                        <td>
+                            <button class="confirm-btn">Confirmar Ocorrência</button>
+                            <button class="not-occurred-btn">Não Ocorrido</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
 </body>
 </html>
