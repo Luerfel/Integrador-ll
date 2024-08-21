@@ -189,32 +189,21 @@ Uso: Esta função é chamada quando um usuário tenta se cadastrar na aplicaç�
     return render_template('cadastro.html', error_message=error_message)
 
 "--------------------------------------------------------------------------------------------------------------------------------------------------------------"
-
 @app.route('/moderador_dashboard', methods=['GET'])
 def moderador_dashboard():
     view = request.args.get('view', 'pendentes')
-    page = int(request.args.get('page', 1))
-    per_page = 10  # Número de eventos por página
-    offset = (page - 1) * per_page
-    
+
     conn = sqlite3.connect(database_path)
     conn.row_factory = sqlite3.Row
-    
-    if view == 'pendentes':
-        eventos = conn.execute('SELECT * FROM eventos WHERE status = ? LIMIT ? OFFSET ?', 
-                               ('pendente', per_page, offset)).fetchall()
-        total_eventos = conn.execute('SELECT COUNT(*) FROM eventos WHERE status = ?', ('pendente',)).fetchone()[0]
-    else:
-        eventos = conn.execute('SELECT * FROM eventos WHERE status = ? LIMIT ? OFFSET ?', 
-                               ('aprovado', per_page, offset)).fetchall()
-        total_eventos = conn.execute('SELECT COUNT(*) FROM eventos WHERE status = ?', ('aprovado',)).fetchone()[0]
-    
-    conn.close()
-    
-    total_pages = (total_eventos + per_page - 1) // per_page
-    
-    return render_template('area_moderador.html', eventos=eventos, view=view, page=page, total_pages=total_pages)
 
+    if view == 'pendentes':
+        eventos = conn.execute('SELECT * FROM eventos WHERE status = ?', ('pendente',)).fetchall()
+    else:
+        eventos = conn.execute('SELECT * FROM eventos WHERE status = ?', ('aprovado',)).fetchall()
+
+    conn.close()
+
+    return render_template('area_moderador.html', eventos=eventos, view=view)
 
 
 @app.route('/acao_evento', methods=['POST'])

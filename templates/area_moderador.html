@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área do Moderador</title>
-    <link rel="stylesheet" href="/static/css/area_moderacao.css"> <!-- Link para o arquivo de estilos CSS -->
+    <link rel="stylesheet" href="/static/css/area_moderacao.css">
 </head>
 <body>
     <header>
         <h1>Área do Moderador</h1>
     </header>
     
-    <!-- MenuStrip para alternar entre as visualizações -->
     <nav class="menustrip">
         <ul>
             <li><a href="{{ url_for('moderador_dashboard', view='pendentes') }}" {% if view == 'pendentes' %}class="active"{% endif %}>Eventos Pendentes de Aprovação</a></li>
@@ -21,7 +20,6 @@
     
     <main>
         {% if view == 'pendentes' %}
-        <!-- Seção de Eventos Pendentes de Aprovação -->
         <section class="pending-approval">
             <h2>Eventos Pendentes de Aprovação</h2>
             <table>
@@ -61,7 +59,6 @@
             </table>
         </section>
         {% elif view == 'finalizar' %}
-        <!-- Seção de Eventos para Finalizar -->
         <section class="events-to-finalize">
             <h2>Eventos para Finalizar</h2>
             <table>
@@ -101,24 +98,8 @@
             </table>
         </section>
         {% endif %}
-        
-        <div class="pagination">
-            {% if page > 1 %}
-            <a href="{{ url_for('moderador_dashboard', view=view, page=page-1) }}">&laquo; Página Anterior</a>
-            {% endif %}
-            
-            {% for p in range(1, total_pages + 1) %}
-            <a href="{{ url_for('moderador_dashboard', view=view, page=p) }}" class="{% if p == page %}active{% endif %}">{{ p }}</a>
-            {% endfor %}
-            
-            {% if page < total_pages %}
-            <a href="{{ url_for('moderador_dashboard', view=view, page=page+1) }}">Próxima Página &raquo;</a>
-            {% endif %}
-        </div>
-        
     </main>
 
-    <!-- Link para o arquivo JavaScript externo -->
     <script src="/static/js/area_moderador.js"></script>
 </body>
 </html>

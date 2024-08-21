@@ -51,6 +51,5 @@ def criar_aposta():
         else:
             print("Opção inválida. Digite 'S' para sim ou 'N' para não.")
 
-# Exemplo de como a função seria chamada
 if __name__ == "__main__":
     criar_aposta()
