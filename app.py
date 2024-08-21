@@ -190,6 +190,61 @@ Uso: Esta função é chamada quando um usuário tenta se cadastrar na aplicaç�
 
 "--------------------------------------------------------------------------------------------------------------------------------------------------------------"
 
+"area do moderador"
+@app.route('/moderador_dashboard', methods=['GET'])
+def moderador_dashboard():
+    """
+    Renderiza a página HTML da área do moderador.
+    Exibe eventos pendentes de aprovação ou eventos para finalizar com base na seleção do usuário.
+    """
+    view = request.args.get('view', 'pendentes')  # Padrão para "pendentes"
+    
+    conn = sqlite3.connect(database_path)
+    conn.row_factory = sqlite3.Row
+    
+    if view == 'pendentes':
+        eventos = conn.execute('SELECT * FROM eventos WHERE status = ?', ('pendente',)).fetchall()
+    else:
+        eventos = conn.execute('SELECT * FROM eventos WHERE status = ?', ('aprovado',)).fetchall()
+    
+    conn.close()
+    return render_template('area_moderador.html', eventos=eventos, view=view)
+
+
+@app.route('/acao_evento', methods=['POST'])
+
+def acao_evento():
+    """
+    Esta função processa as ações de moderação sobre eventos.
+    Dependendo da ação, um evento pode ser aprovado, reprovado ou finalizado.
+    """
+    evento_id = request.form['evento_id']
+    acao = request.form['acao']
+    
+    conn = sqlite3.connect(database_path)
+    
+    if acao == 'aprovar':
+        conn.execute('UPDATE eventos SET status = ? WHERE id = ?', ('aprovado', evento_id))
+    elif acao == 'reprovar':
+        motivo_rejeicao = request.form.get('motivo_rejeicao', '')
+        conn.execute('UPDATE eventos SET status = ? WHERE id = ?', ('reprovado', evento_id))
+        # Registrar o motivo de rejeição em uma tabela de moderação
+        conn.execute('''
+            INSERT INTO moderacoes_eventos (id_evento, id_moderador, acao, motivo_rejeicao) 
+            VALUES (?, ?, ?, ?)''', 
+            (evento_id, 1, 'reprovar', motivo_rejeicao))
+    elif acao == 'confirmar':
+        conn.execute('UPDATE eventos SET status = ? WHERE id = ?', ('finalizado', evento_id))
+        conn.execute('INSERT INTO resultados_eventos (id_evento, resultado) VALUES (?, ?)', (evento_id, 'ocorrido'))
+        # Lógica para distribuição de valores das apostas
+    elif acao == 'nao_ocorrido':
+        conn.execute('UPDATE eventos SET status = ? WHERE id = ?', ('finalizado', evento_id))
+        conn.execute('INSERT INTO resultados_eventos (id_evento, resultado) VALUES (?, ?)', (evento_id, 'não ocorrido'))
+    
+    conn.commit()
+    conn.close()
+    return redirect(url_for('area_moderador'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)  # Executa o aplicativo Flask no modo debug

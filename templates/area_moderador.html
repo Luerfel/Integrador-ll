@@ -4,72 +4,109 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área do Moderador</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/area_moderacao.css') }}">
+    <link rel="stylesheet" href="/static/css/area_moderacao.css"> <!-- Link para o arquivo de estilos CSS -->
 </head>
 <body>
     <header>
-        <h1>Sistema de Moderação</h1>
-        <nav>
-            <a href="#">Logout</a>
-        </nav>
+        <h1>Área do Moderador</h1>
     </header>
     
+    <!-- MenuStrip para alternar entre as visualizações -->
+    <nav class="menustrip">
+        <ul>
+            <li><a href="{{ url_for('moderador_dashboard', view='pendentes') }}" {% if view == 'pendentes' %}class="active"{% endif %}>Eventos Pendentes de Aprovação</a></li>
+            <li><a href="{{ url_for('moderador_dashboard', view='finalizar') }}" {% if view == 'finalizar' %}class="active"{% endif %}>Eventos para Finalizar</a></li>
+        </ul>
+    </nav>
+    
     <main>
+        {% if view == 'pendentes' %}
+        <!-- Seção de Eventos Pendentes de Aprovação -->
         <section class="pending-approval">
             <h2>Eventos Pendentes de Aprovação</h2>
             <table>
                 <thead>
                     <tr>
+                        <th>ID</th>
                         <th>Título</th>
                         <th>Descrição</th>
-                        <th>Data</th>
-                        <th>Criador</th>
+                        <th>Valor da Cota</th>
+                        <th>Data do Evento</th>
+                        <th>Período de Apostas</th>
+                        <th>Status</th>
+                        <th>ID Criador</th>
+                        <th>Data de Criação</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Exemplo de um evento -->
+                    {% for evento in eventos %}
                     <tr>
-                        <td>Evento X</td>
-                        <td>Descrição do Evento X...</td>
-                        <td>2024-08-25</td>
-                        <td>Usuário Y</td>
+                        <td>{{ evento.id }}</td>
+                        <td>{{ evento.titulo }}</td>
+                        <td>{{ evento.descricao }}</td>
+                        <td>{{ evento.valor_cota }}</td>
+                        <td>{{ evento.data_evento }}</td>
+                        <td>{{ evento.periodo_apostas }}</td>
+                        <td>{{ evento.status }}</td>
+                        <td>{{ evento.id_criador }}</td>
+                        <td>{{ evento.data_criacao }}</td>
                         <td>
-                            <button class="approve-btn">Aprovar</button>
-                            <button class="reject-btn">Reprovar</button>
+                            <form method="POST" action="{{ url_for('acao_evento') }}">
+                                <input type="hidden" name="evento_id" value="{{ evento.id }}">
+                                <button type="submit" name="acao" value="aprovar" class="approve-btn">Aprovar</button>
+                                <button type="submit" name="acao" value="reprovar" class="reject-btn">Reprovar</button>
+                            </form>
                         </td>
                     </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </section>
-        
+        {% elif view == 'finalizar' %}
+        <!-- Seção de Eventos para Finalizar -->
         <section class="events-to-finalize">
             <h2>Eventos para Finalizar</h2>
             <table>
                 <thead>
                     <tr>
+                        <th>ID</th>
                         <th>Título</th>
                         <th>Descrição</th>
-                        <th>Data</th>
+                        <th>Valor da Cota</th>
+                        <th>Data do Evento</th>
+                        <th>Período de Apostas</th>
                         <th>Status</th>
+                        <th>ID Criador</th>
+                        <th>Data de Criação</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Exemplo de um evento -->
+                    {% for evento in eventos %}
                     <tr>
-                        <td>Evento Z</td>
-                        <td>Descrição do Evento Z...</td>
-                        <td>2024-08-20</td>
-                        <td>Pendente</td>
+                        <td>{{ evento.id }}</td>
+                        <td>{{ evento.titulo }}</td>
+                        <td>{{ evento.descricao }}</td>
+                        <td>{{ evento.valor_cota }}</td>
+                        <td>{{ evento.data_evento }}</td>
+                        <td>{{ evento.periodo_apostas }}</td>
+                        <td>{{ evento.status }}</td>
+                        <td>{{ evento.id_criador }}</td>
+                        <td>{{ evento.data_criacao }}</td>
                         <td>
-                            <button class="confirm-btn">Confirmar Ocorrência</button>
-                            <button class="not-occurred-btn">Não Ocorrido</button>
+                            <form method="POST" action="{{ url_for('acao_evento') }}">
+                                <input type="hidden" name="evento_id" value="{{ evento.id }}">
+                                <button type="submit" name="acao" value="confirmar" class="confirm-btn">Confirmar Ocorrência</button>
+                                <button type="submit" name="acao" value="nao_ocorrido" class="not-occurred-btn">Não Ocorrido</button>
+                            </form>
                         </td>
                     </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </section>
+        {% endif %}
     </main>
 </body>
 </html>
