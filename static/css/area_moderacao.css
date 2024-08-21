@@ -106,3 +106,26 @@ nav.menustrip ul li a.active,
 nav.menustrip ul li a:hover {
     background-color: #555;
 }
+/* Estilo para a paginação */
+.pagination {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.pagination a {
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    background-color: #333;
+    border-radius: 5px;
+    margin: 0 2px;
+}
+
+.pagination a.active {
+    background-color: #555;
+    pointer-events: none;
+}
+
+.pagination a:hover {
+    background-color: #777;
+}

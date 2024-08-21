@@ -190,60 +190,67 @@ Uso: Esta função é chamada quando um usuário tenta se cadastrar na aplicaç�
 
 "--------------------------------------------------------------------------------------------------------------------------------------------------------------"
 
-"area do moderador"
 @app.route('/moderador_dashboard', methods=['GET'])
 def moderador_dashboard():
-    """
-    Renderiza a página HTML da área do moderador.
-    Exibe eventos pendentes de aprovação ou eventos para finalizar com base na seleção do usuário.
-    """
-    view = request.args.get('view', 'pendentes')  # Padrão para "pendentes"
+    view = request.args.get('view', 'pendentes')
+    page = int(request.args.get('page', 1))
+    per_page = 10  # Número de eventos por página
+    offset = (page - 1) * per_page
     
     conn = sqlite3.connect(database_path)
     conn.row_factory = sqlite3.Row
     
     if view == 'pendentes':
-        eventos = conn.execute('SELECT * FROM eventos WHERE status = ?', ('pendente',)).fetchall()
+        eventos = conn.execute('SELECT * FROM eventos WHERE status = ? LIMIT ? OFFSET ?', 
+                               ('pendente', per_page, offset)).fetchall()
+        total_eventos = conn.execute('SELECT COUNT(*) FROM eventos WHERE status = ?', ('pendente',)).fetchone()[0]
     else:
-        eventos = conn.execute('SELECT * FROM eventos WHERE status = ?', ('aprovado',)).fetchall()
+        eventos = conn.execute('SELECT * FROM eventos WHERE status = ? LIMIT ? OFFSET ?', 
+                               ('aprovado', per_page, offset)).fetchall()
+        total_eventos = conn.execute('SELECT COUNT(*) FROM eventos WHERE status = ?', ('aprovado',)).fetchone()[0]
     
     conn.close()
-    return render_template('area_moderador.html', eventos=eventos, view=view)
+    
+    total_pages = (total_eventos + per_page - 1) // per_page
+    
+    return render_template('area_moderador.html', eventos=eventos, view=view, page=page, total_pages=total_pages)
+
 
 
 @app.route('/acao_evento', methods=['POST'])
-
 def acao_evento():
-    """
-    Esta função processa as ações de moderação sobre eventos.
-    Dependendo da ação, um evento pode ser aprovado, reprovado ou finalizado.
-    """
     evento_id = request.form['evento_id']
     acao = request.form['acao']
     
     conn = sqlite3.connect(database_path)
     
-    if acao == 'aprovar':
-        conn.execute('UPDATE eventos SET status = ? WHERE id = ?', ('aprovado', evento_id))
-    elif acao == 'reprovar':
-        motivo_rejeicao = request.form.get('motivo_rejeicao', '')
-        conn.execute('UPDATE eventos SET status = ? WHERE id = ?', ('reprovado', evento_id))
-        # Registrar o motivo de rejeição em uma tabela de moderação
-        conn.execute('''
-            INSERT INTO moderacoes_eventos (id_evento, id_moderador, acao, motivo_rejeicao) 
-            VALUES (?, ?, ?, ?)''', 
-            (evento_id, 1, 'reprovar', motivo_rejeicao))
-    elif acao == 'confirmar':
-        conn.execute('UPDATE eventos SET status = ? WHERE id = ?', ('finalizado', evento_id))
-        conn.execute('INSERT INTO resultados_eventos (id_evento, resultado) VALUES (?, ?)', (evento_id, 'ocorrido'))
-        # Lógica para distribuição de valores das apostas
-    elif acao == 'nao_ocorrido':
-        conn.execute('UPDATE eventos SET status = ? WHERE id = ?', ('finalizado', evento_id))
-        conn.execute('INSERT INTO resultados_eventos (id_evento, resultado) VALUES (?, ?)', (evento_id, 'não ocorrido'))
+    try:
+        if acao == 'aprovar':
+            conn.execute('UPDATE eventos SET status = ? WHERE id = ?', ('aprovado', evento_id))
+        elif acao == 'reprovar':
+            motivo_rejeicao = request.form.get('motivo_rejeicao', '')
+            conn.execute('UPDATE eventos SET status = ? WHERE id = ?', ('reprovado', evento_id))
+            conn.execute('''
+                INSERT INTO moderacoes_eventos (id_evento, id_moderador, acao, motivo_rejeicao) 
+                VALUES (?, ?, ?, ?)''', 
+                (evento_id, 1, 'reprovar', motivo_rejeicao))
+        elif acao == 'confirmar':
+            conn.execute('UPDATE eventos SET status = ? WHERE id = ?', ('finalizado', evento_id))
+            conn.execute('INSERT INTO resultados_eventos (id_evento, resultado) VALUES (?, ?)', (evento_id, 'ocorrido'))
+        elif acao == 'nao_ocorrido':
+            conn.execute('UPDATE eventos SET status = ? WHERE id = ?', ('finalizado', evento_id))
+            conn.execute('INSERT INTO resultados_eventos (id_evento, resultado) VALUES (?, ?)', (evento_id, 'não ocorrido'))
+        
+        conn.commit()
+        return '', 200  # Retorna uma resposta vazia com código de sucesso
     
-    conn.commit()
-    conn.close()
-    return redirect(url_for('area_moderador'))
+    except Exception as e:
+        print(f"Erro ao processar ação: {e}")  # Loga o erro no console
+        return str(e), 500  # Retorna o erro com código 500 (Internal Server Error)
+    
+    finally:
+        conn.close()
+
 
 
 if __name__ == '__main__':
