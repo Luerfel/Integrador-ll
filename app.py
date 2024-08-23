@@ -178,58 +178,61 @@ Uso: Esta função é chamada quando um usuário tenta se cadastrar na aplicaç�
     return render_template('cadastro.html', error_message=error_message)
 
 "--------------------------------------------------------------------------------------------------------------------------------------------------------------"
+
+"moderador"
+
 @app.route('/moderador_dashboard', methods=['GET'])
 def moderador_dashboard():
+    # Obtém o parâmetro de consulta 'view' da URL, com o valor padrão 'pendentes'
     view = request.args.get('view', 'pendentes')
+    # Define o filtro de status com base no valor de 'view'
+    status_filter = 'pendente' if view == 'pendentes' else 'aprovado'
 
-    conn = sqlite3.connect(database_path)
-    conn.row_factory = sqlite3.Row
+    # Conecta ao banco de dados SQLite
+    with sqlite3.connect(database_path) as conn:
+        conn.row_factory = sqlite3.Row  # Configura a fábrica de linhas para acessar colunas por nome
+        # Executa a consulta para selecionar eventos com o status especificado
+        eventos = conn.execute('SELECT * FROM eventos WHERE status = ?', (status_filter,)).fetchall()
 
-    if view == 'pendentes':
-        eventos = conn.execute('SELECT * FROM eventos WHERE status = ?', ('pendente',)).fetchall()
-    else:
-        eventos = conn.execute('SELECT * FROM eventos WHERE status = ?', ('aprovado',)).fetchall()
-
-    conn.close()
-
+    # Renderiza o template 'area_moderador.html', passando os eventos e a view atual
     return render_template('area_moderador.html', eventos=eventos, view=view)
-
 
 @app.route('/acao_evento', methods=['POST'])
 def acao_evento():
     evento_id = request.form['evento_id']
     acao = request.form['acao']
-    
-    conn = sqlite3.connect(database_path)
-    
-    try:
-        if acao == 'aprovar':
-            conn.execute('UPDATE eventos SET status = ? WHERE id = ?', ('aprovado', evento_id))
-        elif acao == 'reprovar':
-            motivo_rejeicao = request.form.get('motivo_rejeicao', '')
-            conn.execute('UPDATE eventos SET status = ? WHERE id = ?', ('reprovado', evento_id))
-            conn.execute('''
-                INSERT INTO moderacoes_eventos (id_evento, id_moderador, acao, motivo_rejeicao) 
-                VALUES (?, ?, ?, ?)''', 
-                (evento_id, 1, 'reprovar', motivo_rejeicao))
-        elif acao == 'confirmar':
-            conn.execute('UPDATE eventos SET status = ? WHERE id = ?', ('finalizado', evento_id))
-            conn.execute('INSERT INTO resultados_eventos (id_evento, resultado) VALUES (?, ?)', (evento_id, 'ocorrido'))
-        elif acao == 'nao_ocorrido':
-            conn.execute('UPDATE eventos SET status = ? WHERE id = ?', ('finalizado', evento_id))
-            conn.execute('INSERT INTO resultados_eventos (id_evento, resultado) VALUES (?, ?)', (evento_id, 'não ocorrido'))
-        
-        conn.commit()
-        return '', 200  # Retorna uma resposta vazia com código de sucesso
-    
-    except Exception as e:
-        print(f"Erro ao processar ação: {e}")  # Loga o erro no console
-        return str(e), 500  # Retorna o erro com código 500 (Internal Server Error)
-    
-    finally:
-        conn.close()
+    motivo_rejeicao = request.form.get('motivo_rejeicao', '')  # Captura o motivo da rejeição
+    id_moderador = 1  # Aqui você deve substituir pelo ID real do moderador logado
 
+    acao_map = {
+        'aprovar': ('aprovado', None),
+        'reprovar': ('reprovado', motivo_rejeicao),  # Passa o motivo da rejeição
+        'confirmar': ('finalizado', 'ocorrido'),
+        'nao_ocorrido': ('finalizado', 'não ocorrido')
+    }
 
+    with sqlite3.connect(database_path) as conn:
+        try:
+            status, extra_data = acao_map.get(acao, (None, None))
+            if status:
+                conn.execute('UPDATE eventos SET status = ? WHERE id = ?', (status, evento_id))
+                if acao == 'reprovar':
+                    # Inserir o registro na tabela moderacoes_eventos após a rejeição
+                    conn.execute('''
+                        INSERT INTO moderacoes_eventos (id_evento, id_moderador, acao, motivo_rejeicao) 
+                        VALUES (?, ?, ?, ?)
+                    ''', (evento_id, id_moderador, acao, motivo_rejeicao))
+                
+                # Inserir resultado do evento, se necessário
+                if acao in ['reprovar', 'confirmar', 'nao_ocorrido']:
+                    conn.execute('''INSERT INTO resultados_eventos (id_evento, resultado) VALUES (?, ?)''', 
+                                 (evento_id, extra_data))
+                
+                conn.commit()
+                return '', 200
+        except Exception as e:
+            print(f"Erro ao processar ação: {e}")
+            return str(e), 500
 
 if __name__ == '__main__':
     app.run(debug=True)  # Executa o aplicativo Flask no modo debug

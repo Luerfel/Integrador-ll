@@ -5,6 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área do Moderador</title>
     <link rel="stylesheet" href="/static/css/area_moderacao.css">
+    <style>
+        /* Estilo básico para o modal */
+        .modal {
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -31,7 +67,6 @@
                         <th>Valor da Cota</th>
                         <th>Data do Evento</th>
                         <th>Período de Apostas</th>
-                        <th>Status</th>
                         <th>ID Criador</th>
                         <th>Data de Criação</th>
                         <th>Ações</th>
@@ -46,12 +81,11 @@
                         <td>{{ evento.valor_cota }}</td>
                         <td>{{ evento.data_evento }}</td>
                         <td>{{ evento.periodo_apostas }}</td>
-                        <td>{{ evento.status }}</td>
                         <td>{{ evento.id_criador }}</td>
                         <td>{{ evento.data_criacao }}</td>
                         <td>
                             <button type="button" onclick="handleEventAction('{{ evento.id }}', 'aprovar')" class="approve-btn">Aprovar</button>
-                            <button type="button" onclick="handleEventAction('{{ evento.id }}', 'reprovar')" class="reject-btn">Reprovar</button>
+                            <button type="button" onclick="abrirModalReprovar('{{ evento.id }}')" class="reject-btn">Reprovar</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -70,7 +104,6 @@
                         <th>Valor da Cota</th>
                         <th>Data do Evento</th>
                         <th>Período de Apostas</th>
-                        <th>Status</th>
                         <th>ID Criador</th>
                         <th>Data de Criação</th>
                         <th>Ações</th>
@@ -85,7 +118,6 @@
                         <td>{{ evento.valor_cota }}</td>
                         <td>{{ evento.data_evento }}</td>
                         <td>{{ evento.periodo_apostas }}</td>
-                        <td>{{ evento.status }}</td>
                         <td>{{ evento.id_criador }}</td>
                         <td>{{ evento.data_criacao }}</td>
                         <td>
@@ -98,6 +130,32 @@
             </table>
         </section>
         {% endif %}
+
+        <!-- Modal para justificar a reprovação -->
+        <div id="modalReprovar" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Justificar Reprovação</h2>
+                <form id="formReprovarEvento" method="POST" action="/acao_evento">
+                    <input type="hidden" name="evento_id" id="modalEventoId">
+                    <input type="hidden" name="acao" value="reprovar">
+                    
+                    <label for="motivo_rejeicao">Reprovado por:</label>
+                    <select name="motivo_rejeicao" id="modalMotivoRejeicao" required>
+                        <option value="texto confuso">Texto confuso</option>
+                        <option value="texto inapropriado">Texto inapropriado</option>
+                        <option value="não respeita a política de privacidade e/ou termos de uso da plataforma">
+                            Não respeita a política de privacidade e/ou termos de uso da plataforma
+                        </option>
+                    </select>
+
+                    <label for="mensagem_rejeicao">Mensagem:</label>
+                    <textarea name="mensagem_rejeicao" id="modalMensagemRejeicao" rows="4" required></textarea>
+
+                    <button type="submit">Confirmar Reprovação</button>
+                </form>
+            </div>
+        </div>
     </main>
 
     <script src="/static/js/area_moderador.js"></script>
