@@ -1,4 +1,4 @@
-"WINBET"
+WINBET
 Este projeto consiste no desenvolvimento de uma plataforma web de apostas, permitindo que os usuários criem e aceitem apostas em eventos futuros, como resultados esportivos, eleições, entre outros. A plataforma simula o controle financeiro, oferecendo uma experiência completa para os usuários.
 
 Tecnologias do Projeto
