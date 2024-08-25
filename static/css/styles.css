@@ -5,7 +5,8 @@ body {
     font-family: Arial, sans-serif;
     
     /* Define um fundo gradiente escuro */
-    background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+    background: url('/static/images/bg.png') no-repeat center center fixed;
+    background-size: cover;
     
     /* Configura o layout do body para centralizar o conteúdo */
     height: 100vh;
@@ -17,8 +18,9 @@ body {
 /* Estilo para o contêiner de login */
 .login-container {
     /* Define a cor de fundo com opacidade para ver o fundo gradiente */
-    background-color: rgba(0, 0, 0, 0.7);
-    
+    background-color: #080E1A;
+
+
     /* Adiciona preenchimento e bordas arredondadas */
     padding: 40px;
     border-radius: 10px;
@@ -28,6 +30,7 @@ body {
     
     /* Centraliza o conteúdo dentro do contêiner */
     text-align: center;
+
     width: 300px;
 }
 
