@@ -1,6 +1,6 @@
 # WINBET
 
-uma plataforma web de apostas, que permite aos usuários criar e aceitar apostas entre si em diversos eventos futuros, Desenvolvida na disciplina Projeto Integrador II
+uma plataforma web de apostas, que permite aos usuários criar e aceitar apostas entre si em diversos eventos futuros, desenvolvida na disciplina Projeto Integrador II
 
 ### Tecnologias do Projeto
 
