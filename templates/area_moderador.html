@@ -4,58 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área do Moderador</title>
+    <!-- Link para o arquivo CSS da área de moderação -->
     <link rel="stylesheet" href="/static/css/area_moderacao.css">
-    <style>
-        /* Estilo básico para o modal */
-        .modal {
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 500px;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-    </style>
 </head>
 <body>
     <header>
         <h1>Área do Moderador</h1>
     </header>
     
+    <!-- Menu de navegação para alternar entre as diferentes visualizações da área do moderador -->
     <nav class="menustrip">
         <ul>
+            <!-- Link para visualizar eventos pendentes de aprovação -->
             <li><a href="{{ url_for('moderador_dashboard', view='pendentes') }}" {% if view == 'pendentes' %}class="active"{% endif %}>Eventos Pendentes de Aprovação</a></li>
+            <!-- Link para visualizar eventos que precisam ser finalizados -->
             <li><a href="{{ url_for('moderador_dashboard', view='finalizar') }}" {% if view == 'finalizar' %}class="active"{% endif %}>Eventos para Finalizar</a></li>
         </ul>
     </nav>
     
     <main>
         {% if view == 'pendentes' %}
+        <!-- Seção para exibir eventos pendentes de aprovação -->
         <section class="pending-approval">
             <h2>Eventos Pendentes de Aprovação</h2>
             <table>
@@ -73,6 +42,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- Iteração sobre os eventos para exibir cada um na tabela -->
                     {% for evento in eventos %}
                     <tr id="event-{{ evento.id }}">
                         <td>{{ evento.id }}</td>
@@ -84,7 +54,9 @@
                         <td>{{ evento.id_criador }}</td>
                         <td>{{ evento.data_criacao }}</td>
                         <td>
+                            <!-- Botão para aprovar o evento -->
                             <button type="button" onclick="handleEventAction('{{ evento.id }}', 'aprovar')" class="approve-btn">Aprovar</button>
+                            <!-- Botão para abrir o modal de reprovação -->
                             <button type="button" onclick="abrirModalReprovar('{{ evento.id }}')" class="reject-btn">Reprovar</button>
                         </td>
                     </tr>
@@ -93,6 +65,7 @@
             </table>
         </section>
         {% elif view == 'finalizar' %}
+        <!-- Seção para exibir eventos que precisam ser finalizados -->
         <section class="events-to-finalize">
             <h2>Eventos para Finalizar</h2>
             <table>
@@ -110,6 +83,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- Iteração sobre os eventos para exibir cada um na tabela -->
                     {% for evento in eventos %}
                     <tr id="event-{{ evento.id }}">
                         <td>{{ evento.id }}</td>
@@ -121,7 +95,9 @@
                         <td>{{ evento.id_criador }}</td>
                         <td>{{ evento.data_criacao }}</td>
                         <td>
+                            <!-- Botão para confirmar que o evento ocorreu -->
                             <button type="button" onclick="handleEventAction('{{ evento.id }}', 'confirmar')" class="confirm-btn">Confirmar Ocorrência</button>
+                            <!-- Botão para marcar o evento como não ocorrido -->
                             <button type="button" onclick="handleEventAction('{{ evento.id }}', 'nao_ocorrido')" class="not-occurred-btn">Não Ocorrido</button>
                         </td>
                     </tr>
@@ -131,31 +107,37 @@
         </section>
         {% endif %}
 
-        <!-- Modal para justificar a reprovação -->
-<div id="modalReprovar" class="modal" style="display: none;">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Justificar Reprovação</h2>
-        <form id="formReprovarEvento" method="POST" action="/acao_evento">
-            <input type="hidden" name="evento_id" id="modalEventoId">
-            <input type="hidden" name="acao" value="reprovar">
-            
-            <label for="motivo_rejeicao">Reprovado por:</label>
-            <select name="motivo_rejeicao" id="modalMotivoRejeicao" required>
-                <option value="texto confuso">Texto confuso</option>
-                <option value="texto inapropriado">Texto inapropriado</option>
-                <option value="não respeita a política de privacidade e/ou termos de uso da plataforma">
-                    Não respeita a política de privacidade e/ou termos de uso da plataforma
-                </option>
-            </select>
+        <!-- Modal para justificar a reprovação de um evento -->
+        <div id="modalReprovar" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Justificar Reprovação</h2>
+                <!-- Formulário para enviar o motivo de reprovação do evento -->
+                <form id="formReprovarEvento" method="POST" action="/acao_evento">
+                    <!-- Campo oculto para armazenar o ID do evento que está sendo reprovado -->
+                    <input type="hidden" name="evento_id" id="modalEventoId">
+                    <!-- Campo oculto para definir a ação como reprovação -->
+                    <input type="hidden" name="acao" value="reprovar">
+                    
+                    <!-- Seleção do motivo de reprovação -->
+                    <label for="motivo_rejeicao">Reprovado por:</label>
+                    <select name="motivo_rejeicao" id="modalMotivoRejeicao" required>
+                        <option value="texto confuso">Texto confuso</option>
+                        <option value="texto inapropriado">Texto inapropriado</option>
+                        <option value="não respeita a política de privacidade e/ou termos de uso da plataforma">
+                            Não respeita a política de privacidade e/ou termos de uso da plataforma
+                        </option>
+                    </select>
 
-            <button type="submit">Confirmar Reprovação</button>
-        </form>
-    </div>
-</div>
+                    <!-- Botão para confirmar a reprovação -->
+                    <button type="submit">Confirmar Reprovação</button>
+                </form>
+            </div>
+        </div>
 
     </main>
 
+    <!-- Link para o arquivo JavaScript da área de moderação -->
     <script src="/static/js/area_moderador.js"></script>
 </body>
 </html>
