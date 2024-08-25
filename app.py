@@ -127,7 +127,6 @@ Uso: Esta função é chamada durante o processo de cadastro para garantir que o
     return False
 
 @app.route('/cadastro', methods=['GET', 'POST'])
-
 def cadastro():
     """
 Função para gerenciar o cadastro de novos usuários.
