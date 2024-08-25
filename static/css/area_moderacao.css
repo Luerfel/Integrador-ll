@@ -114,7 +114,7 @@ nav.menustrip ul li a.active,
 nav.menustrip ul li a:hover {
     background-color: #555; /* Cor de fundo dos links ativos ou com hover */
 }
-/* Estilo básico para o modal */
+/* Adicione este código ao seu arquivo area_moderacao.css */
 .modal {
     position: fixed;
     z-index: 1;
@@ -148,3 +148,4 @@ nav.menustrip ul li a:hover {
     text-decoration: none;
     cursor: pointer;
 }
+

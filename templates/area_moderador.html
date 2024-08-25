@@ -132,30 +132,28 @@
         {% endif %}
 
         <!-- Modal para justificar a reprovação -->
-        <div id="modalReprovar" class="modal" style="display: none;">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2>Justificar Reprovação</h2>
-                <form id="formReprovarEvento" method="POST" action="/acao_evento">
-                    <input type="hidden" name="evento_id" id="modalEventoId">
-                    <input type="hidden" name="acao" value="reprovar">
-                    
-                    <label for="motivo_rejeicao">Reprovado por:</label>
-                    <select name="motivo_rejeicao" id="modalMotivoRejeicao" required>
-                        <option value="texto confuso">Texto confuso</option>
-                        <option value="texto inapropriado">Texto inapropriado</option>
-                        <option value="não respeita a política de privacidade e/ou termos de uso da plataforma">
-                            Não respeita a política de privacidade e/ou termos de uso da plataforma
-                        </option>
-                    </select>
+<div id="modalReprovar" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Justificar Reprovação</h2>
+        <form id="formReprovarEvento" method="POST" action="/acao_evento">
+            <input type="hidden" name="evento_id" id="modalEventoId">
+            <input type="hidden" name="acao" value="reprovar">
+            
+            <label for="motivo_rejeicao">Reprovado por:</label>
+            <select name="motivo_rejeicao" id="modalMotivoRejeicao" required>
+                <option value="texto confuso">Texto confuso</option>
+                <option value="texto inapropriado">Texto inapropriado</option>
+                <option value="não respeita a política de privacidade e/ou termos de uso da plataforma">
+                    Não respeita a política de privacidade e/ou termos de uso da plataforma
+                </option>
+            </select>
 
-                    <label for="mensagem_rejeicao">Mensagem:</label>
-                    <textarea name="mensagem_rejeicao" id="modalMensagemRejeicao" rows="4" required></textarea>
+            <button type="submit">Confirmar Reprovação</button>
+        </form>
+    </div>
+</div>
 
-                    <button type="submit">Confirmar Reprovação</button>
-                </form>
-            </div>
-        </div>
     </main>
 
     <script src="/static/js/area_moderador.js"></script>
