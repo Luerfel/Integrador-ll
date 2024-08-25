@@ -2,7 +2,7 @@
 
 uma plataforma web de apostas, que permite aos usuários criar e aceitar apostas entre si em diversos eventos futuros, Desenvolvida na disciplina Projeto Integrador II
 
-## Tecnologias do Projeto
+### Tecnologias do Projeto
 
 - **Frontend:** HTML, CSS, JavaScript para validações e funcionalidades do frontend.
 - **Backend:** Python e Flask.
@@ -10,14 +10,13 @@ uma plataforma web de apostas, que permite aos usuários criar e aceitar apostas
 - **Ambientes de Desenvolvimento:** VSCODE (Visual Studio Code).
 - **Frameworks:** Nenhum.
 
-### Prerequisites
-
+### Requisitos
 - [Python 3.8+](https://www.python.org/downloads/)
 - [Flask](https://flask.palletsprojects.com/en/2.0.x/installation/)
 - [SQLite](https://www.sqlite.org/download.html)
 - [Visual Studio Code](https://code.visualstudio.com/Download) - Recomendado para desenvolvimento
 
-### Installing
+### Instalação
 
 Uma série de passos que explica como configurar o ambiente de desenvolvimento:
 
