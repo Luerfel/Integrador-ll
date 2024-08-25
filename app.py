@@ -1,7 +1,6 @@
 from flask import Flask, request, redirect, url_for, render_template
 import sqlite3
 import os
-import re
 
 app = Flask(__name__)
 
@@ -79,7 +78,7 @@ formulário de login.
         if tipo_usuario == 'usuario':
             return '/area_usuario'  # Retorna a URL para a área do usuário
         elif tipo_usuario == 'moderador':
-            return '/area_moderador'  # Retorna a URL para a área do moderador
+            return '/moderador_dashboard'  # Retorna a URL para a área do moderador
         else:
             return 'Credenciais inválidas', 401  # Retorna uma mensagem de erro e o status 401 (não autorizado)
 
@@ -98,17 +97,6 @@ Uso: Esta função é chamada quando um usuário comum faz login com sucesso
 """
     return render_template('area_usuario.html')  # Renderiza a página da área do usuário
 
-# Rota para a área do moderador
-@app.route('/area_moderador')
-
-def area_moderador():
-    """
-Esta função renderiza a página HTML correspondente à área do moderador
-(area_moderador.html).
-
-Uso: Esta função é chamada quando um moderador faz login com sucesso.
-"""
-    return render_template('area_moderador.html')  # Renderiza a página da área do moderador
 
 "--------------------------------------------------------------------------------------------------------------------------------------------------------------"
 
@@ -139,7 +127,6 @@ Uso: Esta função é chamada durante o processo de cadastro para garantir que o
     return False
 
 @app.route('/cadastro', methods=['GET', 'POST'])
-
 def cadastro():
     """
 Função para gerenciar o cadastro de novos usuários.
@@ -190,6 +177,99 @@ Uso: Esta função é chamada quando um usuário tenta se cadastrar na aplicaç�
     return render_template('cadastro.html', error_message=error_message)
 
 "--------------------------------------------------------------------------------------------------------------------------------------------------------------"
+
+"moderador"
+
+@app.route('/moderador_dashboard', methods=['GET'])
+def moderador_dashboard():
+    """
+    Função para gerenciar a exibição do dashboard do moderador.
+
+    Esta função lida com as requisições GET na rota '/moderador_dashboard'.
+    - Obtém o parâmetro de consulta 'view' da URL, que define qual visualização o moderador quer acessar (pendentes ou finalizados).
+    - Com base no parâmetro 'view', define um filtro de status para a consulta SQL, que pode ser 'pendente' ou 'aprovado'.
+    - Conecta ao banco de dados SQLite e executa uma consulta para selecionar todos os eventos que correspondem ao status filtrado.
+    - Renderiza o template 'area_moderador.html', passando os eventos e a view atual para serem exibidos na interface.
+
+    Uso: Esta função é chamada quando um moderador acessa o dashboard para ver eventos pendentes de aprovação ou eventos que já foram aprovados.
+    """
+    # Obtém o parâmetro de consulta 'view' da URL, com o valor padrão 'pendentes'
+    view = request.args.get('view', 'pendentes')
+    # Define o filtro de status com base no valor de 'view'
+    status_filter = 'pendente' if view == 'pendentes' else 'aprovado'
+
+    # Conecta ao banco de dados SQLite
+    with sqlite3.connect(database_path) as conn:
+        conn.row_factory = sqlite3.Row  # Configura a fábrica de linhas para acessar colunas por nome
+        # Executa a consulta para selecionar eventos com o status especificado
+        eventos = conn.execute('SELECT * FROM eventos WHERE status = ?', (status_filter,)).fetchall()
+
+    # Renderiza o template 'area_moderador.html', passando os eventos e a view atual
+    return render_template('area_moderador.html', eventos=eventos, view=view)
+
+
+@app.route('/acao_evento', methods=['POST'])
+def acao_evento():
+    """
+    Função para processar as ações realizadas pelos moderadores sobre os eventos.
+
+    Esta função lida com as requisições POST na rota '/acao_evento'.
+    - Recebe o ID do evento, a ação a ser realizada (aprovar, reprovar, confirmar, não ocorrido) e, opcionalmente, o motivo de reprovação.
+    - Mapeia a ação recebida para os status e dados extras correspondentes, a serem armazenados no banco de dados.
+    - Conecta ao banco de dados SQLite e realiza as operações de atualização ou inserção necessárias:
+      - Atualiza o status do evento de acordo com a ação escolhida.
+      - Se a ação for 'reprovar', insere um registro na tabela 'moderacoes_eventos' com o motivo de reprovação.
+      - Para as ações 'reprovar', 'confirmar' ou 'nao_ocorrido', insere um registro na tabela 'resultados_eventos' com o resultado do evento.
+    - Retorna uma resposta HTTP adequada (200 para sucesso ou 500 em caso de erro).
+
+    Uso: Esta função é chamada quando um moderador realiza alguma ação em um evento na interface da área do moderador.
+    """
+    # Obtém os dados do formulário
+    evento_id = request.form.get('evento_id')
+    acao = request.form.get('acao')
+    motivo_rejeicao = request.form.get('motivo_rejeicao', '')
+    id_moderador = 1  # ID do moderador fixo ou pode ser passado via request/form.
+
+    # Mapeamento das ações para status e dados adicionais
+    acao_map = {
+        'aprovar': ('aprovado', None),
+        'reprovar': ('reprovado', motivo_rejeicao),
+        'confirmar': ('finalizado', 'ocorrido'),
+        'nao_ocorrido': ('finalizado', 'não ocorrido')
+    }
+
+    # Validações iniciais dos dados recebidos
+    if not evento_id or acao not in acao_map:
+        return 'Dados inválidos', 400
+
+    try:
+        # Conecta ao banco de dados SQLite
+        with sqlite3.connect(database_path) as conn:
+            status, extra_data = acao_map[acao]
+            # Atualiza o status do evento com base na ação
+            conn.execute('UPDATE eventos SET status = ? WHERE id = ?', (status, evento_id))
+            
+            # Se a ação for 'reprovar', insere um registro na tabela de moderações
+            if acao == 'reprovar':
+                conn.execute('''
+                    INSERT INTO moderacoes_eventos (id_evento, id_moderador, acao, motivo_rejeicao) 
+                    VALUES (?, ?, ?, ?)
+                ''', (evento_id, id_moderador, acao, motivo_rejeicao))
+            
+            # Insere um registro na tabela de resultados se a ação for 'reprovar', 'confirmar' ou 'não_ocorrido'
+            if acao in ['reprovar', 'confirmar', 'nao_ocorrido']:
+                conn.execute('''
+                    INSERT INTO resultados_eventos (id_evento, resultado) 
+                    VALUES (?, ?)
+                ''', (evento_id, extra_data))
+            
+            # Confirma as operações no banco de dados
+            conn.commit()
+            return '', 200
+    except Exception as e:
+        # Em caso de erro, retorna o erro e um status 500
+        print(f"Erro ao processar ação: {e}")
+        return str(e), 500
 
 
 if __name__ == '__main__':
