@@ -1,8 +1,9 @@
-# Integrador-ll
+"WINBET"
+Este projeto consiste no desenvolvimento de uma plataforma web de apostas, permitindo que os usuários criem e aceitem apostas em eventos futuros, como resultados esportivos, eleições, entre outros. A plataforma simula o controle financeiro, oferecendo uma experiência completa para os usuários.
 
-Uma plataforma de apostas que permite aos usuários criar e aceitar apostas entre si em
-diversos eventos futuros que são resultados de jogos esportivos, ganhador de alguma eleição de
-um país por quantidade de votos ou porcentagem, catástrofes do tipo: vulcão Etna entrará em
-erupção dia X.
-Os participantes da comunidade poderão somente apostar e/ou lançar eventos. O
-controle financeiros será automaticamente feito pela plataforma de maneira simulada.
+Tecnologias do Projeto
+Frontend: HTML, CSS, JavaScript para validações e funcionalidades do frontend.
+Backend: Python e Flask.
+Banco de dados: SQLite.
+Ambientes de Desenvolvimento: VSCODE (Visual Studio Code).
+Frameworks: Nenhum.
