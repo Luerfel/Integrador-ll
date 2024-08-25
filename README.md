@@ -2,92 +2,58 @@
 
 uma plataforma web de apostas, que permite aos usuários criar e aceitar apostas entre si em diversos eventos futuros.
 
-Initially appeared on
-[gist](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2). But the page cannot open anymore so that is why I have moved it here.
 
 ## Getting Started
 
-These instructions will give you a copy of the project up and running on
-your local machine for development and testing purposes. See deployment
-for notes on deploying the project on a live system.
+Estas instruções ajudarão você a obter uma cópia do projeto em execução em sua máquina local para fins de desenvolvimento e testes. Consulte a seção de deployment para obter notas sobre como implantar o projeto em um sistema ao vivo.
+
+## Tecnologias do Projeto
+
+- **Frontend:** HTML, CSS, JavaScript para validações e funcionalidades do frontend.
+- **Backend:** Python e Flask.
+- **Banco de dados:** SQLite.
+- **Ambientes de Desenvolvimento:** VSCODE (Visual Studio Code).
+- **Frameworks:** Nenhum.
 
 ### Prerequisites
 
-Requirements for the software and other tools to build, test and push 
-- [Example 1](https://www.example.com)
-- [Example 2](https://www.example.com)
+- [Python 3.8+](https://www.python.org/downloads/)
+- [Flask](https://flask.palletsprojects.com/en/2.0.x/installation/)
+- [SQLite](https://www.sqlite.org/download.html)
+- [Visual Studio Code](https://code.visualstudio.com/Download) - Recomendado para desenvolvimento
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development
-environment running
+Uma série de passos que explica como configurar o ambiente de desenvolvimento:
 
-Say what the step will be
+1. **Clone o repositório:**
 
-    Give the example
+    ```bash
+    git clone https://github.com/Luerfel/Integrador-ll.git
+    cd Integrador-ll
+    ```
 
-And repeat
+2. **Crie e ative um ambiente virtual:**
 
-    until finished
+    ```bash
+    python3 -m venv venv
+    source venv/bin/activate   # No Windows use `venv\Scripts\activate`
+    ```
 
-End with an example of getting some data out of the system or using it
-for a little demo
+3. **Instale as dependências do projeto:**
 
-## Running the tests
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-Explain how to run the automated tests for this system
+4. **Inicie o servidor Flask:**
 
-### Sample Tests
+    ```bash
+    flask run
+    ```
 
-Explain what these tests test and why
+5. **Acesse a aplicação no navegador:**
 
-    Give an example
+    Abra `http://localhost:5000` no seu navegador para visualizar a aplicação em execução.
+   
 
-### Style test
-
-Checks if the best practices and the right coding style has been used.
-
-    Give an example
-
-## Deployment
-
-Add additional notes to deploy this on a live system
-
-## Built With
-
-  - [Contributor Covenant](https://www.contributor-covenant.org/) - Used
-    for the Code of Conduct
-  - [Creative Commons](https://creativecommons.org/) - Used to choose
-    the license
-
-## Contributing
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code
-of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [Semantic Versioning](http://semver.org/) for versioning. For the versions
-available, see the [tags on this
-repository](https://github.com/PurpleBooth/a-good-readme-template/tags).
-
-## Authors
-
-  - **Billie Thompson** - *Provided README Template* -
-    [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of
-[contributors](https://github.com/PurpleBooth/a-good-readme-template/contributors)
-who participated in this project.
-
-## License
-
-This project is licensed under the [CC0 1.0 Universal](LICENSE.md)
-Creative Commons License - see the [LICENSE.md](LICENSE.md) file for
-details
-
-## Acknowledgments
-
-  - Hat tip to anyone whose code is used
-  - Inspiration
-  - etc
