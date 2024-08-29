@@ -272,9 +272,26 @@ def acao_evento():
         return str(e), 500
 "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 
-"Criar evento"
 @app.route('/criar_evento', methods=['GET', 'POST'])
 def criar_evento():
+    """
+    Função para criar um novo evento a partir dos dados enviados pelo formulário.
+
+    Esta função lida com as requisições GET e POST na rota '/criar_evento'.
+    - Se a requisição for POST, os dados do formulário são recuperados e validados.
+    - O título do evento, descrição, valor da cota, data do evento, período de apostas e o ID do criador são extraídos do formulário.
+    - São realizadas validações nos campos:
+      - O título deve ter no máximo 50 caracteres.
+      - A descrição deve ter no máximo 150 caracteres.
+      - O valor da cota deve ser no mínimo R$1,00.
+    - Se as validações forem bem-sucedidas, os dados são inseridos na tabela 'eventos' do banco de dados SQLite.
+    - Em caso de sucesso na inserção, uma mensagem de confirmação é exibida ao usuário.
+    - Em caso de erro na inserção, uma mensagem de erro é exibida ao usuário.
+    - A função retorna a página com o formulário para criar um novo evento.
+
+    Uso: Esta função é chamada quando um usuário tenta criar um novo evento através da interface de criação de eventos.
+    """
+
     if request.method == 'POST':
         # Recupera os dados do formulário
         titulo = request.form['titulo']
