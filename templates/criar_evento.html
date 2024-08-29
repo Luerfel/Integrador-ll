@@ -53,9 +53,12 @@
                 <label for="categoria">Categoria:</label>
                 <select id="categoria" name="categoria" required>
                     <option value="">Selecione...</option>
-                    <!-- Adicione opções de categoria aqui -->
+                    {% for categoria in categorias %}
+                        <option value="{{ categoria[0] }}">{{ categoria[1] }}</option>
+                    {% endfor %}
                 </select>
             </div>
+            
 
             <button type="submit" class="btn-submit">Criar evento</button>
         </form>

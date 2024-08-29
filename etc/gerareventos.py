@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import random
 
 # Conectar ao banco de dados
-database_path = 'data/database.db'  # Atualize o caminho se necessário
+database_path = 'Integrador-ll/data/database.db'  # Atualize o caminho se necessário
 conn = sqlite3.connect(database_path)
 cursor = conn.cursor()
 
