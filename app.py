@@ -21,6 +21,8 @@ que começa com '/static/' é acessada para carregar um recurso estático.
     with open(f'static/{path}', 'rb') as file:
         return file.read()
     
+"POST envia dados no corpo da requisição HTTP"
+"método GET, que envia os dados na URL"
 "--------------------------------------------------------------------------------------------------------------------------------------------------------------"
 
 "LOGIN"
