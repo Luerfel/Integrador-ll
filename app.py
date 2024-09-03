@@ -1,6 +1,7 @@
 from flask import Flask, request, redirect, url_for, render_template , flash
 import sqlite3
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -299,13 +300,12 @@ def criar_evento():
         titulo = request.form['titulo']
         descricao = request.form['descricao']
         valor_cota = float(request.form['valor_cota'])
-        data_evento = request.form['data_evento']
-        data_inicio = request.form['data_inicio']
-        data_fim = request.form['data_fim']
-        id_criador = int(request.form['id_criador'])
+        data_evento_str = request.form['data_evento']
+        data_inicio_str = request.form['data_inicio']
+        data_fim_str = request.form['data_fim']
 
         # Combine as datas de início e fim para criar o período de apostas
-        periodo_apostas = f"{data_inicio} até {data_fim}"
+        periodo_apostas = f"{data_inicio_str} até {data_fim_str}"
 
         # Validações
         if len(titulo) > 50:
@@ -314,14 +314,25 @@ def criar_evento():
             return render_template('criar_evento.html', error="A descrição deve ter no máximo 150 caracteres.")
         if valor_cota < 1.00:
             return render_template('criar_evento.html', error="O valor da cota deve ser no mínimo R$1,00.")
+        
+        # Convertendo as strings para objetos datetime
+        data_inicio = datetime.strptime(data_inicio_str, '%Y-%m-%d')
+        data_fim = datetime.strptime(data_fim_str, '%Y-%m-%d')    
+        data_evento = datetime.strptime(data_evento_str, '%Y-%m-%d')       
+
+        if data_inicio > data_fim:
+            return render_template('criar_evento.html', error="A data de início não pode ser maior que a data final.")
+        if data_evento < data_fim:
+            return render_template('criar_evento.html', error="A data do evento não pode ser menor que a data final do período de apostas.")
+
 
         # Inserindo os dados na tabela
         try:
             conn = sqlite3.connect(database_path)
             cursor = conn.cursor()
-            sql = '''INSERT INTO eventos (titulo, descricao, valor_cota, data_evento, periodo_apostas, id_criador)
-                     VALUES (?, ?, ?, ?, ?, ?)'''
-            values = (titulo, descricao, valor_cota, data_evento, periodo_apostas, id_criador)
+            sql = '''INSERT INTO eventos (titulo, descricao, valor_cota, data_evento, periodo_apostas)
+                     VALUES (?, ?, ?, ?, ?)'''
+            values = (titulo, descricao, valor_cota, data_evento_str, periodo_apostas)
             cursor.execute(sql, values)
             conn.commit()
             return render_template('criar_evento.html', success="Evento criado com sucesso!")
