@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carteira</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h1>Minha Carteira</h1>
+    <label for="id_usuario">Id usuário: </label>
+    <input type="number" id="id_usuario" name="id_usuario" required>
+
+    <p>Disponível para saque: </p>
+    <p>R$ {{ "{:,.2f}".format(valor).replace(",", "v").replace(".", ",").replace("v", ".") }}</p>
+    <p>Taxas aplicadas ao saque: {{taxa_str}} </p>
+    <button type="button" class="btn-sacar">Sacar</button>
+    <p>Novo saldo: </p>
+    <p>R$ {{ "{:,.2f}".format(saldo).replace(",", "v").replace(".", ",").replace("v", ".") }}</p>
+    <p>Formas de pagamento disponíveis</p>
+    <ul>
+        <li>Pix</li>
+        <li>Cartão de crédito ou débito</li>
+        <li>Cheque</li>
+    </ul>
+    <button type="button" class="btn-adicionar-creditos">Adicionar créditos</button>
+
+    <!-- Pop-up e Overlay -->
+    <div id="popup-overlay" style="display: none;"></div>
+    <div id="popup" style="display: none;">
+        <button class="btn-close">Fechar</button>
+        <label for="quantidade">Quantidade a ser adicionada: </label>
+    <input type="number" id="quantidade" name="quantidade" required>
+    </div>
+
+    <!-- Incluindo o JavaScript -->
+    <script src="{{ url_for('static', filename='js/carteira.js') }}"></script>
+</body>
+</html>
