@@ -6,7 +6,7 @@ from datetime import datetime
 app = Flask(__name__)
 
 # Caminho absoluto para o banco de dados
-database_path = os.path.join(os.getcwd(), 'Integrador-ll/data/database.db')
+database_path = os.path.join(os.getcwd(), 'data/database.db')
 
 @app.route('/static/<path:path>')
 def serve_static(path):
@@ -27,41 +27,56 @@ que começa com '/static/' é acessada para carregar um recurso estático.
 
 @app.route('/gerenciar_carteira', methods=['GET', 'POST'])
 def carteira():
-    if request.method == 'POST':    
-        id_usuario = request.form['id_usuario']
-        quantidade = request.form['quantidade']
     conn = sqlite3.connect(database_path)
     cursor = conn.cursor()
-    sql = '''SELECT saldo FROM CARTEIRAS WHERE id_usuario = ?'''
-    cursor.execute(sql, id_usuario)
-    valor = cursor.fetchone()[0]
+    valor = 0  # Valor padrão
+    taxa_str = ""
+    saldo = 0  # Saldo padrão
 
-    if valor <= 100:
-        taxa = 0.04 * valor
-        taxa_str = "4%"
-    elif valor > 100 and valor <= 1000:
-        taxa = 0.03 * valor
-        taxa_str = "3%"
-    elif valor > 1001 and valor <= 5000:
-        taxa = 0.02 * valor
-        taxa_str = "2%"
-    elif valor > 5000 and valor < 100000:
-        taxa = 0.01 * valor
-        taxa_str = "1%"
-    elif valor > 100000:
-        taxa = 0
-        taxa_str = "Isenção de taxa"
-    
-    valor_saque = valor - taxa
-    saldo = valor - valor_saque
-    sql = '''UPDATE CARTEIRAS SET saldo = ? WHERE id_usuario = ?'''
-    cursor.execute(sql, saldo, id_usuario )
-    
-    return render_template('gerenciar_carteira.html', valor=valor, taxa_str = taxa_str, saldo=saldo, quantidade = quantidade)
+    if request.method == 'POST':
+        id_usuario = request.form['id_usuario']
+        action = request.form['action']
 
+        cursor.execute('SELECT saldo FROM CARTEIRAS WHERE id_usuario = ?', (id_usuario,))
+        resultado = cursor.fetchone()
 
+        if resultado:
+            valor = resultado[0]
+        else:
+            valor = 0  # Caso o usuário não seja encontrado
 
+        # Calculando a taxa com base no saldo
+        if valor <= 100:
+            taxa = 0.04 * valor
+            taxa_str = "4%"
+        elif valor > 100 and valor <= 1000:
+            taxa = 0.03 * valor
+            taxa_str = "3%"
+        elif valor > 1001 and valor <= 5000:
+            taxa = 0.02 * valor
+            taxa_str = "2%"
+        elif valor > 5000 and valor < 100000:
+            taxa = 0.01 * valor
+            taxa_str = "1%"
+        else:
+            taxa = 0
+            taxa_str = "Isenção de taxa"
+
+        if action == '/sacar':
+            # Calculando o valor a ser sacado e o novo saldo
+            valor_saque = valor - taxa
+            saldo = valor - valor_saque
+        
+        if action == '/adicionar_credito':
+            quantidade = request.form['quantidade']
+
+        # Atualizando o saldo na base de dados
+        cursor.execute('UPDATE CARTEIRAS SET saldo = ? WHERE id_usuario = ?', (saldo, id_usuario))
+        conn.commit()
+        conn.close()
+
+    return render_template('gerenciar_carteira.html', valor=valor, taxa_str=taxa_str, saldo=saldo)
 
 
 if __name__ == '__main__':
-    app.run(debug=True)  # Executa o aplicativo Flask no modo debug
+    app.run(debug=True)
