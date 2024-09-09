@@ -62,23 +62,28 @@ def carteira():
             taxa = 0
             taxa_str = "Isenção de taxa"
 
-        botao_sacar = request.form.get('sacar')
-        if botao_sacar:
+        # Lógica de saque
+        if 'sacar' in request.form:
             # Calculando o valor a ser sacado e o novo saldo
             valor_saque = valor - taxa
             saldo = valor - valor_saque
-            
-        botao_adicionar_credito = request.form.get('btn-adicionar')    
-        if botao_adicionar_credito:
-            quantidade = request.form['quantidade']
-            saldo = saldo + quantidade
+        
+        # Lógica de adicionar créditos
+        elif 'btn-adicionar' in request.form:
+            quantidade = float(request.form['quantidade'])
+            saldo = valor + quantidade
 
-        # Atualizando o saldo na base de dados
         cursor.execute('UPDATE CARTEIRAS SET saldo = ? WHERE id_usuario = ?', (saldo, id_usuario))
         conn.commit()
+        
         conn.close()
-
+        
         return render_template('gerenciar_carteira.html', valor=valor, taxa_str=taxa_str, saldo=saldo)
+
+    conn.close()
+
+    return render_template('gerenciar_carteira.html', valor=valor, taxa_str=taxa_str, saldo=saldo)
+
 
 
 if __name__ == '__main__':
