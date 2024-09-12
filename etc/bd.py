@@ -5,7 +5,7 @@ from tabulate import tabulate #pip install tabulate
 
 def conectar_db():
     # Atualize o caminho do banco de dados se necessário
-    return sqlite3.connect('data/database.db')
+    return sqlite3.connect('Integrador-ll/data/database.db')
 
 def limpar_terminal():
     # Detecta o sistema operacional  
