@@ -9,25 +9,28 @@
 <body>
     <h1>Minha Carteira</h1>
     
-    <!-- Formulário para saque -->
     <!-- Formulário para selecionar o ID do usuário e ver o saldo -->
-    <form method="POST" action="/gerenciar_carteira">
+    <form action="/gerenciar_carteira" method="POST">
         <label for="id_usuario">Id usuário: </label>
         <input type="number" id="id_usuario" name="id_usuario" required>
-        <p>Disponível para saque: </p>
-        <p>R$ {{ "{:,.2f}".format(valor).replace(",", "v").replace(".", ",").replace("v", ".") }}</p>
         <button type="submit" name="action" value="ver_saldo">Ver saldo</button>
+        <p>Disponível para saque: </p>
+        <p>R$ {{ valor }}</p>
         <p>Taxas aplicadas ao saque: {{taxa_str}} </p>
+    </form>
 
+    <!-- Formulário para sacar -->
+    <form action="/sacar" method="POST">
+        <!-- Campo hidden para enviar o id_usuario -->
+        <input type="hidden" name="id_usuario" value="{{ id_usuario }}">
         <button type="submit" name="sacar" value="sacar">Sacar</button>
         <p>Novo saldo: </p>
-        <p>R$ {{ "{:,.2f}".format(saldo).replace(",", "v").replace(".", ",").replace("v", ".") }}</p>
+        <p>R$ {{ saldo }}</p>
+    </form>
     
     <p>Formas de pagamento disponíveis</p>
     <ul>
-        <li>Pix</li>
         <li>Cartão de crédito ou débito</li>
-        <li>Cheque</li>
     </ul>
 
     <!-- Botão para abrir o pop-up de adicionar créditos -->
@@ -37,12 +40,17 @@
     <div id="popup-overlay" style="display: none;"></div>
     <div id="popup" style="display: none;">
         <button class="btn-close">Fechar</button>
+        
+        <!-- Formulário para adicionar créditos -->
+        <form action="/sacar" method="POST">
             <label for="quantidade">Quantidade a ser adicionada R$: </label>
             <input type="number" id="quantidade" name="quantidade" required>
+            <!-- Campo hidden para enviar o id_usuario -->
             <input type="hidden" name="id_usuario" value="{{ id_usuario }}">
-            <button type="submit" value="btn-adicionar">Confirmar</button>
+            <button type="submit" name="btn-adicionar" value="adicionar">Confirmar</button>
+        </form>
     </div>
-    </form>
+    
 
     <!-- Incluindo o JavaScript -->
     <script src="{{ url_for('static', filename='js/carteira.js') }}"></script>

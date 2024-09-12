@@ -1,42 +1,20 @@
-from flask import Flask, request, redirect, url_for, render_template , flash
+from flask import Flask, request, redirect, url_for, render_template
 import sqlite3
 import os
-from datetime import datetime
 
 app = Flask(__name__)
-
-# Caminho absoluto para o banco de dados
-database_path = os.path.join(os.getcwd(), 'data/database.db')
-
-@app.route('/static/<path:path>')
-def serve_static(path):
-    """
-Função para servir arquivos estáticos.
-
-Esta função serve arquivos estáticos, como CSS, JavaScript, e imagens,
-a partir do diretório /static, com base no caminho especificado.
-
-Uso: Esta função é chamada automaticamente pelo Flask quando uma rota 
-que começa com '/static/' é acessada para carregar um recurso estático.
-"""
-    with open(f'static/{path}', 'rb') as file:
-        return file.read()
-    
-"POST envia dados no corpo da requisição HTTP"
-"método GET, que envia os dados na URL"
+database_path = os.path.join(os.getcwd(), 'data/database.db')  # Defina o caminho para o banco de dados
 
 @app.route('/gerenciar_carteira', methods=['GET', 'POST'])
-def carteira():
+def carteira_ver_saldo():
     conn = sqlite3.connect(database_path)
     cursor = conn.cursor()
     valor = 0  # Valor padrão
     taxa_str = ""
-    saldo = 0  # Saldo padrão
-
+    
     if request.method == 'POST':
         id_usuario = request.form['id_usuario']
-        action = request.form['action']
-
+        
         cursor.execute('SELECT saldo FROM CARTEIRAS WHERE id_usuario = ?', (id_usuario,))
         resultado = cursor.fetchone()
 
@@ -61,29 +39,53 @@ def carteira():
         else:
             taxa = 0
             taxa_str = "Isenção de taxa"
-
-        # Lógica de saque
-        if 'sacar' in request.form:
-            # Calculando o valor a ser sacado e o novo saldo
-            valor_saque = valor - taxa
-            saldo = valor - valor_saque
         
-        # Lógica de adicionar créditos
-        elif 'btn-adicionar' in request.form:
-            quantidade = float(request.form['quantidade'])
-            saldo = valor + quantidade
+        return render_template('gerenciar_carteira.html', valor=valor, taxa_str=taxa_str)
+    
+    conn.close()
+    return render_template('gerenciar_carteira.html', valor=valor, taxa_str=taxa_str)
 
+
+@app.route('/sacar', methods=['POST'])
+def carteira_sacar():
+    conn = sqlite3.connect(database_path)
+    cursor = conn.cursor()
+
+    id_usuario = request.form['id_usuario']
+    
+    # Buscar o saldo atual do usuário
+    cursor.execute('SELECT saldo FROM CARTEIRAS WHERE id_usuario = ?', (id_usuario,))
+    resultado = cursor.fetchone()
+
+    if resultado:
+        saldo = resultado[0]
+        taxa = 0
+
+        # Calculando a taxa com base no saldo
+        if saldo <= 100:
+            taxa = 0.04 * saldo
+        elif saldo > 100 and saldo <= 1000:
+            taxa = 0.03 * saldo
+        elif saldo > 1001 and saldo <= 5000:
+            taxa = 0.02 * saldo
+        elif saldo > 5000 and saldo < 100000:
+            taxa = 0.01 * saldo
+
+        # Verificar se é saque ou adição de saldo
+        if 'btn-sacar' in request.form:
+            valor_saque = float(request.form['valor_saque'])
+            saldo -= (valor_saque + taxa)  # Subtrai o valor sacado e a taxa
+        elif 'btn-adicionar' in request.form:
+            valor_adicionar = float(request.form['valor_adicionar'])
+            saldo += valor_adicionar
+
+        # Atualizar o saldo do usuário no banco de dados
         cursor.execute('UPDATE CARTEIRAS SET saldo = ? WHERE id_usuario = ?', (saldo, id_usuario))
         conn.commit()
-        
-        conn.close()
-        
-        return render_template('gerenciar_carteira.html', valor=valor, taxa_str=taxa_str, saldo=saldo)
 
     conn.close()
 
-    return render_template('gerenciar_carteira.html', valor=valor, taxa_str=taxa_str, saldo=saldo)
-
+    return render_template('gerenciar_carteira.html', saldo=saldo)
 
 
 if __name__ == '__main__':
