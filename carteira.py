@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, url_for, render_template
+from flask import Flask, request, redirect, url_for, render_template, flash
 import sqlite3
 import os
 
@@ -46,7 +46,7 @@ def carteira_sacar():
             saldo = 0  # Ou um valor padrão, se preferir
 
             # Verificar se é saque ou adição de saldo
-        valor_saque = float(request.form['valor_saque'])
+        valor_saque = float(request.form['valor_saque'])        
         if 'btn-sacar' in request.form:
             id_usuario = request.form['id_usuario1']
 
@@ -63,7 +63,10 @@ def carteira_sacar():
             elif valor_saque > 5000 and valor_saque < 100000:
                 taxa = 0.01 * valor_saque
                 taxa_str = "1%"
-            saldo = saldo - (valor_saque + taxa)  # Subtrai o valor sacado e a taxa
+            if (valor_saque + taxa) <= saldo:
+                saldo = saldo - (valor_saque + taxa)  # Subtrai o valor sacado e a taxa
+            else:
+                flash("Erro, o valor a ser sacado deve ser menor ou igual ao saldo com a taxa aplicada.")
         # Atualizar o saldo do usuário no banco de dados
         cursor.execute('UPDATE CARTEIRAS SET saldo = ? WHERE id_usuario = ?', (saldo, id_usuario))
         conn.commit()

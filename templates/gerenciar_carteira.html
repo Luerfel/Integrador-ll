@@ -45,10 +45,18 @@
         
         <!-- Formulário para adicionar créditos -->
         <form action="/adicionar" method="POST">
-            <label for="valor_adicionar">Valor a ser adicionado R$: </label>
-            <input type="number" id="valor_adicionar" name="valor_adicionar" step="0.01" required>
             <label for="id_usuario">Id usuário: </label>
             <input type="number" id="id_usuario" name="id_usuario2" required>
+            <label for="numero_cartao">Numero do cartão: </label>
+            <input type="text" id="numero_cartao" name="numero_cartao" required>
+            <label for="data_validade">Data de validade </label>
+            <input type="date" id="data_validade" name="data_validade" required>
+            <label for="CVV">CVV: </label>
+            <input type="number" id="CVV" name="CVV" required>
+            <label for="CPF">CPF do titular: </label>
+            <input type="text" id="CPF" name="CPF" required>
+            <label for="valor_adicionar">Valor a ser adicionado R$: </label>
+            <input type="number" id="valor_adicionar" name="valor_adicionar" step="0.01" required>
             <button type="submit" name="btn-adicionar" value="btn-adicionar">Confirmar</button>
         </form>
     </div>
