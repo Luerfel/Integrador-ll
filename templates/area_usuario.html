@@ -6,6 +6,8 @@
     <title>Area do usuario</title>
     <!-- Link para o arquivo de estilo CSS -->
     <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="/static/css/area_usuario.css">
+
 </head>
 <body>
     <!-- Contêiner principal da tela de usuario -->
@@ -14,9 +16,12 @@
         <div style="position: absolute; top: 0; left: 0; padding: 10px;">
             <!-- Imagem da logo -->
             <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" style="max-width: 100px;">
+
         </div>
         <!-- Nome do usuario -->
-        
+        <div style="position: absolute; top: 0; right: 0; padding: 30px; color: white;"> Seu nome</div>           
     </div>
+    <class="caixa_com_botao">
+        
 </body>
 </html>
