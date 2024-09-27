@@ -50,4 +50,3 @@ Uma série de passos que explica como configurar o ambiente de desenvolvimento:
 
     Abra `http://localhost:5000` no seu navegador para visualizar a aplicação em execução.
    
-a
