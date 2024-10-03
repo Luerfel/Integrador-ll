@@ -9,27 +9,43 @@ O arquivo cadastro.js contém o código JavaScript que lida com o envio do formu
 Uso: Este script é essencial para validar o formato de email no frontend e garantir uma experiência de usuário consistente.
 */
 
-document.getElementById('cadastroForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Evita o envio do formulário para validação imediata
+document.getElementById('registerForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Impede o envio automático do formulário
 
-    const email = document.querySelector('input[name="email"]').value; // Coleta o valor do email inserido
-    const emailError = document.getElementById('emailError'); // Seleciona o elemento onde a mensagem de erro será exibida
+    const email = document.querySelector('input[name="email"]').value; // Pega o valor do campo de email
 
-    // Verificação simples para garantir que o email contém "@" e "."
+    // Validação simples de email
     if (!email.includes('@') || !email.includes('.')) {
-        emailError.textContent = 'Email digitado é inválido.'; // Define a mensagem de erro se o email for inválido
-        return; // Interrompe o processo de submissão do formulário se o email for inválido
-    } else {
-        emailError.textContent = ''; // Limpa a mensagem de erro caso o email seja válido
-        this.submit(); // Submete o formulário ao servidor Flask para processamento
+        alert('Email inválido. Por favor, insira um email válido.');
+        return; // Impede o envio se o email for inválido
     }
-});
 
-// Após o carregamento da página, verifica se existe uma mensagem de erro proveniente do backend
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('cadastroForm'); // Seleciona o formulário de cadastro
-    const errorMessage = form.getAttribute('data-error-message'); // Coleta a mensagem de erro do atributo data-error-message
-    if (errorMessage) {
-        alert(errorMessage); // Exibe a mensagem de erro como um alerta se existir
-    }
+    // Coleta os dados do formulário
+    const formData = new FormData(this);
+
+    // Envia o formulário usando fetch para evitar recarregamento da página
+    fetch('/cadastro', {
+        method: 'POST',
+        body: formData,
+    })
+    .then(response => {
+        if (response.ok) {
+            // Cadastro realizado com sucesso, exibe a pergunta sobre adicionar créditos
+            const addCredits = confirm("Deseja adicionar créditos à sua carteira?");
+            
+            // Redireciona de acordo com a escolha do usuário
+            if (addCredits) {
+                window.location.href = "/gerenciar_carteira";
+            } else {
+                window.location.href = "/area_usuario";
+            }
+        } else {
+            // Se houver erro no cadastro
+            alert('Erro ao realizar o cadastro. Tente novamente.');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Ocorreu um erro. Por favor, tente novamente mais tarde.');
+    });
 });

@@ -1,12 +1,12 @@
-from flask import Flask, request, redirect, url_for, render_template , flash
+from flask import Flask, request, redirect, url_for, render_template , flash , session
 import sqlite3
 import os
 from datetime import datetime
 
 app = Flask(__name__)
-
+app.secret_key = 'macaco'
 # Caminho absoluto para o banco de dados
-database_path = os.path.join(os.getcwd(), 'Integrador-ll/data/database.db')
+database_path = os.path.join(os.getcwd(), 'data/database.db')
 
 @app.route('/static/<path:path>')
 def serve_static(path):
@@ -72,20 +72,23 @@ Uso: Esta função é chamada quando o usuário tenta acessar a página de login
 formulário de login.
   """
     if request.method == 'POST':
-        # Coleta os dados do formulário de login
         email = request.form['email']
         senha = request.form['senha']
         tipo_usuario = check_credentials(email, senha)
 
-        # Verifica o tipo de usuário e redireciona para a área correspondente
         if tipo_usuario == 'usuario':
-            return '/area_usuario'  # Retorna a URL para a área do usuário
+            session['logged_in'] = True
+            session['user_type'] = 'usuario'
+            session['email'] = email
+            return '/area_usuario'
         elif tipo_usuario == 'moderador':
-            return '/moderador_dashboard'  # Retorna a URL para a área do moderador
+            session['logged_in'] = True
+            session['user_type'] = 'moderador'
+            session['email'] = email
+            return '/moderador_dashboard'
         else:
-            return 'Credenciais inválidas', 401  # Retorna uma mensagem de erro e o status 401 (não autorizado)
+            return 'Credenciais inválidas', 401
 
-    # Se o método for GET, renderiza a página de login
     return render_template('index.html')
 
 # Rota para a área do usuário
@@ -98,9 +101,9 @@ Esta função simplesmente renderiza a página HTML correspondente à área do u
 
 Uso: Esta função é chamada quando um usuário comum faz login com sucesso
 """
-    return render_template('area_usuario.html')  # Renderiza a página da área do usuário
-
-
+    if not session.get('logged_in'):
+        return redirect(url_for('home'))
+    return render_template('area_usuario.html')
 "--------------------------------------------------------------------------------------------------------------------------------------------------------------"
 
 
@@ -141,7 +144,7 @@ Esta função lida com as requisições GET e POST na rota '/cadastro'.
 
 Uso: Esta função é chamada quando um usuário tenta se cadastrar na aplicação.
 """
-    error_message = None  # Variável para armazenar a mensagem de erro
+    error_message = None
 
     if request.method == 'POST':
         nome = request.form['nome']
@@ -149,10 +152,9 @@ Uso: Esta função é chamada quando um usuário tenta se cadastrar na aplicaç�
         senha = request.form['senha']
         data_nascimento = request.form['data_nascimento']
 
-        # Validação do email 
+        # Validação do email
         if not is_valid_email(email):
             error_message = 'Email inválido.'
-
         else:
             # Conectar ao banco de dados e inserir o novo usuário
             conn = sqlite3.connect(database_path)
@@ -160,24 +162,36 @@ Uso: Esta função é chamada quando um usuário tenta se cadastrar na aplicaç�
 
             try:
                 cursor.execute('''
-                    INSERT INTO usuarios (nome, email, senha, data_nascimento)
-                    VALUES (?, ?, ?, ?)
+                    INSERT INTO usuarios (nome, email, senha, data_nascimento, tipo)
+                    VALUES (?, ?, ?, ?, 'usuario')  -- Define o tipo como 'usuario' por padrão
                 ''', (nome, email, senha, data_nascimento))
 
                 conn.commit()
-                return redirect(url_for('home'))
+
+                # Autentica o usuário após o cadastro
+                session['logged_in'] = True
+                session['user_type'] = 'usuario'
+                session['email'] = email
+
+                # Renderiza a página que pergunta sobre adicionar crédito
+                return render_template('ask_add_credit.html')
 
             except sqlite3.IntegrityError:
                 error_message = 'Erro: Email já cadastrado. Tente novamente com um email diferente.'
-
             except Exception as e:
-                # Tratamento genérico de erros
                 error_message = f'Erro inesperado: {e}'
-
             finally:
                 conn.close()
 
     return render_template('cadastro.html', error_message=error_message)
+"------------------------------------------------------------------------------------------------------"
+"tela inicial"
+@app.route('/tela_inicial')
+def tela_inicial():
+    if not session.get('logged_in'):
+        return redirect(url_for('home'))
+    # Lógica para exibir a tela inicial do usuário
+    return render_template('tela_inicial.html')
 
 "--------------------------------------------------------------------------------------------------------------------------------------------------------------"
 
@@ -359,6 +373,13 @@ def criar_evento():
 
 
 
+"------------------------------- carteira----------------------------------"
+@app.route('/gerenciar_carteira')
+def gerenciar_carteira():
+    if not session.get('logged_in'):
+        return redirect(url_for('home'))
+    # Lógica para exibir e gerenciar a carteira do usuário
+    return render_template('gerenciar_carteira.html')
 
 if __name__ == '__main__':
     app.run(debug=True)  # Executa o aplicativo Flask no modo debug
