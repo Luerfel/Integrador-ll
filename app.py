@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, url_for, render_template , flash , session
+from flask import Flask, request, redirect, url_for, render_template , flash, get_flashed_messages , session
 import sqlite3
 import os
 from datetime import datetime
@@ -7,6 +7,19 @@ app = Flask(__name__)
 app.secret_key = 'macaco'
 # Caminho absoluto para o banco de dados
 database_path = os.path.join(os.getcwd(), 'data/database.db')
+
+def get_user_id():
+
+    email = session.get('email')
+    if email:
+        conn = sqlite3.connect(database_path)
+        cursor = conn.cursor()
+        cursor.execute('SELECT id FROM usuarios WHERE email = ?', (email,))
+        result = cursor.fetchone()
+        conn.close()
+        if result:
+            return result[0]
+    return None
 
 @app.route('/static/<path:path>')
 def serve_static(path):
@@ -44,17 +57,14 @@ Uso: Esta função é usada para validar as credenciais do usuário durante o pr
     conn = sqlite3.connect(database_path)
     cursor = conn.cursor()
 
-    # Consulta para verificar se o email e a senha correspondem a um usuário existente
-    cursor.execute('SELECT tipo FROM usuarios WHERE email = ? AND senha = ?', (email, senha))
+    cursor.execute('SELECT id, tipo FROM usuarios WHERE email = ? AND senha = ?', (email, senha))
     result = cursor.fetchone()
-
-    # Fecha a conexão com o banco de dados
     conn.close()
-
-    # Se a consulta retornar um resultado, as credenciais são válidas
     if result:
-        return result[0]  # Retorna o tipo de usuário ('usuario' ou 'moderador')
-    return None  # Retorna None se as credenciais forem inválidas
+        session['id_usuario'] = result[0]  # Armazena o id do usuário na sessão
+        return result[1]  # Retorna o tipo de usuário
+    else:
+        return None
 
 # Rota principal (login)
 @app.route('/', methods=['GET', 'POST'])
@@ -165,14 +175,20 @@ Uso: Esta função é chamada quando um usuário tenta se cadastrar na aplicaç�
                     INSERT INTO usuarios (nome, email, senha, data_nascimento, tipo)
                     VALUES (?, ?, ?, ?, 'usuario')  -- Define o tipo como 'usuario' por padrão
                 ''', (nome, email, senha, data_nascimento))
+        
 
+                user_id = cursor.lastrowid
+                # Criar carteira para o usuário
+                cursor.execute('''
+                INSERT INTO carteiras (id_usuario, saldo)
+                VALUES (?, 0.00)
+                ''', (user_id,))
                 conn.commit()
-
                 # Autentica o usuário após o cadastro
                 session['logged_in'] = True
                 session['user_type'] = 'usuario'
                 session['email'] = email
-
+                
                 # Renderiza a página que pergunta sobre adicionar crédito
                 return render_template('ask_add_credit.html')
 
@@ -376,10 +392,199 @@ def criar_evento():
 "------------------------------- carteira----------------------------------"
 @app.route('/gerenciar_carteira')
 def gerenciar_carteira():
-    if not session.get('logged_in'):
-        return redirect(url_for('home'))
-    # Lógica para exibir e gerenciar a carteira do usuário
-    return render_template('gerenciar_carteira.html')
+    if 'logged_in' in session:
+        user_id = get_user_id()
+        
+        if user_id:
+            conn = sqlite3.connect(database_path)
+            cursor = conn.cursor()
+
+            # Obter saldo
+            cursor.execute('SELECT saldo FROM carteiras WHERE id_usuario = ?', (user_id,))
+            result = cursor.fetchone()
+            saldo = result[0] if result else 0.00
+
+            # Obter o id da carteira do usuário
+            cursor.execute('SELECT id FROM carteiras WHERE id_usuario = ?', (user_id,))
+            result = cursor.fetchone()
+            if result:
+                carteira_id = result[0]
+            else:
+                carteira_id = None  # Ou lidar com o caso de não existência
+
+            # Obter histórico de transações
+            if carteira_id:
+                cursor.execute('SELECT data_transacao, tipo, valor, detalhes FROM transacoes WHERE id_carteira = ? ORDER BY data_transacao DESC', (carteira_id,))
+                transacoes = cursor.fetchall()
+            else:
+                transacoes = []
+
+            # Obter histórico de apostas
+            cursor.execute('''
+                SELECT apostas.data_aposta, eventos.titulo, apostas.valor, apostas.opcao
+                FROM apostas
+                JOIN eventos ON apostas.id_evento = eventos.id
+                WHERE apostas.id_usuario = ?
+                ORDER BY apostas.data_aposta DESC
+            ''', (user_id,))
+            apostas = cursor.fetchall()
+
+            conn.close()
+
+            # Preparar transações para o template
+            transacoes_formatadas = []
+            for transacao in transacoes:
+                transacoes_formatadas.append({
+                    'data_transacao': transacao[0],
+                    'tipo': transacao[1],
+                    'valor': transacao[2],
+                    'detalhes': transacao[3],
+                })
+
+            # Preparar apostas para o template
+            apostas_formatadas = []
+            for aposta in apostas:
+                apostas_formatadas.append({
+                    'data_aposta': aposta[0],
+                    'titulo_evento': aposta[1],
+                    'valor': aposta[2],
+                    'opcao': aposta[3],
+                })
+
+            # Obter mensagens flash
+            mensagens = get_flashed_messages()
+
+            return render_template('gerenciar_carteira.html', saldo=saldo, transacoes=transacoes_formatadas, apostas=apostas_formatadas, mensagens=mensagens)
+        else:
+            return redirect(url_for('login'))
+    else:
+        return redirect(url_for('login'))
+
+    
+@app.route('/adicionar', methods=['POST'])
+def carteira_adicionar():
+    if 'logged_in' in session:
+        user_id = get_user_id()
+        if user_id:
+            valor_adicionar = float(request.form['valor_adicionar'])
+
+            conn = sqlite3.connect(database_path)
+            cursor = conn.cursor()
+
+            # Verificar se a carteira existe; caso contrário, criar
+            cursor.execute('SELECT id FROM carteiras WHERE id_usuario = ?', (user_id,))
+            result = cursor.fetchone()
+            if result:
+                carteira_id = result[0]
+                # Atualizar o saldo
+                cursor.execute('UPDATE carteiras SET saldo = saldo + ? WHERE id_usuario = ?', (valor_adicionar, user_id))
+            else:
+                # Criar carteira para o usuário
+                cursor.execute('INSERT INTO carteiras (id_usuario, saldo) VALUES (?, ?)', (user_id, valor_adicionar))
+                carteira_id = cursor.lastrowid
+
+            # Registrar a transação
+            cursor.execute('''
+                INSERT INTO transacoes (id_carteira, tipo, valor, detalhes)
+                VALUES (?, 'Compra de Créditos', ?, 'Adição de créditos via cartão')
+            ''', (carteira_id, valor_adicionar))
+
+            conn.commit()
+            conn.close()
+
+            flash('Créditos adicionados com sucesso!')
+
+            return redirect(url_for('gerenciar_carteira'))
+        else:
+            return redirect(url_for('login'))
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/sacar', methods=['POST'])
+@app.route('/sacar', methods=['POST'])
+def carteira_sacar():
+    if 'logged_in' in session:
+        user_id = get_user_id()
+        if user_id:
+            valor_saque = float(request.form['valor_saque'])
+            metodo_saque = request.form['metodo_saque']
+            detalhes = ''
+
+            # Limitar o saque a R$ 101.000,00 por transação
+            if valor_saque > 101000:
+                flash('O valor máximo para saque por transação é R$ 101.000,00.')
+                return redirect(url_for('gerenciar_carteira'))
+
+            # Aplicar taxas conforme tabela
+            if valor_saque <= 100:
+                taxa = 0.04 * valor_saque
+            elif valor_saque <= 1000:
+                taxa = 0.03 * valor_saque
+            elif valor_saque <= 5000:
+                taxa = 0.02 * valor_saque
+            elif valor_saque <= 100000:
+                taxa = 0.01 * valor_saque
+            else:
+                taxa = 0.00  # Isento
+
+            # O valor total a ser deduzido do saldo é o valor de saque
+            valor_total = valor_saque
+
+            # O valor líquido que o usuário receberá é o valor de saque menos a taxa
+            valor_liquido = valor_saque - taxa
+
+            conn = sqlite3.connect(database_path)
+            cursor = conn.cursor()
+
+            # Verificar se a carteira existe
+            cursor.execute('SELECT saldo, id FROM carteiras WHERE id_usuario = ?', (user_id,))
+            result = cursor.fetchone()
+            if result:
+                saldo = result[0]
+                carteira_id = result[1]
+            else:
+                conn.close()
+                flash('Erro: Carteira não encontrada.')
+                return redirect(url_for('gerenciar_carteira'))
+
+            if valor_total > saldo:
+                conn.close()
+                flash('Saldo insuficiente para realizar o saque.')
+                return redirect(url_for('gerenciar_carteira'))
+
+            # Deduzir o valor total do saldo
+            novo_saldo = saldo - valor_total
+            cursor.execute('UPDATE carteiras SET saldo = ? WHERE id_usuario = ?', (novo_saldo, user_id))
+
+            # Preparar detalhes do saque
+            if metodo_saque == 'banco':
+                banco = request.form['banco']
+                agencia = request.form['agencia']
+                conta = request.form['conta']
+                detalhes = f'Saque para Banco: {banco}, Agência: {agencia}, Conta: {conta}'
+            elif metodo_saque == 'pix':
+                chave_pix = request.form['chave_pix']
+                detalhes = f'Saque via PIX para a chave: {chave_pix}'
+
+            detalhes += f' | Taxa aplicada: R$ {taxa:.2f} | Valor líquido: R$ {valor_liquido:.2f}'
+
+            # Registrar a transação
+            cursor.execute('''
+                INSERT INTO transacoes (id_carteira, tipo, valor, detalhes)
+                VALUES (?, 'Saque', ?, ?)
+            ''', (carteira_id, -valor_total, detalhes))
+
+            conn.commit()
+            conn.close()
+
+            flash('Saque realizado com sucesso!')
+            return redirect(url_for('gerenciar_carteira'))
+        else:
+            return redirect(url_for('login'))
+    else:
+        return redirect(url_for('login'))
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)  # Executa o aplicativo Flask no modo debug

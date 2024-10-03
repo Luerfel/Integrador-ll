@@ -146,3 +146,140 @@ button:hover {
 
     width: 400px;
 }
+
+/* Contêiner principal da carteira */
+.wallet-container {
+    background-color: #080E1A;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    width: 600px;
+    margin: 0 auto;
+    color: #fff;
+}
+
+/* Estilo para os títulos */
+.wallet-container h2, .wallet-container h3 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Estilo para o saldo */
+.saldo-container {
+    text-align: center;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+/* Estilo para os botões de ação */
+.action-buttons {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.action-buttons button {
+    padding: 10px 20px;
+    margin: 0 10px;
+    background-color: #f0f0f0;
+    color: #000;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.action-buttons button:hover {
+    background-color: #ddd;
+}
+
+/* Estilo para a tabela de transações */
+.transacoes-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.transacoes-table th, .transacoes-table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+.transacoes-table th {
+    background-color: #333;
+    color: #fff;
+}
+
+/* Estilo para os modais */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.7);
+}
+
+.modal-content {
+    background-color: #080E1A;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 400px;
+    color: #fff;
+    border-radius: 10px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover, .close:focus {
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Estilo para os campos de entrada */
+.input-container {
+    margin-bottom: 15px;
+}
+
+.input-container label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.input-container input[type="text"],
+.input-container input[type="password"],
+.input-container input[type="number"],
+.input-container input[type="month"] {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Estilo para os botões dentro dos modais */
+.modal-content button {
+    width: 100%;
+    padding: 10px;
+    background-color: #f0f0f0;
+    color: #000;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.modal-content button:hover {
+    background-color: #ddd;
+}

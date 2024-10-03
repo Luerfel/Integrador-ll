@@ -3,67 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carteira</title>
-    <!--<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">-->
+    <title>Minha Carteira</title>
+    <!-- Link para o arquivo de estilo CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script>
+    </script>
+    
 </head>
 <body>
-    <h1>Minha Carteira</h1>
+    <!-- Contêiner principal -->
+    <div class="wallet-container">
+        <h2>Minha Carteira</h2>
+
+        <!-- Exibir o saldo atual -->
+        <div class="saldo-container">
+            <p><strong>Saldo disponível:</strong> R$ {{ saldo }}</p>
+        </div>
+
+        <!-- Botões de ação -->
+        <div class="action-buttons">
+            <button id="btn-adicionar-creditos">Adicionar Créditos</button>
+            <button id="btn-sacar">Sacar</button>
+            <button id="btn-ver-transacoes">Histórico de Transações</button>
+            <button id="btn-ver-apostas">Histórico de Apostas</button>
+        </div>
+
     
-    <!-- Formulário para selecionar o ID do usuário e ver o saldo -->
-    <form action="/ver_saldo" method="POST">
-        <label for="id_usuario">Id usuário: </label>
-        <input type="number" id="id_usuario" name="id_usuario" required>
-        <button type="submit" name="action" value="ver_saldo">Ver saldo</button>
-        <p>Disponível para saque: </p>
-        <p>R$ {{ valor }}</p>
-    </form>
 
-    <!-- Formulário para sacar -->
-    <form action="/sacar" method="POST">
-        <!-- Campo hidden para enviar o id_usuario -->
-        <label for="id_usuario">Id usuário: </label>
-        <input type="number" id="id_usuario" name="id_usuario1" required>
-        <label for="valor_saque">Valor do saque R$: </label>
-        <input type="number" id="valor_saque" name="valor_saque" step="0.01" required>
-        <button type="submit" name="btn-sacar" value="btn-sacar">Sacar</button>
-        <p>Taxas aplicadas ao saque: {{taxa_str}} - {{taxa}} </p>
-        <p>Novo saldo: R$ {{ saldo }}</p>
-    </form>
-    
-    <p>Formas de pagamento disponíveis</p>
-    <ul>
-        <li>Cartão de crédito ou débito</li>
-    </ul>
+    <!-- Modal para Adicionar Créditos -->
+    <div id="modal-adicionar" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-adicionar">&times;</span>
+            <h3>Adicionar Créditos</h3>
+            <form id="form-adicionar" method="POST" action="/adicionar">
+                <!-- Campos do cartão de crédito -->
+                <div class="input-container">
+                    <label for="numero_cartao">Número do cartão:</label>
+                    <input type="text" id="numero_cartao" name="numero_cartao" required>
+                </div>
+                <div class="input-container">
+                    <label for="data_validade">Data de validade:</label>
+                    <input type="month" id="data_validade" name="data_validade" required>
+                </div>
+                <div class="input-container">
+                    <label for="CVV">CVV:</label>
+                    <input type="password" id="CVV" name="CVV" required>
+                </div>
+                <div class="input-container">
+                    <label for="CPF">CPF do titular:</label>
+                    <input type="text" id="CPF" name="CPF" required>
+                </div>
+                <div class="input-container">
+                    <label for="valor_adicionar">Valor a ser adicionado (R$):</label>
+                    <input type="number" id="valor_adicionar" name="valor_adicionar" step="0.01" required>
+                </div>
+                <button type="submit">Confirmar</button>
+            </form>
+        </div>
+    </div>
+<!-- Modal para Histórico de Transações -->
+<div id="modal-transacoes" class="modal">
+    <div class="modal-content">
+        <span class="close" id="close-transacoes">&times;</span>
+        <h3>Histórico de Transações</h3>
+        <table class="transacoes-table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Valor (R$)</th>
+                    <th>Detalhes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transacao in transacoes %}
+                <tr>
+                    <td>{{ transacao.data_transacao }}</td>
+                    <td>{{ transacao.tipo }}</td>
+                    <td>{{ '{:.2f}'.format(transacao.valor) }}</td>
+                    <td>{{ transacao.detalhes }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4">Nenhuma transação encontrada.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
-    <!-- Botão para abrir o pop-up de adicionar créditos -->
-    <button type="button" class="btn-adicionar-creditos">Adicionar créditos</button>
+<!-- Modal para Histórico de Apostas -->
+<div id="modal-apostas" class="modal">
+    <div class="modal-content">
+        <span class="close" id="close-apostas">&times;</span>
+        <h3>Histórico de Apostas</h3>
+        <table class="transacoes-table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Evento</th>
+                    <th>Valor Apostado (R$)</th>
+                    <th>Opção</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for aposta in apostas %}
+                <tr>
+                    <td>{{ aposta.data_aposta }}</td>
+                    <td>{{ aposta.titulo_evento }}</td>
+                    <td>{{ '{:.2f}'.format(aposta.valor) }}</td>
+                    <td>{{ aposta.opcao }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4">Nenhuma aposta encontrada.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
-    <!-- Pop-up e Overlay -->
-    <div id="popup-overlay" style="display: none;"></div>
-    <div id="popup" style="display: none;">
-        <button class="btn-close">Fechar</button>
-        
-        <!-- Formulário para adicionar créditos -->
-        <form action="/adicionar" method="POST">
-            <label for="id_usuario">Id usuário: </label>
-            <input type="number" id="id_usuario" name="id_usuario2" required>
-            <label for="numero_cartao">Numero do cartão: </label>
-            <input type="text" id="numero_cartao" name="numero_cartao" required>
-            <label for="data_validade">Data de validade </label>
-            <input type="date" id="data_validade" name="data_validade" required>
-            <label for="CVV">CVV: </label>
-            <input type="number" id="CVV" name="CVV" required>
-            <label for="CPF">CPF do titular: </label>
-            <input type="text" id="CPF" name="CPF" required>
-            <label for="valor_adicionar">Valor a ser adicionado R$: </label>
-            <input type="number" id="valor_adicionar" name="valor_adicionar" step="0.01" required>
-            <button type="submit" name="btn-adicionar" value="btn-adicionar">Confirmar</button>
+
+   <!-- Modal para Sacar -->
+<div id="modal-sacar" class="modal">
+    <div class="modal-content">
+        <span class="close" id="close-sacar">&times;</span>
+        <h3>Sacar Créditos</h3>
+        <form id="form-sacar" method="POST" action="/sacar">
+            <div class="input-container">
+                <label for="valor_saque">Valor do saque (R$):</label>
+                <input type="number" id="valor_saque" name="valor_saque" step="0.01" max="101000" required>
+            </div>
+            <!-- Exibir a taxa e o valor líquido -->
+            <div class="input-container">
+                <p>Taxa aplicada: R$ <span id="taxa_aplicada">0.00</span></p>
+                <p>Valor líquido a receber: R$ <span id="valor_liquido">0.00</span></p>
+            </div>
+            <div class="input-container">
+                <label>Método de saque:</label>
+                <input type="radio" id="metodo_banco" name="metodo_saque" value="banco" required>
+                <label for="metodo_banco">Conta Bancária</label>
+                <input type="radio" id="metodo_pix" name="metodo_saque" value="pix" required>
+                <label for="metodo_pix">PIX</label>
+            </div>
+            <!-- Campos para Conta Bancária -->
+            <div id="campos-banco" style="display: none;">
+                <div class="input-container">
+                    <label for="banco">Banco:</label>
+                    <input type="text" id="banco" name="banco">
+                </div>
+                <div class="input-container">
+                    <label for="agencia">Agência:</label>
+                    <input type="text" id="agencia" name="agencia">
+                </div>
+                <div class="input-container">
+                    <label for="conta">Número da Conta Corrente:</label>
+                    <input type="text" id="conta" name="conta">
+                </div>
+            </div>
+            <!-- Campo para Chave PIX -->
+            <div id="campos-pix" style="display: none;">
+                <div class="input-container">
+                    <label for="chave_pix">Chave PIX:</label>
+                    <input type="text" id="chave_pix" name="chave_pix">
+                </div>
+            </div>
+            <button type="submit">Confirmar Saque</button>
         </form>
     </div>
-    
+</div>
+
+<!-- Mensagens de Sucesso ou Erro -->
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for mensagem in messages %}
+      <script>
+        alert("{{ mensagem }}");
+
+
+      </script>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
 
     <!-- Incluindo o JavaScript -->
     <script src="{{ url_for('static', filename='js/carteira.js') }}"></script>
-
 </body>
 </html>
