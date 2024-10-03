@@ -6,6 +6,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
+    <!-- Barra Superior com o Botão "Minha Wallet" -->
+    <div class="top-bar">
+        <a href="{{ url_for('gerenciar_carteira') }}" class="wallet-button">Minha Wallet</a>
+    </div>
 <!-- Mecanismo de Busca -->
 <div class="search-container">
     <form action="{{ url_for('pesquisar_evento') }}" method="GET" target="_blank">
