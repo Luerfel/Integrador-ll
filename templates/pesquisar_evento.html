@@ -9,7 +9,7 @@
     <!-- Mecanismo de Busca -->
     <div class="search-container">
         <form action="{{ url_for('pesquisar_evento') }}" method="GET">
-            <input type="text" name="query" placeholder="Buscar eventos..." value="{{ query }}" required>
+            <input type="text" name="query" placeholder="Buscar eventos..." value="{{ query }}">
             <button type="submit">Buscar</button>
         </form>
     </div>
@@ -17,23 +17,28 @@
     <!-- Filtros -->
     <div class="filters-container">
         <form action="{{ url_for('pesquisar_evento') }}" method="GET">
+            <!-- Campo oculto para manter a consulta de busca -->
             <input type="hidden" name="query" value="{{ query }}">
+
+            <!-- Filtro de Categoria -->
             <label for="categoria">Categoria:</label>
             <select name="categoria" id="categoria">
                 <option value="">Todas</option>
-                {% for categoria in categorias %}
-                    <option value="{{ categoria[0] }}">{{ categoria[1] }}</option>
+                {% for cat in categorias %}
+                    <option value="{{ cat[0] }}" {% if cat[0]|string == categoria_id %}selected{% endif %}>{{ cat[1] }}</option>
                 {% endfor %}
             </select>
 
+            <!-- Filtro de Data -->
             <label for="data">Data do Evento:</label>
-            <input type="date" name="data" id="data">
+            <input type="date" name="data" id="data" value="{{ data }}">
 
+            <!-- Ordenação -->
             <label for="ordenacao">Ordenar por:</label>
             <select name="ordenacao" id="ordenacao">
-                <option value="data">Data do Evento</option>
-                <option value="popularidade">Popularidade</option>
-                <option value="valor_cota">Valor da Cota</option>
+                <option value="data" {% if ordenacao == 'data' or ordenacao == '' %}selected{% endif %}>Data do Evento</option>
+                <option value="popularidade" {% if ordenacao == 'popularidade' %}selected{% endif %}>Popularidade</option>
+                <option value="valor_cota" {% if ordenacao == 'valor_cota' %}selected{% endif %}>Valor da Cota</option>
             </select>
 
             <button type="submit">Aplicar Filtros</button>
@@ -55,20 +60,20 @@
                 </div>
             {% endfor %}
         {% else %}
-            <p>Nenhum evento encontrado para "{{ query }}".</p>
+            <p>Nenhum evento encontrado.</p>
         {% endif %}
     </div>
-<!-- Paginação -->
-<div class="pagination">
-    {% if page > 1 %}
-        <a href="?query={{ query }}&page={{ page - 1 }}">Página Anterior</a>
-    {% endif %}
-    <span>Página {{ page }}</span>
-    {% if eventos|length == per_page %}
-        <a href="?query={{ query }}&page={{ page + 1 }}">Próxima Página</a>
-    {% endif %}
-</div>
 
+    <!-- Paginação -->
+    <div class="pagination">
+        {% if page > 1 %}
+            <a href="?query={{ query }}&categoria={{ categoria_id }}&data={{ data }}&ordenacao={{ ordenacao }}&page={{ page - 1 }}">Página Anterior</a>
+        {% endif %}
+        <span>Página {{ page }}</span>
+        {% if eventos|length == per_page %}
+            <a href="?query={{ query }}&categoria={{ categoria_id }}&data={{ data }}&ordenacao={{ ordenacao }}&page={{ page + 1 }}">Próxima Página</a>
+        {% endif %}
+    </div>
 
 </body>
 </html>

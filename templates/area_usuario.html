@@ -65,7 +65,7 @@
             {% for categoria in categorias %}
                 <div class="categoria-card">
                     <h3>{{ categoria[1] }}</h3> <!-- Nome da categoria -->
-                    <a href="{{ url_for('eventos_por_categoria', categoria_id=categoria[0]) }}">Ver Eventos</a>
+                    <a href="{{ url_for('pesquisar_evento') }}?categoria={{ categoria[0] }}">Ver Eventos</a>
                 </div>
             {% else %}
                 <p>Nenhuma categoria disponível.</p>

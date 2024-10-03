@@ -148,35 +148,45 @@ def area_usuario():
 @app.route('/pesquisar_evento', methods=['GET'])
 def pesquisar_evento():
     query = request.args.get('query', '')
-    filtros = request.args.get('filtros', '')
+    categoria_id = request.args.get('categoria', '')
+    data = request.args.get('data', '')
     ordenacao = request.args.get('ordenacao', '')
+    page = int(request.args.get('page', 1))
+    per_page = 10
+    offset = (page - 1) * per_page
 
     conn = sqlite3.connect(database_path)
     cursor = conn.cursor()
 
-    # Consulta básica de busca
+    # Consulta SQL base
     sql = '''
-        SELECT eventos.*
+        SELECT DISTINCT eventos.*
         FROM eventos
-        WHERE (eventos.titulo LIKE ? OR eventos.descricao LIKE ?)
-        AND eventos.status = 'aprovado'
+        LEFT JOIN eventos_categorias ON eventos.id = eventos_categorias.id_evento
+        WHERE eventos.status = 'aprovado'
     '''
-    params = ('%' + query + '%', '%' + query + '%')
+    params = []
 
-    # Aplicar filtros
-    if 'categoria' in request.args and request.args['categoria']:
-        sql += ' AND eventos.id IN (SELECT id_evento FROM eventos_categorias WHERE id_categoria = ?)'
-        params += (request.args['categoria'],)
+    # Aplicar filtro de busca se houver
+    if query:
+        sql += ' AND (eventos.titulo LIKE ? OR eventos.descricao LIKE ?)'
+        params.extend(['%' + query + '%', '%' + query + '%'])
 
-    if 'data' in request.args and request.args['data']:
+    # Aplicar filtro de categoria se houver
+    if categoria_id:
+        sql += ' AND eventos_categorias.id_categoria = ?'
+        params.append(categoria_id)
+
+    # Aplicar filtro de data se houver
+    if data:
         sql += ' AND eventos.data_evento = ?'
-        params += (request.args['data'],)
+        params.append(data)
 
     # Aplicar ordenação
-    if 'ordenacao' in request.args and request.args['ordenacao']:
-        if request.args['ordenacao'] == 'popularidade':
+    if ordenacao:
+        if ordenacao == 'popularidade':
             sql += ' ORDER BY (SELECT COUNT(*) FROM apostas WHERE apostas.id_evento = eventos.id) DESC'
-        elif request.args['ordenacao'] == 'valor_cota':
+        elif ordenacao == 'valor_cota':
             sql += ' ORDER BY eventos.valor_cota DESC'
         else:
             sql += ' ORDER BY eventos.data_evento ASC'
@@ -184,11 +194,8 @@ def pesquisar_evento():
         sql += ' ORDER BY eventos.data_evento ASC'
 
     # Paginação
-    page = int(request.args.get('page', 1))
-    per_page = 10
-    offset = (page - 1) * per_page
     sql += ' LIMIT ? OFFSET ?'
-    params += (per_page, offset)
+    params.extend([per_page, offset])
 
     cursor.execute(sql, params)
     eventos = cursor.fetchall()
@@ -199,7 +206,9 @@ def pesquisar_evento():
 
     conn.close()
 
-    return render_template('pesquisar_evento.html', eventos=eventos, query=query, categorias=categorias, page=page, per_page=per_page)
+    return render_template('pesquisar_evento.html', eventos=eventos, query=query, categorias=categorias,
+                           categoria_id=categoria_id, data=data, ordenacao=ordenacao, page=page, per_page=per_page)
+
 
 @app.route('/eventos_categoria/<int:categoria_id>')
 def eventos_por_categoria(categoria_id):
