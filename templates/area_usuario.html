@@ -2,10 +2,82 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Olá, Mundo!</title>
+    <title>Área do Usuário</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <h1 id="message">Olá, Mundo!</h1>
+<!-- Mecanismo de Busca -->
+<div class="search-container">
+    <form action="{{ url_for('pesquisar_evento') }}" method="GET" target="_blank">
+        <input type="text" name="query" placeholder="Buscar eventos..." required>
+        <button type="submit">Buscar</button>
+    </form>
+</div>
+
+        <!-- Seção de Destaques: Eventos com Período de Apostas Finalizando -->
+    <div class="section">
+        <h2>Último Dia para Apostar</h2>
+        <div class="eventos-container">
+            {% for evento in eventos_finalizando %}
+                <div class="evento-card">
+                    <h3>{{ evento[1] }}</h3> <!-- Título do evento -->
+                    <p>{{ evento[2] }}</p> <!-- Descrição do evento -->
+                    <p>Data do Evento: {{ evento[4] }}</p>
+                    <p>Valor da Cota: R$ {{ '{:.2f}'.format(evento[3]) }}</p>
+                    <!-- Botões para apostar (não implementados agora) -->
+                    <button disabled>Apostar Sim</button>
+                    <button disabled>Apostar Não</button>
+                </div>
+            {% else %}
+                <p>Nenhum evento disponível.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Seção de Destaques: Eventos Mais Apostados -->
+    <div class="section">
+        <h2>Eventos Mais Apostados</h2>
+        <div class="eventos-container">
+            {% for evento in eventos_mais_apostados %}
+                <div class="evento-card">
+                    <h3>{{ evento[1] }}</h3> <!-- Título do evento -->
+                    <p>{{ evento[2] }}</p> <!-- Descrição do evento -->
+                    <p>Total Apostado: R$ {{ '{:.2f}'.format(evento[-1]) }}</p> <!-- total_apostado -->
+                    <p>Valor da Cota: R$ {{ '{:.2f}'.format(evento[3]) }}</p>
+                    <!-- Botões para apostar (não implementados agora) -->
+                    <button disabled>Apostar Sim</button>
+                    <button disabled>Apostar Não</button>
+                </div>
+            {% else %}
+                <p>Nenhum evento disponível.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Cards de Categorias -->
+    <div class="section">
+        <h2>Categorias</h2>
+        <div class="categorias-container">
+            {% for categoria in categorias %}
+                <div class="categoria-card">
+                    <h3>{{ categoria[1] }}</h3> <!-- Nome da categoria -->
+                    <a href="{{ url_for('eventos_por_categoria', categoria_id=categoria[0]) }}">Ver Eventos</a>
+                </div>
+            {% else %}
+                <p>Nenhuma categoria disponível.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+<!-- JavaScript para controlar a submissão do formulário -->
+<script>
+    document.getElementById('search-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Impede a submissão tradicional do formulário
+        const query = document.querySelector('input[name="query"]').value;
+        const url = "{{ url_for('pesquisar_evento') }}" + "?query=" + encodeURIComponent(query);
+        window.open(url, '_blank'); // Abre a URL em uma nova aba
+    });
+    </script>
+    
 </body>
 </html>

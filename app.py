@@ -100,24 +100,136 @@ formulário de login.
             return 'Credenciais inválidas', 401
 
     return render_template('index.html')
-
-# Rota para a área do usuário
+"AREA DO USUARIOOOOOOOOOOOOOOOOOOOOOOOO"
 @app.route('/area_usuario')
-
 def area_usuario():
-    """
-Esta função simplesmente renderiza a página HTML correspondente à área do usuário comum
-(area_usuario.html).
+    if 'logged_in' in session:
+        user_id = get_user_id()
+        conn = sqlite3.connect(database_path)
+        cursor = conn.cursor()
 
-Uso: Esta função é chamada quando um usuário comum faz login com sucesso
-"""
-    if not session.get('logged_in'):
-        return redirect(url_for('home'))
-    return render_template('area_usuario.html')
-"--------------------------------------------------------------------------------------------------------------------------------------------------------------"
+        # Obter eventos com período de apostas finalizando
+        cursor.execute('''
+            SELECT * FROM eventos
+            WHERE periodo_apostas = date('now')
+            AND status = 'aprovado'
+            ORDER BY data_evento ASC
+            LIMIT 10
+        ''')
+        eventos_finalizando = cursor.fetchall()
+
+        # Obter eventos mais apostados
+        cursor.execute('''
+            SELECT eventos.*, SUM(apostas.valor) as total_apostado
+            FROM eventos
+            JOIN apostas ON eventos.id = apostas.id_evento
+            WHERE eventos.status = 'aprovado'
+            GROUP BY eventos.id
+            ORDER BY total_apostado DESC
+            LIMIT 10
+        ''')
+        eventos_mais_apostados = cursor.fetchall()
+
+        # Obter categorias
+        cursor.execute('SELECT * FROM categorias_eventos')
+        categorias = cursor.fetchall()
+
+        conn.close()
+
+        return render_template('area_usuario.html', eventos_finalizando=eventos_finalizando,
+                               eventos_mais_apostados=eventos_mais_apostados, categorias=categorias)
+    else:
+        return redirect(url_for('login'))
 
 
 
+
+"PESQUISAR EVENTO"
+@app.route('/pesquisar_evento', methods=['GET'])
+def pesquisar_evento():
+    query = request.args.get('query', '')
+    filtros = request.args.get('filtros', '')
+    ordenacao = request.args.get('ordenacao', '')
+
+    conn = sqlite3.connect(database_path)
+    cursor = conn.cursor()
+
+    # Consulta básica de busca
+    sql = '''
+        SELECT eventos.*
+        FROM eventos
+        WHERE (eventos.titulo LIKE ? OR eventos.descricao LIKE ?)
+        AND eventos.status = 'aprovado'
+    '''
+    params = ('%' + query + '%', '%' + query + '%')
+
+    # Aplicar filtros
+    if 'categoria' in request.args and request.args['categoria']:
+        sql += ' AND eventos.id IN (SELECT id_evento FROM eventos_categorias WHERE id_categoria = ?)'
+        params += (request.args['categoria'],)
+
+    if 'data' in request.args and request.args['data']:
+        sql += ' AND eventos.data_evento = ?'
+        params += (request.args['data'],)
+
+    # Aplicar ordenação
+    if 'ordenacao' in request.args and request.args['ordenacao']:
+        if request.args['ordenacao'] == 'popularidade':
+            sql += ' ORDER BY (SELECT COUNT(*) FROM apostas WHERE apostas.id_evento = eventos.id) DESC'
+        elif request.args['ordenacao'] == 'valor_cota':
+            sql += ' ORDER BY eventos.valor_cota DESC'
+        else:
+            sql += ' ORDER BY eventos.data_evento ASC'
+    else:
+        sql += ' ORDER BY eventos.data_evento ASC'
+
+    # Paginação
+    page = int(request.args.get('page', 1))
+    per_page = 10
+    offset = (page - 1) * per_page
+    sql += ' LIMIT ? OFFSET ?'
+    params += (per_page, offset)
+
+    cursor.execute(sql, params)
+    eventos = cursor.fetchall()
+
+    # Obter categorias para os filtros
+    cursor.execute('SELECT * FROM categorias_eventos')
+    categorias = cursor.fetchall()
+
+    conn.close()
+
+    return render_template('pesquisar_evento.html', eventos=eventos, query=query, categorias=categorias, page=page, per_page=per_page)
+
+@app.route('/eventos_categoria/<int:categoria_id>')
+def eventos_por_categoria(categoria_id):
+    conn = sqlite3.connect(database_path)
+    cursor = conn.cursor()
+
+    # Obter o nome da categoria
+    cursor.execute('SELECT nome FROM categorias_eventos WHERE id = ?', (categoria_id,))
+    categoria = cursor.fetchone()
+
+    if not categoria:
+        conn.close()
+        return 'Categoria não encontrada.', 404
+
+    categoria_nome = categoria[0]
+
+    # Obter eventos da categoria
+    cursor.execute('''
+        SELECT eventos.*
+        FROM eventos
+        JOIN eventos_categorias ON eventos.id = eventos_categorias.id_evento
+        WHERE eventos_categorias.id_categoria = ?
+        AND eventos.status = 'aprovado'
+        ORDER BY eventos.data_evento ASC
+    ''', (categoria_id,))
+    eventos = cursor.fetchall()
+
+    conn.close()
+
+    return render_template('eventos_categoria.html', eventos=eventos, categoria_nome=categoria_nome)
 
 
 

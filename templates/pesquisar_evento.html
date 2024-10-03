@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultado da Pesquisa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <!-- Mecanismo de Busca -->
+    <div class="search-container">
+        <form action="{{ url_for('pesquisar_evento') }}" method="GET">
+            <input type="text" name="query" placeholder="Buscar eventos..." value="{{ query }}" required>
+            <button type="submit">Buscar</button>
+        </form>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-container">
+        <form action="{{ url_for('pesquisar_evento') }}" method="GET">
+            <input type="hidden" name="query" value="{{ query }}">
+            <label for="categoria">Categoria:</label>
+            <select name="categoria" id="categoria">
+                <option value="">Todas</option>
+                {% for categoria in categorias %}
+                    <option value="{{ categoria[0] }}">{{ categoria[1] }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="data">Data do Evento:</label>
+            <input type="date" name="data" id="data">
+
+            <label for="ordenacao">Ordenar por:</label>
+            <select name="ordenacao" id="ordenacao">
+                <option value="data">Data do Evento</option>
+                <option value="popularidade">Popularidade</option>
+                <option value="valor_cota">Valor da Cota</option>
+            </select>
+
+            <button type="submit">Aplicar Filtros</button>
+        </form>
+    </div>
+
+    <!-- Resultados da Pesquisa -->
+    <div class="eventos-container">
+        {% if eventos %}
+            {% for evento in eventos %}
+                <div class="evento-card">
+                    <h3>{{ evento[1] }}</h3> <!-- Título do evento -->
+                    <p>{{ evento[2] }}</p> <!-- Descrição do evento -->
+                    <p>Data do Evento: {{ evento[4] }}</p>
+                    <p>Valor da Cota: R$ {{ '{:.2f}'.format(evento[3]) }}</p>
+                    <!-- Botões para apostar (não implementados agora) -->
+                    <button disabled>Apostar Sim</button>
+                    <button disabled>Apostar Não</button>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Nenhum evento encontrado para "{{ query }}".</p>
+        {% endif %}
+    </div>
+<!-- Paginação -->
+<div class="pagination">
+    {% if page > 1 %}
+        <a href="?query={{ query }}&page={{ page - 1 }}">Página Anterior</a>
+    {% endif %}
+    <span>Página {{ page }}</span>
+    {% if eventos|length == per_page %}
+        <a href="?query={{ query }}&page={{ page + 1 }}">Próxima Página</a>
+    {% endif %}
+</div>
+
+
+</body>
+</html>

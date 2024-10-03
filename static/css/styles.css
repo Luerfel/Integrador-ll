@@ -283,3 +283,140 @@ button:hover {
 .modal-content button:hover {
     background-color: #ddd;
 }
+/* Container de busca */
+.search-container {
+    text-align: center;
+    margin: 20px;
+}
+
+.search-container input[type="text"] {
+    width: 300px;
+    padding: 10px;
+}
+
+.search-container button {
+    padding: 10px 20px;
+    background-color: #f0f0f0;
+    color: #000;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Seções */
+.section {
+    margin: 40px;
+}
+
+.section h2 {
+    color: #fff;
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+/* Container de eventos */
+.eventos-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.evento-card {
+    background-color: #080E1A;
+    padding: 20px;
+    margin: 10px;
+    width: 250px;
+    border-radius: 10px;
+    color: #fff;
+    text-align: center;
+}
+
+.evento-card h3 {
+    margin-bottom: 10px;
+}
+
+.evento-card p {
+    margin: 5px 0;
+}
+
+.evento-card button {
+    margin-top: 10px;
+    width: 100px;
+    padding: 10px;
+    background-color: #f0f0f0;
+    color: #000;
+    border: none;
+    border-radius: 5px;
+    cursor: not-allowed;
+    font-weight: bold;
+}
+
+/* Container de categorias */
+.categorias-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.categoria-card {
+    background-color: #080E1A;
+    padding: 20px;
+    margin: 10px;
+    width: 200px;
+    border-radius: 10px;
+    color: #fff;
+    text-align: center;
+}
+
+.categoria-card h3 {
+    margin-bottom: 10px;
+}
+
+.categoria-card a {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 15px;
+    background-color: #f0f0f0;
+    color: #000;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+/* Filtros */
+.filters-container {
+    margin: 20px;
+    text-align: center;
+}
+
+.filters-container form {
+    display: inline-block;
+}
+
+.filters-container label {
+    margin: 0 10px;
+    color: #fff;
+}
+
+.filters-container select,
+.filters-container input[type="date"] {
+    padding: 5px;
+    margin: 0 10px;
+}
+
+/* Paginação */
+.pagination {
+    text-align: center;
+    margin: 20px;
+}
+
+.pagination a {
+    margin: 0 10px;
+    color: #fff;
+    text-decoration: none;
+}
+
+.pagination span {
+    color: #fff;
+}
