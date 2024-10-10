@@ -142,8 +142,7 @@ def area_usuario():
         return redirect(url_for('login'))
 
 
-
-
+"------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 "PESQUISAR EVENTO"
 @app.route('/pesquisar_evento', methods=['GET'])
 def pesquisar_evento():
@@ -321,14 +320,7 @@ Uso: Esta função é chamada quando um usuário tenta se cadastrar na aplicaç�
                 conn.close()
 
     return render_template('cadastro.html', error_message=error_message)
-"------------------------------------------------------------------------------------------------------"
-"tela inicial"
-@app.route('/tela_inicial')
-def tela_inicial():
-    if not session.get('logged_in'):
-        return redirect(url_for('home'))
-    # Lógica para exibir a tela inicial do usuário
-    return render_template('tela_inicial.html')
+
 
 "--------------------------------------------------------------------------------------------------------------------------------------------------------------"
 
@@ -425,8 +417,8 @@ def acao_evento():
         print(f"Erro ao processar ação: {e}")
         return str(e), 500
 "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
-
 "criar evento"
+
 @app.route('/criar_evento', methods=['GET', 'POST'])
 def criar_evento():
     """
@@ -623,7 +615,6 @@ def carteira_adicionar():
     else:
         return redirect(url_for('login'))
 
-@app.route('/sacar', methods=['POST'])
 @app.route('/sacar', methods=['POST'])
 def carteira_sacar():
     if 'logged_in' in session:
