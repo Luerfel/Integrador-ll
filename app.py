@@ -623,6 +623,20 @@ def gerenciar_carteira():
     
 @app.route('/adicionar', methods=['POST'])
 def carteira_adicionar():
+    """
+    Função para adicionar créditos à carteira do usuário.
+
+    Esta função lida com as requisições POST na rota '/adicionar'.
+    - Verifica se o usuário está logado e obtém o ID do usuário.
+    - Recebe o valor a ser adicionado via formulário.
+    - Conecta-se ao banco de dados SQLite e verifica se a carteira do usuário existe:
+      - Se a carteira existir, atualiza o saldo da carteira.
+      - Se a carteira não existir, cria uma nova carteira para o usuário.
+    - Registra a transação de adição de créditos.
+    - Exibe uma mensagem de sucesso via flash e redireciona o usuário de volta para a página de gerenciamento da carteira.
+    
+    Uso: Esta função é chamada quando o usuário deseja adicionar créditos à sua carteira.
+    """
     if 'logged_in' in session:
         user_id = get_user_id()
         if user_id:
