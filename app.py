@@ -1,7 +1,7 @@
 from flask import Flask, request, redirect, url_for, render_template , flash, get_flashed_messages , session
 import sqlite3
 import os
-from datetime import datetime
+from datetime import datetime,date
 
 app = Flask(__name__)
 app.secret_key = 'macaco'
@@ -108,10 +108,10 @@ def area_usuario():
         conn = sqlite3.connect(database_path)
         cursor = conn.cursor()
 
-        # Obter eventos com período de apostas finalizando
+        # Obter eventos com período de apostas finalizando hoje
         cursor.execute('''
             SELECT * FROM eventos
-            WHERE periodo_apostas = date('now')
+            WHERE data_fim_apostas = date('now')
             AND status = 'aprovado'
             ORDER BY data_evento ASC
             LIMIT 10
@@ -122,7 +122,7 @@ def area_usuario():
         cursor.execute('''
             SELECT eventos.*, SUM(apostas.valor) as total_apostado
             FROM eventos
-            JOIN apostas ON eventos.id = apostas.id_evento
+            LEFT JOIN apostas ON eventos.id = apostas.id_evento
             WHERE eventos.status = 'aprovado'
             GROUP BY eventos.id
             ORDER BY total_apostado DESC
@@ -419,6 +419,8 @@ def acao_evento():
 "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 "criar evento"
 
+
+
 @app.route('/criar_evento', methods=['GET', 'POST'])
 def criar_evento():
     """
@@ -431,6 +433,9 @@ def criar_evento():
       - O título deve ter no máximo 50 caracteres.
       - A descrição deve ter no máximo 150 caracteres.
       - O valor da cota deve ser no mínimo R$1,00.
+      - A data de início do período de apostas deve ser igual ou posterior à data atual.
+      - A data de fim do período de apostas deve ser posterior à data de início.
+      - A data do evento deve ser posterior ao fim do período de apostas.
     - Se as validações forem bem-sucedidas, os dados são inseridos na tabela 'eventos' do banco de dados SQLite.
     - Em caso de sucesso na inserção, uma mensagem de confirmação é exibida ao usuário.
     - Em caso de erro na inserção, uma mensagem de erro é exibida ao usuário.
@@ -438,45 +443,54 @@ def criar_evento():
 
     Uso: Esta função é chamada quando um usuário tenta criar um novo evento através da interface de criação de eventos.
     """
+    if 'logged_in' not in session or session['user_type'] != 'usuario':
+        return redirect(url_for('login'))
 
     if request.method == 'POST':
         # Recupera os dados do formulário
-        titulo = request.form['titulo']
-        descricao = request.form['descricao']
-        valor_cota = float(request.form['valor_cota'])
+        titulo = request.form['titulo'].strip()
+        descricao = request.form['descricao'].strip()
+        try:
+            valor_cota = float(request.form['valor_cota'])
+        except ValueError:
+            return render_template('criar_evento.html', error="O valor da cota deve ser um número válido.")
         data_evento_str = request.form['data_evento']
         data_inicio_str = request.form['data_inicio']
         data_fim_str = request.form['data_fim']
 
-        # Combine as datas de início e fim para criar o período de apostas
-        periodo_apostas = f"{data_inicio_str} até {data_fim_str}"
-
         # Validações
-        if len(titulo) > 50:
-            return render_template('criar_evento.html', error="O título deve ter no máximo 50 caracteres.")
-        if len(descricao) > 150:
-            return render_template('criar_evento.html', error="A descrição deve ter no máximo 150 caracteres.")
+        if not titulo or len(titulo) > 50:
+            return render_template('criar_evento.html', error="O título deve ter entre 1 e 50 caracteres.")
+        if not descricao or len(descricao) > 150:
+            return render_template('criar_evento.html', error="A descrição deve ter entre 1 e 150 caracteres.")
         if valor_cota < 1.00:
             return render_template('criar_evento.html', error="O valor da cota deve ser no mínimo R$1,00.")
-        
+
         # Convertendo as strings para objetos datetime
-        data_inicio = datetime.strptime(data_inicio_str, '%Y-%m-%d')
-        data_fim = datetime.strptime(data_fim_str, '%Y-%m-%d')    
-        data_evento = datetime.strptime(data_evento_str, '%Y-%m-%d')       
+        try:
+            data_inicio = datetime.strptime(data_inicio_str, '%Y-%m-%d').date()
+            data_fim = datetime.strptime(data_fim_str, '%Y-%m-%d').date()
+            data_evento = datetime.strptime(data_evento_str, '%Y-%m-%d').date()
+        except ValueError:
+            return render_template('criar_evento.html', error="Formato de data inválido. Use o formato AAAA-MM-DD.")
 
-        if data_inicio > data_fim:
-            return render_template('criar_evento.html', error="A data de início não pode ser maior que a data final.")
-        if data_evento < data_fim:
-            return render_template('criar_evento.html', error="A data do evento não pode ser menor que a data final do período de apostas.")
+        data_atual = date.today()
 
+        if data_inicio < data_atual:
+            return render_template('criar_evento.html', error="A data de início do período de apostas não pode ser anterior à data atual.")
+        if data_fim <= data_inicio:
+            return render_template('criar_evento.html', error="A data de fim do período de apostas deve ser posterior à data de início.")
+        if data_evento <= data_fim:
+            return render_template('criar_evento.html', error="A data do evento deve ser posterior ao fim do período de apostas.")
 
         # Inserindo os dados na tabela
         try:
             conn = sqlite3.connect(database_path)
             cursor = conn.cursor()
-            sql = '''INSERT INTO eventos (titulo, descricao, valor_cota, data_evento, periodo_apostas)
-                     VALUES (?, ?, ?, ?, ?)'''
-            values = (titulo, descricao, valor_cota, data_evento_str, periodo_apostas)
+            user_id = get_user_id()  # Função que obtem o ID do usuário logado
+            sql = '''INSERT INTO eventos (titulo, descricao, valor_cota, data_evento, periodo_apostas, id_criador)
+                     VALUES (?, ?, ?, ?, ?, ?)'''
+            values = (titulo, descricao, valor_cota, data_evento_str, f"{data_inicio_str} até {data_fim_str}", user_id)
             cursor.execute(sql, values)
             conn.commit()
             return render_template('criar_evento.html', success="Evento criado com sucesso!")
@@ -500,8 +514,6 @@ def criar_evento():
 
     # Renderiza o formulário na página, passando as categorias
     return render_template('criar_evento.html', categorias=categorias)
-
-
 
 "------------------------------- carteira----------------------------------"
 

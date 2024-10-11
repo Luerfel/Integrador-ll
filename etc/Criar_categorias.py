@@ -1,7 +1,7 @@
 import sqlite3
 
 # Conectando ao banco de dados (ou criando um novo se não existir)
-database_path = 'Integrador-ll/data/database.db'  # Atualize o caminho se necessário
+database_path = 'data/database.db'  # Atualize o caminho se necessário
 conn = sqlite3.connect(database_path)
 cursor = conn.cursor()
 # Criando a tabela categorias_eventos se não existir
