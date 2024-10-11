@@ -676,6 +676,20 @@ def carteira_adicionar():
 
 @app.route('/sacar', methods=['POST'])
 def carteira_sacar():
+    """
+    Função para realizar o saque de créditos da carteira do usuário.
+
+    Esta função lida com as requisições POST na rota '/sacar'.
+    - Verifica se o usuário está logado e obtém o ID do usuário.
+    - Recebe o valor e o método de saque via formulário.
+    - Aplica as taxas apropriadas com base no valor do saque.
+    - Verifica se o saldo do usuário é suficiente para realizar o saque.
+    - Deduz o valor total do saldo do usuário.
+    - Registra a transação de saque no banco de dados.
+    - Exibe uma mensagem de sucesso via flash e redireciona o usuário de volta para a página de gerenciamento da carteira.
+    
+    Uso: Esta função é chamada quando o usuário deseja realizar um saque da sua carteira.
+    """
     if 'logged_in' in session:
         user_id = get_user_id()
         if user_id:
