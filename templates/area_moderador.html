@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área do Moderador</title>
     <!-- Link para o arquivo CSS da área de moderação -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/area_moderacao.css') }}">
+    <link rel="stylesheet" href="/static/css/area_moderacao.css">
 </head>
 <body>
     <header>
@@ -44,20 +44,20 @@
                 <tbody>
                     <!-- Iteração sobre os eventos para exibir cada um na tabela -->
                     {% for evento in eventos %}
-                    <tr id="event-{{ evento['id'] }}">
-                        <td>{{ evento['id'] }}</td>
-                        <td>{{ evento['titulo'] }}</td>
-                        <td>{{ evento['descricao'] }}</td>
-                        <td>{{ '{:.2f}'.format(evento['valor_cota']) }}</td>
-                        <td>{{ evento['data_evento'] }}</td>
-                        <td>{{ evento['data_inicio_apostas'] }} até {{ evento['data_fim_apostas'] }}</td>
-                        <td>{{ evento['id_criador'] }}</td>
-                        <td>{{ evento['data_criacao'] }}</td>
+                    <tr id="event-{{ evento.id }}">
+                        <td>{{ evento.id }}</td>
+                        <td>{{ evento.titulo }}</td>
+                        <td>{{ evento.descricao }}</td>
+                        <td>{{ evento.valor_cota }}</td>
+                        <td>{{ evento.data_evento }}</td>
+                        <td>{{ evento.periodo_apostas }}</td>
+                        <td>{{ evento.id_criador }}</td>
+                        <td>{{ evento.data_criacao }}</td>
                         <td>
                             <!-- Botão para aprovar o evento -->
-                            <button type="button" onclick="handleEventAction('{{ evento['id'] }}', 'aprovar')" class="approve-btn">Aprovar</button>
+                            <button type="button" onclick="handleEventAction('{{ evento.id }}', 'aprovar')" class="approve-btn">Aprovar</button>
                             <!-- Botão para abrir o modal de reprovação -->
-                            <button type="button" onclick="abrirModalReprovar('{{ evento['id'] }}')" class="reject-btn">Reprovar</button>
+                            <button type="button" onclick="abrirModalReprovar('{{ evento.id }}')" class="reject-btn">Reprovar</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -85,20 +85,20 @@
                 <tbody>
                     <!-- Iteração sobre os eventos para exibir cada um na tabela -->
                     {% for evento in eventos %}
-                    <tr id="event-{{ evento['id'] }}">
-                        <td>{{ evento['id'] }}</td>
-                        <td>{{ evento['titulo'] }}</td>
-                        <td>{{ evento['descricao'] }}</td>
-                        <td>{{ '{:.2f}'.format(evento['valor_cota']) }}</td>
-                        <td>{{ evento['data_evento'] }}</td>
-                        <td>{{ evento['data_inicio_apostas'] }} até {{ evento['data_fim_apostas'] }}</td>
-                        <td>{{ evento['id_criador'] }}</td>
-                        <td>{{ evento['data_criacao'] }}</td>
+                    <tr id="event-{{ evento.id }}">
+                        <td>{{ evento.id }}</td>
+                        <td>{{ evento.titulo }}</td>
+                        <td>{{ evento.descricao }}</td>
+                        <td>{{ evento.valor_cota }}</td>
+                        <td>{{ evento.data_evento }}</td>
+                        <td>{{ evento.periodo_apostas }}</td>
+                        <td>{{ evento.id_criador }}</td>
+                        <td>{{ evento.data_criacao }}</td>
                         <td>
                             <!-- Botão para confirmar que o evento ocorreu -->
-                            <button type="button" onclick="handleEventAction('{{ evento['id'] }}', 'confirmar')" class="confirm-btn">Confirmar Ocorrência</button>
+                            <button type="button" onclick="handleEventAction('{{ evento.id }}', 'confirmar')" class="confirm-btn">Confirmar Ocorrência</button>
                             <!-- Botão para marcar o evento como não ocorrido -->
-                            <button type="button" onclick="handleEventAction('{{ evento['id'] }}', 'nao_ocorrido')" class="not-occurred-btn">Não Ocorrido</button>
+                            <button type="button" onclick="handleEventAction('{{ evento.id }}', 'nao_ocorrido')" class="not-occurred-btn">Não Ocorrido</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -110,10 +110,10 @@
         <!-- Modal para justificar a reprovação de um evento -->
         <div id="modalReprovar" class="modal" style="display: none;">
             <div class="modal-content">
-                <span class="close" onclick="fecharModalReprovar()">&times;</span>
+                <span class="close">&times;</span>
                 <h2>Justificar Reprovação</h2>
                 <!-- Formulário para enviar o motivo de reprovação do evento -->
-                <form id="formReprovarEvento" method="POST" action="{{ url_for('acao_evento') }}">
+                <form id="formReprovarEvento" method="POST" action="/acao_evento">
                     <!-- Campo oculto para armazenar o ID do evento que está sendo reprovado -->
                     <input type="hidden" name="evento_id" id="modalEventoId">
                     <!-- Campo oculto para definir a ação como reprovação -->
@@ -138,6 +138,6 @@
     </main>
 
     <!-- Link para o arquivo JavaScript da área de moderação -->
-    <script src="{{ url_for('static', filename='js/area_moderador.js') }}"></script>
+    <script src="/static/js/area_moderador.js"></script>
 </body>
 </html>
