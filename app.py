@@ -421,7 +421,6 @@ def acao_evento():
 
 
 @app.route('/criar_evento', methods=['GET', 'POST'])
-@app.route('/criar_evento', methods=['GET', 'POST'])
 def criar_evento():
     if 'logged_in' not in session or session['user_type'] != 'usuario':
         return redirect(url_for('login'))
