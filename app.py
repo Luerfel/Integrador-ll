@@ -2,7 +2,7 @@ from flask import Flask, request, redirect, url_for, render_template , flash, ge
 import sqlite3
 import os
 from datetime import datetime,date
-
+import traceback
 app = Flask(__name__)
 app.secret_key = 'macaco'
 # Caminho absoluto para o banco de dados
@@ -423,26 +423,6 @@ def acao_evento():
 
 @app.route('/criar_evento', methods=['GET', 'POST'])
 def criar_evento():
-    """
-    Função para criar um novo evento a partir dos dados enviados pelo formulário.
-
-    Esta função lida com as requisições GET e POST na rota '/criar_evento'.
-    - Se a requisição for POST, os dados do formulário são recuperados e validados.
-    - O título do evento, descrição, valor da cota, data do evento, período de apostas e o ID do criador são extraídos do formulário.
-    - São realizadas validações nos campos:
-      - O título deve ter no máximo 50 caracteres.
-      - A descrição deve ter no máximo 150 caracteres.
-      - O valor da cota deve ser no mínimo R$1,00.
-      - A data de início do período de apostas deve ser igual ou posterior à data atual.
-      - A data de fim do período de apostas deve ser posterior à data de início.
-      - A data do evento deve ser posterior ao fim do período de apostas.
-    - Se as validações forem bem-sucedidas, os dados são inseridos na tabela 'eventos' do banco de dados SQLite.
-    - Em caso de sucesso na inserção, uma mensagem de confirmação é exibida ao usuário.
-    - Em caso de erro na inserção, uma mensagem de erro é exibida ao usuário.
-    - A função retorna a página com o formulário para criar um novo evento.
-
-    Uso: Esta função é chamada quando um usuário tenta criar um novo evento através da interface de criação de eventos.
-    """
     if 'logged_in' not in session or session['user_type'] != 'usuario':
         return redirect(url_for('login'))
 
@@ -450,6 +430,7 @@ def criar_evento():
         # Recupera os dados do formulário
         titulo = request.form['titulo'].strip()
         descricao = request.form['descricao'].strip()
+        categoria_id = request.form.get('categoria')
         try:
             valor_cota = float(request.form['valor_cota'])
         except ValueError:
@@ -465,18 +446,21 @@ def criar_evento():
             return render_template('criar_evento.html', error="A descrição deve ter entre 1 e 150 caracteres.")
         if valor_cota < 1.00:
             return render_template('criar_evento.html', error="O valor da cota deve ser no mínimo R$1,00.")
+        if not categoria_id:
+            return render_template('criar_evento.html', error="Por favor, selecione uma categoria.")
 
         # Convertendo as strings para objetos datetime
         try:
-            data_inicio = datetime.strptime(data_inicio_str, '%Y-%m-%d').date()
-            data_fim = datetime.strptime(data_fim_str, '%Y-%m-%d').date()
-            data_evento = datetime.strptime(data_evento_str, '%Y-%m-%d').date()
+            data_inicio = datetime.strptime(data_inicio_str, '%Y-%m-%d')
+            data_fim = datetime.strptime(data_fim_str, '%Y-%m-%d')
+            data_evento = datetime.strptime(data_evento_str, '%Y-%m-%d')
         except ValueError:
             return render_template('criar_evento.html', error="Formato de data inválido. Use o formato AAAA-MM-DD.")
 
-        data_atual = date.today()
+        data_atual = datetime.now()
 
-        if data_inicio < data_atual:
+        # Validações de data
+        if data_inicio.date() < data_atual.date():
             return render_template('criar_evento.html', error="A data de início do período de apostas não pode ser anterior à data atual.")
         if data_fim <= data_inicio:
             return render_template('criar_evento.html', error="A data de fim do período de apostas deve ser posterior à data de início.")
@@ -487,18 +471,30 @@ def criar_evento():
         try:
             conn = sqlite3.connect(database_path)
             cursor = conn.cursor()
-            user_id = get_user_id()  # Função que obtem o ID do usuário logado
-            sql = '''INSERT INTO eventos (titulo, descricao, valor_cota, data_evento, periodo_apostas, id_criador)
-                     VALUES (?, ?, ?, ?, ?, ?)'''
-            values = (titulo, descricao, valor_cota, data_evento_str, f"{data_inicio_str} até {data_fim_str}", user_id)
-            cursor.execute(sql, values)
+
+            user_id = get_user_id()
+            if user_id is None:
+                return render_template('criar_evento.html', error="Usuário não autenticado ou sessão expirada.")
+
+            # Inserir o evento na tabela 'eventos'
+            sql_evento = '''INSERT INTO eventos (titulo, descricao, valor_cota, data_evento, data_inicio_apostas, data_fim_apostas, id_criador)
+                            VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            evento_values = (titulo, descricao, valor_cota, data_evento_str, data_inicio_str, data_fim_str, user_id)
+            cursor.execute(sql_evento, evento_values)
+            evento_id = cursor.lastrowid  # Obter o ID do evento inserido
+
+            # Inserir o relacionamento na tabela 'eventos_categorias'
+            sql_categoria = '''INSERT INTO eventos_categorias (id_evento, id_categoria) VALUES (?, ?)'''
+            cursor.execute(sql_categoria, (evento_id, categoria_id))
+
             conn.commit()
             return render_template('criar_evento.html', success="Evento criado com sucesso!")
         except sqlite3.Error as e:
-            return render_template('criar_evento.html', error=f"Erro ao inserir no banco de dados: {e}")
+            error_message = f"Erro ao inserir no banco de dados: {e}"
+            print(traceback.format_exc())
+            return render_template('criar_evento.html', error=error_message)
         finally:
             conn.close()
-
     else:
         # Carregar categorias da tabela 'categorias_eventos'
         try:
@@ -508,13 +504,14 @@ def criar_evento():
             categorias = cursor.fetchall()
         except sqlite3.Error as e:
             categorias = []
-            return render_template('criar_evento.html', error=f"Erro ao carregar categorias: {e}")
+            error_message = f"Erro ao carregar categorias: {e}"
+            print(traceback.format_exc())
+            return render_template('criar_evento.html', error=error_message)
         finally:
             conn.close()
 
     # Renderiza o formulário na página, passando as categorias
     return render_template('criar_evento.html', categorias=categorias)
-
 "------------------------------- carteira----------------------------------"
 
 @app.route('/gerenciar_carteira')
