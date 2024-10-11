@@ -755,7 +755,7 @@ def carteira_sacar():
 
             detalhes += f' | Taxa aplicada: R$ {taxa:.2f} | Valor líquido: R$ {valor_liquido:.2f}'
 
-            # Registrar a transaçãoo
+            # Registrar a transação
             cursor.execute('''
                 INSERT INTO transacoes (id_carteira, tipo, valor, detalhes)
                 VALUES (?, 'Saque', ?, ?)
