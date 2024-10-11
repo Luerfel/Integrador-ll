@@ -1,7 +1,7 @@
 from flask import Flask, request, redirect, url_for, render_template , flash, get_flashed_messages , session
 import sqlite3
 import os
-from datetime import datetime,date
+from datetime import datetime,timedelta
 
 app = Flask(__name__)
 app.secret_key = 'macaco'
@@ -421,6 +421,7 @@ def acao_evento():
 
 
 @app.route('/criar_evento', methods=['GET', 'POST'])
+@app.route('/criar_evento', methods=['GET', 'POST'])
 def criar_evento():
     if 'logged_in' not in session or session['user_type'] != 'usuario':
         return redirect(url_for('login'))
@@ -436,8 +437,6 @@ def criar_evento():
             flash("O valor da cota deve ser um número válido.", "error")
             return render_template('criar_evento.html', categorias=carregar_categorias(), form_data=request.form)
         data_evento_str = request.form['data_evento']
-        data_inicio_str = request.form['data_inicio']
-        data_fim_str = request.form['data_fim']
 
         # Validações
         errors = []
@@ -451,10 +450,8 @@ def criar_evento():
         if not categoria_id:
             errors.append("Por favor, selecione uma categoria.")
 
-        # Convertendo as strings para objetos datetime
+        # Convertendo a string para objeto datetime
         try:
-            data_inicio = datetime.strptime(data_inicio_str, '%Y-%m-%d')
-            data_fim = datetime.strptime(data_fim_str, '%Y-%m-%d')
             data_evento = datetime.strptime(data_evento_str, '%Y-%m-%d')
         except ValueError:
             errors.append("Formato de data inválido. Use o formato AAAA-MM-DD.")
@@ -462,16 +459,22 @@ def criar_evento():
         data_atual = datetime.now()
 
         # Validações de data
-        if 'data_inicio' in locals() and data_inicio.date() < data_atual.date():
-            errors.append("A data de início do período de apostas não pode ser anterior à data atual.")
-        if 'data_inicio' in locals() and 'data_fim' in locals() and data_fim <= data_inicio:
-            errors.append("A data de fim do período de apostas deve ser posterior à data de início.")
-        if 'data_fim' in locals() and 'data_evento' in locals() and data_evento <= data_fim:
-            errors.append("A data do evento deve ser posterior ao fim do período de apostas.")
+        if 'data_evento' in locals():
+            if data_evento.date() <= data_atual.date():
+                errors.append("A data do evento deve ser posterior à data atual.")
 
         if errors:
             for error in errors:
                 flash(error, "error")
+            return render_template('criar_evento.html', categorias=carregar_categorias(), form_data=request.form)
+
+        # Definir o período de apostas
+        data_inicio_apostas = data_atual.date()
+        data_fim_apostas = (data_evento - timedelta(days=1)).date()
+
+        # Verificar se o período de apostas é válido
+        if data_fim_apostas <= data_inicio_apostas:
+            flash("O período de apostas deve ser de pelo menos 1 dia antes do evento.", "error")
             return render_template('criar_evento.html', categorias=carregar_categorias(), form_data=request.form)
 
         # Inserindo os dados na tabela
@@ -487,7 +490,15 @@ def criar_evento():
             # Inserir o evento na tabela 'eventos'
             sql_evento = '''INSERT INTO eventos (titulo, descricao, valor_cota, data_evento, data_inicio_apostas, data_fim_apostas, id_criador)
                             VALUES (?, ?, ?, ?, ?, ?, ?)'''
-            evento_values = (titulo, descricao, valor_cota, data_evento_str, data_inicio_str, data_fim_str, user_id)
+            evento_values = (
+                titulo,
+                descricao,
+                valor_cota,
+                data_evento_str,
+                data_inicio_apostas.strftime('%Y-%m-%d'),
+                data_fim_apostas.strftime('%Y-%m-%d'),
+                user_id
+            )
             cursor.execute(sql_evento, evento_values)
             evento_id = cursor.lastrowid  # Obter o ID do evento inserido
 
@@ -500,6 +511,7 @@ def criar_evento():
             return redirect(url_for('criar_evento'))
         except sqlite3.Error as e:
             error_message = f"Erro ao inserir no banco de dados: {e}"
+
             flash(error_message, "error")
             return render_template('criar_evento.html', categorias=carregar_categorias(), form_data=request.form)
         finally:
