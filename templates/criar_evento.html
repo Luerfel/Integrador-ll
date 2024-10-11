@@ -29,6 +29,9 @@
             {% endif %}
         {% endwith %}
 
+        <!-- Informar ao usuário sobre o período de apostas -->
+        <p>O período de apostas será definido automaticamente: de hoje até um dia antes da data do evento.</p>
+
         <form method="POST" action="{{ url_for('criar_evento') }}">
             <div class="form-group">
                 <label for="titulo">Título:</label>
@@ -43,15 +46,6 @@
             <div class="form-group">
                 <label for="valor_cota">Valor da cota:</label>
                 <input type="number" step="0.01" id="valor_cota" name="valor_cota" min="1.00" required value="{{ form_data.valor_cota if form_data else '' }}">
-            </div>
-
-            <div class="form-group">
-                <label for="periodo_apostas">Período das apostas:</label>
-                <div class="input-inline">
-                    <input type="date" id="data_inicio" name="data_inicio" required value="{{ form_data.data_inicio if form_data else '' }}">
-                    até
-                    <input type="date" id="data_fim" name="data_fim" required value="{{ form_data.data_fim if form_data else '' }}">
-                </div>
             </div>
 
             <div class="form-group">
