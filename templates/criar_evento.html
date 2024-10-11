@@ -19,10 +19,19 @@
             </div>        
             <h1>Criar um novo evento</h1>
         </div>
+
+        <!-- Exibir mensagens de erro ou sucesso -->
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        {% if success %}
+            <div class="alert alert-success">{{ success }}</div>
+        {% endif %}
+
         <form method="POST" action="{{ url_for('criar_evento') }}">
             <div class="form-group">
-                <label for="titulo"></label>
-                <input type="text" id="titulo" name="titulo" maxlength="50" placeholder="Título:" required>
+                <label for="titulo">Título:</label>
+                <input type="text" id="titulo" name="titulo" maxlength="50" placeholder="Título" required>
             </div>
 
             <div class="form-group">
@@ -58,7 +67,6 @@
                     {% endfor %}
                 </select>
             </div>
-            
 
             <button type="submit" class="btn-submit">Criar evento</button>
         </form>
