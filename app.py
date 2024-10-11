@@ -538,6 +538,20 @@ def carregar_categorias():
 
 @app.route('/gerenciar_carteira')
 def gerenciar_carteira():
+    """
+    Função para gerenciar a carteira de um usuário.
+
+    Esta função lida com as requisições na rota '/gerenciar_carteira'.
+    - Verifica se o usuário está logado e obtém o ID do usuário a partir da sessão.
+    - Se o ID do usuário for encontrado, conecta-se ao banco de dados SQLite e executa as operações:
+      - Obtém o saldo da carteira do usuário.
+      - Obtém o histórico de transações e apostas do usuário.
+    - Prepara os dados de transações e apostas para serem exibidos no template HTML.
+    - Retorna o template 'gerenciar_carteira.html' com o saldo, histórico de transações e apostas.
+    - Se o usuário não estiver logado ou o ID não for encontrado, redireciona para a página de login.
+    
+    Uso: Esta função é chamada quando o usuário deseja visualizar e gerenciar sua carteira.
+    """
     if 'logged_in' in session:
         user_id = get_user_id()
         
