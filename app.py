@@ -29,6 +29,9 @@ app.config['MAIL_USERNAME'] = 'projetointegrador2puc@gmail.com'  # EMAIL
 app.config['MAIL_PASSWORD'] = ''  # SENHA
 app.config['MAIL_DEFAULT_SENDER'] = 'seuemail@gmail.com'  # E-mail do remetente
 app.config['MAIL_USE_SSL'] = False 
+
+mail = Mail(app)
+
 @app.route('/static/<path:path>')
 def serve_static(path):
     """
@@ -363,20 +366,10 @@ def moderador_dashboard():
 
 
 @app.route('/acao_evento', methods=['POST'])
+@app.route('/acao_evento', methods=['POST'])
 def acao_evento():
     """
     Função para processar as ações realizadas pelos moderadores sobre os eventos.
-
-    Esta função lida com as requisições POST na rota '/acao_evento'.
-    - Recebe o ID do evento, a ação a ser realizada (aprovar, reprovar, confirmar, não ocorrido) e, opcionalmente, o motivo de reprovação.
-    - Mapeia a ação recebida para os status e dados extras correspondentes, a serem armazenados no banco de dados.
-    - Conecta ao banco de dados SQLite e realiza as operações de atualização ou inserção necessárias:
-      - Atualiza o status do evento de acordo com a ação escolhida.
-      - Se a ação for 'reprovar', insere um registro na tabela 'moderacoes_eventos' com o motivo de reprovação.
-      - Para as ações 'reprovar', 'confirmar' ou 'nao_ocorrido', insere um registro na tabela 'resultados_eventos' com o resultado do evento.
-    - Retorna uma resposta HTTP adequada (200 para sucesso ou 500 em caso de erro).
-
-    Uso: Esta função é chamada quando um moderador realiza alguma ação em um evento na interface da área do moderador.
     """
     # Obtém os dados do formulário
     evento_id = request.form.get('evento_id')
@@ -409,6 +402,13 @@ def acao_evento():
                     INSERT INTO moderacoes_eventos (id_evento, id_moderador, acao, motivo_rejeicao) 
                     VALUES (?, ?, ?, ?)
                 ''', (evento_id, id_moderador, acao, motivo_rejeicao))
+                
+                # Obtém o e-mail do criador do evento e o título do evento
+                evento = conn.execute('SELECT titulo, id_criador FROM eventos WHERE id = ?', (evento_id,)).fetchone()
+                criador = conn.execute('SELECT email FROM usuarios WHERE id = ?', (evento['id_criador'],)).fetchone()
+
+                # Envia o e-mail de rejeição usando Flask-Mail
+                enviar_email_rejeicao(criador['email'], evento['titulo'], motivo_rejeicao)
             
             # Insere um registro na tabela de resultados se a ação for 'reprovar', 'confirmar' ou 'não_ocorrido'
             if acao in ['reprovar', 'confirmar', 'nao_ocorrido']:
@@ -424,6 +424,28 @@ def acao_evento():
         # Em caso de erro, retorna o erro e um status 500
         print(f"Erro ao processar ação: {e}")
         return str(e), 500
+
+def enviar_email_rejeicao(email_usuario, titulo_evento, motivo_rejeicao):
+    """
+    Função para enviar um e-mail de notificação de rejeição de evento para o usuário.
+    
+    Parâmetros:
+    - email_usuario: O endereço de e-mail do criador do evento.
+    - titulo_evento: O título do evento rejeitado.
+    - motivo_rejeicao: O motivo da rejeição do evento.
+    """
+    try:
+        # Cria a mensagem de e-mail
+        msg = Message(
+            subject="Seu evento foi rejeitado",
+            recipients=[email_usuario],  # Lista de destinatários
+            body=f"Olá,\n\nSeu evento '{titulo_evento}' foi rejeitado pela moderação.\n\nMotivo da rejeição: {motivo_rejeicao}\n\nPor favor, revise as diretrizes da plataforma e faça as alterações necessárias antes de reenviar.\n\nAtenciosamente,\nEquipe de Moderação"
+        )
+        # Envia o e-mail
+        mail.send(msg)
+        print(f"E-mail enviado com sucesso para {email_usuario}")
+    except Exception as e:
+        print(f"Falha ao enviar e-mail: {e}")
 "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 "criar evento"
 
