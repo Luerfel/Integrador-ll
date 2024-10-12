@@ -366,7 +366,6 @@ def moderador_dashboard():
 
 
 @app.route('/acao_evento', methods=['POST'])
-@app.route('/acao_evento', methods=['POST'])
 def acao_evento():
     """
     Função para processar as ações realizadas pelos moderadores sobre os eventos.
@@ -392,6 +391,7 @@ def acao_evento():
     try:
         # Conecta ao banco de dados SQLite
         with sqlite3.connect(database_path) as conn:
+            conn.row_factory = sqlite3.Row  # Adicione esta linha
             status, extra_data = acao_map[acao]
             # Atualiza o status do evento com base na ação
             conn.execute('UPDATE eventos SET status = ? WHERE id = ?', (status, evento_id))
