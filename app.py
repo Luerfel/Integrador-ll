@@ -22,13 +22,15 @@ def get_user_id():
     return None
 
 # Configurações do Flask-Mail para o Gmail
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+
+app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'projetointegrador2puc@gmail.com'  # EMAIL
-app.config['MAIL_PASSWORD'] = ''  # SENHA
-app.config['MAIL_DEFAULT_SENDER'] = 'seuemail@gmail.com'  # E-mail do remetente
-app.config['MAIL_USE_SSL'] = False 
+app.config['MAIL_USERNAME'] = 'apikey'  # Literalmente 'apikey'
+app.config['MAIL_PASSWORD'] = 'SUA_SENDGRID_API_KEY'  # Insira sua API Key aqui
+app.config['MAIL_DEFAULT_SENDER'] = 'seuemail@seudominio.com'  # Use um e-mail verificado no SendGrid
+
+mail = Mail(app)
 
 mail = Mail(app)
 
