@@ -21,7 +21,14 @@ def get_user_id():
             return result[0]
     return None
 
-
+# Configurações do Flask-Mail para o Gmail
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'seuemail@gmail.com'  # Insira seu e-mail
+app.config['MAIL_PASSWORD'] = 'suasenha'  # Insira sua senha ou senha de app
+app.config['MAIL_DEFAULT_SENDER'] = 'seuemail@gmail.com'  # E-mail do remetente
+app.config['MAIL_USE_SSL'] = False
 @app.route('/static/<path:path>')
 def serve_static(path):
     """
