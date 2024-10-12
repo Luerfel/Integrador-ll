@@ -1,8 +1,8 @@
 from flask import Flask, request, redirect, url_for, render_template , flash, get_flashed_messages , session
 import sqlite3
 import os
-from datetime import datetime,timedelta
-
+from datetime import datetime,timedelta #pip install datetime
+from flask_mail import Mail, Message # pip install flask-mail
 app = Flask(__name__)
 app.secret_key = 'macaco'
 # Caminho absoluto para o banco de dados
@@ -20,6 +20,7 @@ def get_user_id():
         if result:
             return result[0]
     return None
+
 
 @app.route('/static/<path:path>')
 def serve_static(path):
