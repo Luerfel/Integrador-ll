@@ -28,7 +28,7 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'seuemail@gmail.com'  # Insira seu e-mail
 app.config['MAIL_PASSWORD'] = 'suasenha'  # Insira sua senha ou senha de app
 app.config['MAIL_DEFAULT_SENDER'] = 'seuemail@gmail.com'  # E-mail do remetente
-app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USE_SSL'] = False #ABC1234!
 @app.route('/static/<path:path>')
 def serve_static(path):
     """
