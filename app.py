@@ -116,6 +116,34 @@ formulário de login.
 "AREA DO USUARIOOOOOOOOOOOOOOOOOOOOOOOO"
 @app.route('/area_usuario')
 def area_usuario():
+    """
+    Esta função lida com a rota '/area_usuario' e exibe a área do usuário, que inclui eventos
+    finalizando hoje, eventos mais apostados e categorias de eventos, caso o usuário esteja logado.
+
+    - Verifica se o usuário está autenticado verificando a chave 'logged_in' na sessão.
+    - Se o usuário estiver logado, a função busca eventos finalizando no dia corrente, eventos
+      mais apostados e as categorias de eventos no banco de dados.
+    - Caso o usuário não esteja autenticado, ele é redirecionado para a página de login.
+
+    Funcionalidades:
+    1. Obter os eventos cujas apostas estão finalizando hoje e que possuem status 'aprovado'.
+       - A consulta é limitada a 10 eventos ordenados pela data do evento.
+    2. Obter os eventos mais apostados, calculando o valor total apostado em cada evento.
+       - A consulta retorna os 10 eventos com maior soma de apostas e os ordena de forma
+         decrescente.
+    3. Obter todas as categorias de eventos.
+
+    Após obter os dados, a função renderiza a página 'area_usuario.html', passando como contexto
+    os eventos finalizando hoje, os eventos mais apostados e as categorias.
+
+    Uso: Esta função é chamada quando o usuário autenticado acessa a área de usuário após fazer login.
+    Se o usuário não estiver logado, ele será redirecionado para a página de login.
+
+    Retorno:
+    - Se o usuário estiver logado: Renderiza a página 'area_usuario.html' com os dados dos eventos e
+      categorias.
+    - Se o usuário não estiver logado: Redireciona para a rota de login ('/login').
+    """
     if 'logged_in' in session:
         user_id = get_user_id()
         conn = sqlite3.connect(database_path)
