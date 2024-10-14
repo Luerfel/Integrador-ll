@@ -663,6 +663,19 @@ def criar_evento():
     # Renderiza o formulário na página, passando as categorias
     return render_template('criar_evento.html', categorias=categorias)
 def carregar_categorias():
+    """
+    Esta função carrega as categorias de eventos do banco de dados para serem exibidas no formulário
+    de criação de evento.
+
+    Funcionalidades:
+    1. Conecta ao banco de dados e executa uma consulta SQL para obter todas as categorias da tabela
+       'categorias_eventos'.
+    2. Retorna as categorias em uma lista de tuplas contendo o ID e o nome de cada categoria.
+
+    Retorno:
+    - Uma lista de categorias obtidas da tabela 'categorias_eventos'.
+    - Se ocorrer um erro ao carregar as categorias, retorna uma lista vazia.
+    """
     try:
         conn = sqlite3.connect(database_path)
         cursor = conn.cursor()
