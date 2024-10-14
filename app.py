@@ -283,6 +283,29 @@ def pesquisar_evento():
 
 @app.route('/eventos_categoria/<int:categoria_id>')
 def eventos_por_categoria(categoria_id):
+    """
+    Esta função trata requisições GET na rota '/eventos_categoria/<categoria_id>' e exibe os eventos
+    de uma categoria específica, determinada pelo ID da categoria fornecido na URL.
+
+    Funcionalidades:
+    1. Obtém o nome da categoria com base no ID fornecido.
+    2. Caso a categoria não seja encontrada, retorna um erro 404 (categoria não encontrada).
+    3. Caso a categoria exista, busca os eventos associados a essa categoria no banco de dados e que
+       tenham o status 'aprovado'.
+    4. Renderiza a página 'eventos_categoria.html', exibindo os eventos da categoria e o nome da
+       categoria para o usuário.
+
+    Uso: Esta função é chamada quando o usuário acessa os eventos de uma categoria específica. A resposta
+    renderiza a página com os eventos da categoria.
+
+    Parâmetro de URL:
+    - categoria_id: ID da categoria cujos eventos serão exibidos.
+
+    Retorno:
+    - Se a categoria for encontrada: Renderiza a página 'eventos_categoria.html' com os eventos da
+      categoria.
+    - Se a categoria não for encontrada: Retorna uma mensagem de erro 404.
+    """
     conn = sqlite3.connect(database_path)
     cursor = conn.cursor()
 
