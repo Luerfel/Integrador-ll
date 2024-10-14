@@ -187,6 +187,37 @@ def area_usuario():
 "PESQUISAR EVENTO"
 @app.route('/pesquisar_evento', methods=['GET'])
 def pesquisar_evento():
+    """
+    Esta função trata requisições GET na rota '/pesquisar_evento' e permite aos usuários pesquisar
+    eventos com base em uma consulta de texto (query), categoria, data e ordenação. A função também
+    suporta paginação para facilitar a navegação pelos resultados.
+
+    Funcionalidades:
+    1. Coleta os parâmetros da URL (query, categoria, data, ordenação e página) para aplicar os filtros
+       e configurar a paginação.
+    2. Realiza uma consulta SQL no banco de dados para buscar eventos que correspondam aos critérios
+       definidos:
+       - Se houver uma 'query', busca no título ou descrição do evento.
+       - Se houver uma categoria, filtra os eventos por categoria.
+       - Se houver uma data, filtra os eventos por data específica.
+       - Aplica a ordenação especificada (popularidade, valor de cota ou data do evento).
+    3. Implementa paginação para limitar os resultados a 10 eventos por página.
+    4. Busca as categorias de eventos disponíveis para serem exibidas como filtros na interface.
+
+    Uso: Esta função é chamada quando o usuário acessa a página de pesquisa de eventos e pode aplicar
+    filtros ou realizar buscas. A resposta renderiza a página 'pesquisar_evento.html' com os eventos
+    filtrados e os dados adicionais necessários para a interface de pesquisa.
+
+    Parâmetros de URL aceitos:
+    - query: String para busca no título ou descrição do evento.
+    - categoria: ID da categoria para filtrar os eventos.
+    - data: Data do evento para filtrar.
+    - ordenacao: Critério de ordenação (popularidade, valor_cota, data).
+    - page: Número da página para implementar a paginação.
+
+    Retorno:
+    - Renderiza a página 'pesquisar_evento.html' com os resultados da pesquisa, os eventos e as categorias.
+    """
     query = request.args.get('query', '')
     categoria_id = request.args.get('categoria', '')
     data = request.args.get('data', '')
