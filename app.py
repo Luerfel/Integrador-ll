@@ -474,13 +474,7 @@ def acao_evento():
                     INSERT INTO moderacoes_eventos (id_evento, id_moderador, acao, motivo_rejeicao) 
                     VALUES (?, ?, ?, ?)
                 ''', (evento_id, id_moderador, acao, motivo_rejeicao))
-                
-                # Obtém o e-mail do criador do evento e o título do evento
-                evento = conn.execute('SELECT titulo, id_criador FROM eventos WHERE id = ?', (evento_id,)).fetchone()
-                criador = conn.execute('SELECT email FROM usuarios WHERE id = ?', (evento['id_criador'],)).fetchone()
 
-                # Envia o e-mail de rejeição usando Flask-Mail
-                enviar_email_rejeicao(criador['email'], evento['titulo'], motivo_rejeicao)
             
             # Insere um registro na tabela de resultados se a ação for 'reprovar', 'confirmar' ou 'não_ocorrido'
             if acao in ['reprovar', 'confirmar', 'nao_ocorrido']:
