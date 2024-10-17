@@ -2,7 +2,6 @@ from flask import Flask, request, redirect, url_for, render_template , flash, ge
 import sqlite3
 import os
 from datetime import datetime,timedelta #pip install datetime
-from flask_mail import Mail, Message # pip install flask-mail
 app = Flask(__name__)
 app.secret_key = 'macaco'
 # Caminho absoluto para o banco de dados
