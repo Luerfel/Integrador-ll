@@ -497,15 +497,6 @@ def acao_evento():
         print(f"Erro ao processar ação: {e}")
         return str(e), 500
 
-def enviar_email_rejeicao(email_usuario, titulo_evento, motivo_rejeicao):
-    """
-    Função para enviar um e-mail de notificação de rejeição de evento para o usuário.
-    
-    Parâmetros:
-    - email_usuario: O endereço de e-mail do criador do evento.
-    - titulo_evento: O título do evento rejeitado.
-    - motivo_rejeicao: O motivo da rejeição do evento.
-    """
 
 "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 "criar evento"
