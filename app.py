@@ -21,18 +21,6 @@ def get_user_id():
             return result[0]
     return None
 
-# Configurações do Flask-Mail para o Gmail
-
-app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'apikey'  # Literalmente 'apikey'
-app.config['MAIL_PASSWORD'] = 'SUA_SENDGRID_API_KEY'  # Insira sua API Key aqui
-app.config['MAIL_DEFAULT_SENDER'] = 'seuemail@seudominio.com'  # Use um e-mail verificado no SendGrid
-
-mail = Mail(app)
-
-mail = Mail(app)
 
 @app.route('/static/<path:path>')
 def serve_static(path):
@@ -526,7 +514,7 @@ def enviar_email_rejeicao(email_usuario, titulo_evento, motivo_rejeicao):
             body=f"Olá,\n\nSeu evento '{titulo_evento}' foi rejeitado pela moderação.\n\nMotivo da rejeição: {motivo_rejeicao}\n\nPor favor, revise as diretrizes da plataforma e faça as alterações necessárias antes de reenviar.\n\nAtenciosamente,\nEquipe de Moderação"
         )
         # Envia o e-mail
-        mail.send(msg)
+ 
         print(f"E-mail enviado com sucesso para {email_usuario}")
     except Exception as e:
         print(f"Falha ao enviar e-mail: {e}")
