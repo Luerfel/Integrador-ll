@@ -506,18 +506,7 @@ def enviar_email_rejeicao(email_usuario, titulo_evento, motivo_rejeicao):
     - titulo_evento: O título do evento rejeitado.
     - motivo_rejeicao: O motivo da rejeição do evento.
     """
-    try:
-        # Cria a mensagem de e-mail
-        msg = Message(
-            subject="Seu evento foi rejeitado",
-            recipients=[email_usuario],  # Lista de destinatários
-            body=f"Olá,\n\nSeu evento '{titulo_evento}' foi rejeitado pela moderação.\n\nMotivo da rejeição: {motivo_rejeicao}\n\nPor favor, revise as diretrizes da plataforma e faça as alterações necessárias antes de reenviar.\n\nAtenciosamente,\nEquipe de Moderação"
-        )
-        # Envia o e-mail
- 
-        print(f"E-mail enviado com sucesso para {email_usuario}")
-    except Exception as e:
-        print(f"Falha ao enviar e-mail: {e}")
+
 "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 "criar evento"
 
