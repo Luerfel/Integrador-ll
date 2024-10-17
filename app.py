@@ -8,7 +8,7 @@ app.secret_key = 'macaco'
 database_path = os.path.join(os.getcwd(), 'data/database.db')
 
 def get_user_id():
-
+ #usamos para obter o id do usuario e usar na 
     email = session.get('email')
     if email:
         conn = sqlite3.connect(database_path)
