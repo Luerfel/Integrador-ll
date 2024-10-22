@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, url_for, render_template , flash, get_flashed_messages , session
+from flask import Flask, request, redirect, url_for, render_template , flash, get_flashed_messages , session , Mail, Message #pip install Flask-Mail
 import sqlite3
 import os
 from datetime import datetime,timedelta #pip install datetime
@@ -6,6 +6,20 @@ app = Flask(__name__)
 app.secret_key = 'macaco'
 # Caminho absoluto para o banco de dados
 database_path = os.path.join(os.getcwd(), 'data/database.db')
+
+# Configuração do Flask-Mail
+app.config['MAIL_SERVER'] = 'smtp.seuprovedor.com'  # Exemplo: 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = 'seu-email@exemplo.com'
+app.config['MAIL_PASSWORD'] = 'sua-senha'
+app.config['MAIL_DEFAULT_SENDER'] = 'seu-email@exemplo.com'
+app.config['MAIL_MAX_EMAILS'] = None
+app.config['MAIL_ASCII_ATTACHMENTS'] = False
+
+mail = Mail(app)
+
 
 def get_user_id():
  #usamos para obter o id do usuario e usar na seassion
@@ -474,6 +488,9 @@ def acao_evento():
                     VALUES (?, ?, ?, ?)
                 ''', (evento_id, id_moderador, acao, motivo_rejeicao))
 
+                # Envia o email ao criador do evento
+                send_email_to_user(evento_id, motivo_rejeicao)
+
             
             # Insere um registro na tabela de resultados se a ação for 'reprovar', 'confirmar' ou 'não_ocorrido'
             if acao in ['reprovar', 'confirmar', 'nao_ocorrido']:
@@ -490,6 +507,31 @@ def acao_evento():
         print(f"Erro ao processar ação: {e}")
         return str(e), 500
 
+
+def send_email_to_user(evento_id, motivo_rejeicao):
+    """
+    Envia um e-mail para o criador do evento informando sobre a rejeição.
+    """
+    with sqlite3.connect(database_path) as conn:
+        conn.row_factory = sqlite3.Row
+        evento = conn.execute('SELECT id_criador, titulo FROM eventos WHERE id = ?', (evento_id,)).fetchone()
+        criador = conn.execute('SELECT email FROM usuarios WHERE id = ?', (evento['id_criador'],)).fetchone()
+
+        if criador and criador['email']:
+            email_destinatario = criador['email']
+            assunto = f"Aposta Rejeitada: {evento['titulo']}"
+            corpo = f"Sua aposta foi rejeitada pelo seguinte motivo: {motivo_rejeicao}."
+
+            # Configura o e-mail a ser enviado
+            msg = Message(assunto, recipients=[email_destinatario])
+            msg.body = corpo
+
+            # Envia o e-mail usando Flask-Mail
+            try:
+                mail.send(msg)
+                print("Email enviado com sucesso!")
+            except Exception as e:
+                print(f"Erro ao enviar email: {e}")
 
 "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 "criar evento"
