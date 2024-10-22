@@ -1,4 +1,5 @@
-from flask import Flask, request, redirect, url_for, render_template , flash, get_flashed_messages , session , Mail, Message #pip install Flask-Mail
+from flask import Flask, request, redirect, url_for, render_template , flash, get_flashed_messages , session 
+from flask_mail import Mail, Message #pip install Flask-Mail
 import sqlite3
 import os
 from datetime import datetime,timedelta #pip install datetime
