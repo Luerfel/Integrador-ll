@@ -20,20 +20,58 @@
         </form>
     </div>
 
+    <!-- Modal para definir valor da aposta -->
+    <div id="apostaModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Apostar em <span id="evento-titulo"></span></h2>
+            <form id="aposta-form" action="{{ url_for('apostar') }}" method="POST">
+                <input type="hidden" name="evento_id" id="evento-id">
+                <input type="hidden" name="aposta" id="aposta-tipo">
+                
+                <label for="valor_aposta">Valor da Aposta:</label>
+                <input type="number" name="valor_aposta" id="valor_aposta" min="1" required>
+                
+                <button type="submit" class="btn-confirmar">Confirmar Aposta</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script para controle do modal -->
+    <script>
+        function openModal(eventoId, eventoTitulo, apostaTipo) {
+            document.getElementById('evento-id').value = eventoId;
+            document.getElementById('evento-titulo').textContent = eventoTitulo;
+            document.getElementById('aposta-tipo').value = apostaTipo;
+            document.getElementById('apostaModal').style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById('apostaModal').style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('apostaModal')) {
+                closeModal();
+            }
+        }
+    </script>
+
     <!-- Seção de Destaques: Eventos com Período de Apostas Finalizando -->
     <div class="section">
         <h2>Último Dia para Apostar</h2>
         <div class="eventos-container">
             {% for evento in eventos_finalizando %}
                 <div class="evento-card">
-                    <h3>{{ evento[1] }}</h3> <!-- Título do evento -->
-                    <p>{{ evento[2] }}</p> <!-- Descrição do evento -->
+                    <h3>{{ evento[1] }}</h3>
+                    <p>{{ evento[2] }}</p>
                     <p>Data do Evento: {{ evento[4] }}</p>
                     <p>Período de Apostas: {{ evento[5] }} até {{ evento[6] }}</p>
                     <p>Valor da Cota: R$ {{ '{:.2f}'.format(evento[3]) }}</p>
-                    <!-- Botões para apostar (não implementados agora) -->
-                    <button disabled>Apostar Sim</button>
-                    <button disabled>Apostar Não</button>
+
+                    <!-- Botões para abrir o modal com aposta "Sim" ou "Não" -->
+                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'sim')">Apostar Sim</button>
+                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'nao')">Apostar Não</button>
                 </div>
             {% else %}
                 <p>Nenhum evento disponível.</p>
@@ -47,15 +85,15 @@
         <div class="eventos-container">
             {% for evento in eventos_mais_apostados %}
                 <div class="evento-card">
-                    <h3>{{ evento[1] }}</h3> <!-- Título do evento -->
-                    <p>{{ evento[2] }}</p> <!-- Descrição do evento -->
+                    <h3>{{ evento[1] }}</h3>
+                    <p>{{ evento[2] }}</p>
                     <p>Data do Evento: {{ evento[4] }}</p>
                     <p>Período de Apostas: {{ evento[5] }} até {{ evento[6] }}</p>
-                    <p>Total Apostado: R$ {{ '{:.2f}'.format(evento[-1] or 0) }}</p> <!-- total_apostado -->
+                    <p>Total Apostado: R$ {{ '{:.2f}'.format(evento[-1] or 0) }}</p>
                     <p>Valor da Cota: R$ {{ '{:.2f}'.format(evento[3]) }}</p>
-                    <!-- Botões para apostar (não implementados agora) -->
-                    <button disabled>Apostar Sim</button>
-                    <button disabled>Apostar Não</button>
+
+                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'sim')">Apostar Sim</button>
+                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'nao')">Apostar Não</button>
                 </div>
             {% else %}
                 <p>Nenhum evento disponível.</p>
@@ -69,7 +107,7 @@
         <div class="categorias-container">
             {% for categoria in categorias %}
                 <div class="categoria-card">
-                    <h3>{{ categoria[1] }}</h3> <!-- Nome da categoria -->
+                    <h3>{{ categoria[1] }}</h3>
                     <a href="{{ url_for('pesquisar_evento') }}?categoria={{ categoria[0] }}">Ver Eventos</a>
                 </div>
             {% else %}
@@ -78,14 +116,26 @@
         </div>
     </div>
 
-    <!-- JavaScript para controlar a submissão do formulário -->
-    <script>
-        document.getElementById('search-form').addEventListener('submit', function(event) {
-            event.preventDefault(); // Impede a submissão tradicional do formulário
-            const query = document.querySelector('input[name="query"]').value;
-            const url = "{{ url_for('pesquisar_evento') }}" + "?query=" + encodeURIComponent(query);
-            window.open(url, '_blank'); // Abre a URL em uma nova aba
-        });
-    </script>
+    <!-- Área de eventos disponíveis -->
+    <h2>Eventos Disponíveis</h2>
+    <div class="eventos-container">
+        {% for evento in eventos %}
+            <div class="evento-card">
+                <h3>{{ evento.titulo }}</h3>
+                <p>{{ evento.descricao }}</p>
+                <p>Data do evento: {{ evento.data_evento }}</p>
+
+                <!-- Formulário para enviar a aposta -->
+                <form action="{{ url_for('apostar') }}" method="POST">
+                    <input type="hidden" name="id_evento" value="{{ evento.id }}">
+                    <label for="valor_aposta_{{ evento.id }}">Valor da Aposta:</label>
+                    <input type="number" name="valor_aposta" id="valor_aposta_{{ evento.id }}" required>
+                    <button type="submit" class="btn btn-primary">Apostar</button>
+                </form>
+            </div>
+        {% else %}
+            <p>Não há eventos disponíveis no momento.</p>
+        {% endfor %}
+    </div>
 </body>
 </html>

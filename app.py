@@ -929,6 +929,41 @@ def carteira_sacar():
     else:
         return redirect(url_for('login'))
 
+@app.route('/apostar', methods=['POST'])
+def apostar():
+    user_id = get_user_id()  # Função para obter o ID do usuário logado
+    if not user_id:
+        flash("Você precisa estar logado para apostar.", "error")
+        return redirect(url_for('login'))
+
+    # Obter o id do evento a partir do formulário
+    id_evento = request.form.get('id_evento')
+    valor_aposta = request.form.get('valor_aposta')
+
+    if not id_evento or not valor_aposta:
+        flash("Evento ou valor da aposta não fornecidos.", "error")
+        return redirect(url_for('area_usuario'))
+
+    # Lógica para salvar a aposta no banco de dados
+    try:
+        conn = sqlite3.connect(database_path)
+        cursor = conn.cursor()
+
+        # Inserir a aposta no banco
+        cursor.execute('''
+            INSERT INTO apostas (id_usuario, id_evento, valor, data_aposta)
+            VALUES (?, ?, ?, datetime('now'))
+        ''', (user_id, id_evento, valor_aposta))
+
+        conn.commit()
+        conn.close()
+
+        flash("Aposta realizada com sucesso!", "success")
+    except sqlite3.Error as e:
+        flash(f"Erro ao realizar a aposta: {e}", "error")
+
+    return redirect(url_for('area_usuario'))
+
 
 
 if __name__ == '__main__':
