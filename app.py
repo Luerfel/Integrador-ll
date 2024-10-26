@@ -35,6 +35,9 @@ def get_user_id():
             return result[0]
     return None
 
+def obter_id_usuario():
+    return session.get('id_usuario')
+
 
 @app.route('/static/<path:path>')
 def serve_static(path):
@@ -147,9 +150,10 @@ def area_usuario():
     - Se o usuário não estiver logado: Redireciona para a rota de login ('/login').
     """
     if 'logged_in' in session:
-        user_id = get_user_id()
+        user_id = session.get('id_usuario')
         conn = sqlite3.connect(database_path)
         cursor = conn.cursor()
+        print("ID do usuário na sessão:", session.get('id_usuario'))
 
         # Obter eventos com período de apostas finalizando hoje
         cursor.execute('''
@@ -183,6 +187,7 @@ def area_usuario():
                                eventos_mais_apostados=eventos_mais_apostados, categorias=categorias)
     else:
         return redirect(url_for('login'))
+    
 
 
 "------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
@@ -929,42 +934,55 @@ def carteira_sacar():
     else:
         return redirect(url_for('login'))
 
+def conectar_db():
+    # Atualize o caminho do banco de dados se necessário
+    return sqlite3.connect('data/database.db')
+
 @app.route('/apostar', methods=['POST'])
 def apostar():
-    user_id = get_user_id()  # Função para obter o ID do usuário logado
-    if not user_id:
-        flash("Você precisa estar logado para apostar.", "error")
+    if 'logged_in' in session:
+        user_id = get_user_id()
+        evento_id = request.form['evento_id']
+        valor_aposta = float(request.form['valor_aposta'])
+        opcao = request.form['aposta']  # Obter a opção do formulário
+
+        # Usar gerenciador de contexto para abrir a conexão
+        with sqlite3.connect(database_path, timeout=5) as conn:
+            cursor = conn.cursor()
+            
+            # Obter o valor da cota do evento
+            cursor.execute('SELECT valor_cota FROM eventos WHERE id = ?', (evento_id,))
+            valor_cota = cursor.fetchone()
+
+            if valor_cota is not None:
+                valor_cota = valor_cota[0]
+                valor_total_aposta = valor_aposta * valor_cota
+
+                # Verificar o saldo do usuário
+                cursor.execute('SELECT saldo FROM carteiras WHERE id_usuario = ?', (user_id,))
+                saldo = cursor.fetchone()
+
+                if saldo is not None and saldo[0] >= valor_total_aposta:
+                    # Inserir a aposta, incluindo a opção
+                    cursor.execute('INSERT INTO apostas (id_evento, id_usuario, valor, opcao) VALUES (?, ?, ?, ?)',
+                                   (evento_id, user_id, valor_total_aposta, opcao))
+                    
+                    # Atualizar o saldo da carteira
+                    novo_saldo = saldo[0] - valor_total_aposta
+                    cursor.execute('UPDATE carteiras SET saldo = ? WHERE id_usuario = ?', (novo_saldo, user_id))
+                    
+                    conn.commit()
+                    message = "Aposta realizada com sucesso!"
+                else:
+                    message = "Saldo insuficiente para realizar a aposta."
+
+                # Exibir mensagem para o usuário
+                return f"<script>alert('{message}'); window.location.href = '{url_for('area_usuario')}';</script>"
+            else:
+                return "Evento não encontrado", 404
+    else:
         return redirect(url_for('login'))
-
-    # Obter o id do evento a partir do formulário
-    id_evento = request.form.get('id_evento')
-    valor_aposta = request.form.get('valor_aposta')
-
-    if not id_evento or not valor_aposta:
-        flash("Evento ou valor da aposta não fornecidos.", "error")
-        return redirect(url_for('area_usuario'))
-
-    # Lógica para salvar a aposta no banco de dados
-    try:
-        conn = sqlite3.connect(database_path)
-        cursor = conn.cursor()
-
-        # Inserir a aposta no banco
-        cursor.execute('''
-            INSERT INTO apostas (id_usuario, id_evento, valor, data_aposta)
-            VALUES (?, ?, ?, datetime('now'))
-        ''', (user_id, id_evento, valor_aposta))
-
-        conn.commit()
-        conn.close()
-
-        flash("Aposta realizada com sucesso!", "success")
-    except sqlite3.Error as e:
-        flash(f"Erro ao realizar a aposta: {e}", "error")
-
-    return redirect(url_for('area_usuario'))
-
 
 
 if __name__ == '__main__':
-    app.run(debug=True)  # Executa o aplicativo Flask no modo debug
+    app.run(debug=True)

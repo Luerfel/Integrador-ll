@@ -115,7 +115,7 @@
             {% endfor %}
         </div>
     </div>
-
+    
     <!-- Área de eventos disponíveis -->
     <h2>Eventos Disponíveis</h2>
     <div class="eventos-container">
@@ -125,13 +125,9 @@
                 <p>{{ evento.descricao }}</p>
                 <p>Data do evento: {{ evento.data_evento }}</p>
 
-                <!-- Formulário para enviar a aposta -->
-                <form action="{{ url_for('apostar') }}" method="POST">
-                    <input type="hidden" name="id_evento" value="{{ evento.id }}">
-                    <label for="valor_aposta_{{ evento.id }}">Valor da Aposta:</label>
-                    <input type="number" name="valor_aposta" id="valor_aposta_{{ evento.id }}" required>
-                    <button type="submit" class="btn btn-primary">Apostar</button>
-                </form>
+                <!-- Botões para abrir o modal com aposta "Sim" ou "Não" -->
+                <button onclick="openModal('{{ evento.id }}', '{{ evento.titulo }}', 'sim')">Apostar Sim</button>
+                <button onclick="openModal('{{ evento.id }}', '{{ evento.titulo }}', 'nao')">Apostar Não</button>
             </div>
         {% else %}
             <p>Não há eventos disponíveis no momento.</p>

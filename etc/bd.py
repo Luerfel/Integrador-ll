@@ -230,5 +230,48 @@ def menu():
         else:
             print("Opção inválida. Tente novamente.")
 
+def verificar_saldo(id_usuario):
+    conn = conectar_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT saldo FROM carteiras WHERE id_usuario = ?", (id_usuario,))
+    saldo = cursor.fetchone()
+
+    conn.close()
+    return saldo[0] if saldo else None
+
+def atualizar_saldo(id_usuario, valor):
+    conn = conectar_db()
+    cursor = conn.cursor()
+
+    cursor.execute("UPDATE carteiras SET saldo = saldo + ? WHERE id_usuario = ?", (valor, id_usuario))
+    conn.commit()
+    conn.close()
+
+def registrar_aposta(id_usuario, id_evento, valor, opcao):
+    saldo = verificar_saldo(id_usuario)
+    if saldo is None:
+        print("Usuário não possui carteira.")
+        return
+
+    if saldo < valor:
+        print("Saldo insuficiente para realizar a aposta.")
+        return
+
+    # Deduzir o valor da aposta e registrar a transação
+    atualizar_saldo(id_usuario, -valor)
+
+    conn = conectar_db()
+    cursor = conn.cursor()
+
+    cursor.execute('''
+    INSERT INTO apostas (id_evento, id_usuario, valor, opcao)
+    VALUES (?, ?, ?, ?)
+    ''', (id_evento, id_usuario, valor, opcao))
+
+    conn.commit()
+    conn.close()
+    print("Aposta registrada com sucesso.")
+
 if __name__ == '__main__':
     menu()
