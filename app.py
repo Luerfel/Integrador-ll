@@ -7,6 +7,9 @@ app = Flask(__name__)
 app.secret_key = 'macaco'
 # Caminho absoluto para o banco de dados
 database_path = os.path.join(os.getcwd(), 'data/database.db')
+import smtplib; #pip install secure-smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 # Configuração do Flask-Mail
 app.config['MAIL_SERVER'] = 'smtp.seuprovedor.com'  # Exemplo: 'smtp.gmail.com'
@@ -532,32 +535,34 @@ def acao_evento():
     try:
         # Conecta ao banco de dados SQLite
         with sqlite3.connect(database_path) as conn:
-            conn.row_factory = sqlite3.Row  # Adicione esta linha
+            conn.row_factory = sqlite3.Row
             status, extra_data = acao_map[acao]
+            
             # Atualiza o status do evento com base na ação
             conn.execute('UPDATE eventos SET status = ? WHERE id = ?', (status, evento_id))
             
             # Se a ação for 'reprovar', insere um registro na tabela de moderações
             if acao == 'reprovar':
-                conn.execute(''' 
+                conn.execute('''
                     INSERT INTO moderacoes_eventos (id_evento, id_moderador, acao, motivo_rejeicao) 
                     VALUES (?, ?, ?, ?)
                 ''', (evento_id, id_moderador, acao, motivo_rejeicao))
 
                 # Envia o email ao criador do evento
-                send_email_to_user(evento_id, motivo_rejeicao)
+                evento = conn.execute('SELECT id_criador FROM eventos WHERE id = ?', (evento_id,)).fetchone()
+                if evento:
+                    id_criador = evento['id_criador']
+                    criador = conn.execute('SELECT email FROM usuarios WHERE id = ?', (id_criador,)).fetchone()
+                    if criador and criador['email']:
+                        enviar_email_rejeicao(criador['email'], motivo_rejeicao, evento_id)
 
             # Insere um registro na tabela de resultados se a ação for 'reprovar', 'confirmar' ou 'não_ocorrido'
             if acao in ['reprovar', 'confirmar', 'nao_ocorrido']:
-                conn.execute(''' 
+                conn.execute('''
                     INSERT INTO resultados_eventos (id_evento, resultado) 
                     VALUES (?, ?)
                 ''', (evento_id, extra_data))
             
-            # Se a ação for 'confirmar', chama a função para distribuir os prêmios
-            if acao == 'confirmar':
-                distribuir_ganhos(evento_id)  # Chame a função para distribuir prêmios
-
             # Confirma as operações no banco de dados
             conn.commit()
             return '', 200
@@ -1209,6 +1214,57 @@ def adicionar_credito_usuario(id_usuario, valor):
         ''', (carteira_id_row['id'], valor))
 
         conn.commit()
+
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import sqlite3
+
+def enviar_email_rejeicao(email_usuario, motivo_rejeicao, evento_id):
+    """
+    Função para enviar um e-mail ao usuário informando sobre a rejeição de um evento.
+    """
+
+    with sqlite3.connect(database_path) as conn:
+        conn.row_factory = sqlite3.Row
+        evento = conn.execute('SELECT id_criador, titulo FROM eventos WHERE id = ?', (evento_id,)).fetchone()
+        criador = conn.execute('SELECT email FROM usuarios WHERE id = ?', (evento['id_criador'],)).fetchone()
+            
+        # Configuração do servidor de e-mail
+        smtp_server = 'smtp.gmail.com'
+        port = 587
+        remetente = 'projetointegradorpython@gmail.com'
+        senha = 'vpql ekjt daeh thjk'
+
+        # Configuração da mensagem   
+        msg = MIMEMultipart()
+        msg['From'] = remetente
+        msg['To'] = email_usuario
+        msg['Subject'] = 'Rejeição de Aposta'
+
+        if criador and criador['email']:
+            email_usuario = criador['email']
+
+        # Adiciona o corpo da mensagem com UTF-8
+        corpo_mensagem = f"Ola, sua aposta '{evento['titulo']}' foi rejeitada pelo seguinte motivo: {motivo_rejeicao}"
+        msg.attach(MIMEText(corpo_mensagem, 'plain', 'utf-8'))
+
+        try:
+            # Tenta se conectar ao servidor SMTP
+            server = smtplib.SMTP(smtp_server, port)
+            server.starttls()
+            server.login(remetente, senha)
+
+            # Envia o e-mail
+            server.sendmail(remetente, email_usuario, msg.as_string())
+
+        except Exception as e:
+            print(f"Erro ao enviar email: {e}")
+    
+        finally:
+            # Fecha a conexão com o servidor
+            server.quit()
+
 
 if __name__ == '__main__':
     app.run(debug=True)
