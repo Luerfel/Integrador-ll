@@ -571,6 +571,156 @@ def acao_evento():
         print(f"Erro ao processar ação: {e}")
         return str(e), 500
 
+@app.route('/finalizar_evento', methods=['POST'])
+def finalizar_evento():
+    """
+    Função para finalizar um evento e registrar a opção vencedora.
+    """
+    evento_id = request.form.get('evento_id')
+    opcao_vencedora = request.form.get('opcao_vencedora')  # Deve vir do formulário ou de outra lógica
+
+    if not evento_id or not opcao_vencedora:
+        return 'Dados inválidos', 400
+
+    try:
+        # Conecta ao banco de dados SQLite
+        with sqlite3.connect(database_path) as conn:
+            conn.row_factory = sqlite3.Row
+            
+            # Atualiza o status do evento para 'finalizado'
+            conn.execute('UPDATE eventos SET status = "finalizado" WHERE id = ?', (evento_id,))
+            
+            # Insere o resultado na tabela de resultados_eventos
+            conn.execute('''
+                INSERT INTO resultados_eventos (id_evento, opcao_vencedora) 
+                VALUES (?, ?)
+            ''', (evento_id, opcao_vencedora))
+
+            # Chama a função para distribuir prêmios
+            distribuir_premios(evento_id, opcao_vencedora)
+
+            conn.commit()
+            return 'Evento finalizado com sucesso!', 200
+    except Exception as e:
+        print(f"Erro ao finalizar o evento: {e}")
+        return str(e), 500
+
+def distribuir_premios(evento_id, opcao_vencedora):
+    """
+    Função para distribuir prêmios aos usuários que apostaram na opção vencedora.
+    """
+    try:
+        # Conecta ao banco de dados SQLite
+        with sqlite3.connect(database_path) as conn:
+            conn.row_factory = sqlite3.Row
+
+            # Obtém o total arrecadado pelas apostas no evento
+            total_arrecadado = conn.execute('''
+                SELECT SUM(valor) AS total
+                FROM apostas
+                WHERE id_evento = ?
+            ''', (evento_id,)).fetchone()['total'] or 0
+
+            # Busca os usuários que apostaram na opção vencedora
+            usuarios_vencedores = conn.execute('''
+                SELECT id_usuario, SUM(valor) AS total_apostado
+                FROM apostas
+                WHERE id_evento = ? AND opcao = ?
+                GROUP BY id_usuario
+            ''', (evento_id, opcao_vencedora)).fetchall()
+
+            # Distribui os prêmios de acordo com o valor apostado por cada usuário
+            for usuario in usuarios_vencedores:
+                id_usuario = usuario['id_usuario']
+                total_apostado = usuario['total_apostado']
+
+                # Calcula a parte do prêmio para o usuário
+                premio = (total_apostado / total_arrecadado) * total_arrecadado if total_arrecadado > 0 else 0
+
+                # Adiciona o prêmio na carteira do usuário
+                adicionar_credito_usuario(id_usuario, premio)
+
+        return 'Prêmios distribuídos com sucesso!'
+    except Exception as e:
+        print(f"Erro ao distribuir prêmios: {e}")
+        return str(e)
+
+def adicionar_credito_usuario(id_usuario, valor):
+    """
+    Função para adicionar créditos à carteira do usuário.
+    """
+    with sqlite3.connect(database_path) as conn:
+        conn.row_factory = sqlite3.Row
+
+        # Verifica se a carteira existe
+        carteira_id_row = conn.execute('SELECT id FROM carteiras WHERE id_usuario = ?', (id_usuario,)).fetchone()
+
+        if carteira_id_row:
+            carteira_id = carteira_id_row['id']
+            print(f"Carteira encontrada para o usuário {id_usuario}: {carteira_id}")
+
+            # Atualiza o saldo da carteira
+            conn.execute('UPDATE carteiras SET saldo = saldo + ? WHERE id = ?', (valor, carteira_id))
+            print(f"Saldo atualizado: {valor} adicionado à carteira {carteira_id}.")
+        else:
+            print(f"Nenhuma carteira encontrada para o usuário {id_usuario}. Criando uma nova.")
+            # Se não existir, cria a carteira
+            conn.execute('INSERT INTO carteiras (id_usuario, saldo) VALUES (?, ?)', (id_usuario, valor))
+            # Após a criação, você pode querer adicionar lógica para registrar a transação.
+
+        # Registra a transação
+        conn.execute('''
+            INSERT INTO transacoes (id_carteira, tipo, valor, detalhes)
+            VALUES (?, 'Distribuição de Prêmios', ?, 'Distribuição de prêmios do evento')
+        ''', (carteira_id_row['id'], valor))
+
+        conn.commit()
+
+def enviar_email_rejeicao(email_usuario, motivo_rejeicao, evento_id):
+    """
+    Função para enviar um e-mail ao usuário informando sobre a rejeição de um evento.
+    """
+
+    with sqlite3.connect(database_path) as conn:
+        conn.row_factory = sqlite3.Row
+        evento = conn.execute('SELECT id_criador, titulo FROM eventos WHERE id = ?', (evento_id,)).fetchone()
+        criador = conn.execute('SELECT email FROM usuarios WHERE id = ?', (evento['id_criador'],)).fetchone()
+            
+        # Configuração do servidor de e-mail
+        smtp_server = 'smtp.gmail.com'
+        port = 587
+        remetente = 'projetointegradorpython@gmail.com'
+        senha = 'vpql ekjt daeh thjk'
+
+        # Configuração da mensagem   
+        msg = MIMEMultipart()
+        msg['From'] = remetente
+        msg['To'] = email_usuario
+        msg['Subject'] = 'Rejeição de Aposta'
+
+        if criador and criador['email']:
+            email_usuario = criador['email']
+
+        # Adiciona o corpo da mensagem com UTF-8
+        corpo_mensagem = f"Ola, sua aposta '{evento['titulo']}' foi rejeitada pelo seguinte motivo: {motivo_rejeicao}"
+        msg.attach(MIMEText(corpo_mensagem, 'plain', 'utf-8'))
+
+        try:
+            # Tenta se conectar ao servidor SMTP
+            server = smtplib.SMTP(smtp_server, port)
+            server.starttls()
+            server.login(remetente, senha)
+
+            # Envia o e-mail
+            server.sendmail(remetente, email_usuario, msg.as_string())
+
+        except Exception as e:
+            print(f"Erro ao enviar email: {e}")
+    
+        finally:
+            # Fecha a conexão com o servidor
+            server.quit()
+
 "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 "criar evento"
 
@@ -1033,156 +1183,6 @@ def adicionar_premio_na_carteira(id_usuario, valor_premio):
 
         conn.commit()
 
-
-@app.route('/finalizar_evento', methods=['POST'])
-def finalizar_evento():
-    """
-    Função para finalizar um evento e registrar a opção vencedora.
-    """
-    evento_id = request.form.get('evento_id')
-    opcao_vencedora = request.form.get('opcao_vencedora')  # Deve vir do formulário ou de outra lógica
-
-    if not evento_id or not opcao_vencedora:
-        return 'Dados inválidos', 400
-
-    try:
-        # Conecta ao banco de dados SQLite
-        with sqlite3.connect(database_path) as conn:
-            conn.row_factory = sqlite3.Row
-            
-            # Atualiza o status do evento para 'finalizado'
-            conn.execute('UPDATE eventos SET status = "finalizado" WHERE id = ?', (evento_id,))
-            
-            # Insere o resultado na tabela de resultados_eventos
-            conn.execute('''
-                INSERT INTO resultados_eventos (id_evento, opcao_vencedora) 
-                VALUES (?, ?)
-            ''', (evento_id, opcao_vencedora))
-
-            # Chama a função para distribuir prêmios
-            distribuir_premios(evento_id, opcao_vencedora)
-
-            conn.commit()
-            return 'Evento finalizado com sucesso!', 200
-    except Exception as e:
-        print(f"Erro ao finalizar o evento: {e}")
-        return str(e), 500
-
-def distribuir_premios(evento_id, opcao_vencedora):
-    """
-    Função para distribuir prêmios aos usuários que apostaram na opção vencedora.
-    """
-    try:
-        # Conecta ao banco de dados SQLite
-        with sqlite3.connect(database_path) as conn:
-            conn.row_factory = sqlite3.Row
-
-            # Obtém o total arrecadado pelas apostas no evento
-            total_arrecadado = conn.execute('''
-                SELECT SUM(valor) AS total
-                FROM apostas
-                WHERE id_evento = ?
-            ''', (evento_id,)).fetchone()['total'] or 0
-
-            # Busca os usuários que apostaram na opção vencedora
-            usuarios_vencedores = conn.execute('''
-                SELECT id_usuario, SUM(valor) AS total_apostado
-                FROM apostas
-                WHERE id_evento = ? AND opcao = ?
-                GROUP BY id_usuario
-            ''', (evento_id, opcao_vencedora)).fetchall()
-
-            # Distribui os prêmios de acordo com o valor apostado por cada usuário
-            for usuario in usuarios_vencedores:
-                id_usuario = usuario['id_usuario']
-                total_apostado = usuario['total_apostado']
-
-                # Calcula a parte do prêmio para o usuário
-                premio = (total_apostado / total_arrecadado) * total_arrecadado if total_arrecadado > 0 else 0
-
-                # Adiciona o prêmio na carteira do usuário
-                adicionar_credito_usuario(id_usuario, premio)
-
-        return 'Prêmios distribuídos com sucesso!'
-    except Exception as e:
-        print(f"Erro ao distribuir prêmios: {e}")
-        return str(e)
-
-def adicionar_credito_usuario(id_usuario, valor):
-    """
-    Função para adicionar créditos à carteira do usuário.
-    """
-    with sqlite3.connect(database_path) as conn:
-        conn.row_factory = sqlite3.Row
-
-        # Verifica se a carteira existe
-        carteira_id_row = conn.execute('SELECT id FROM carteiras WHERE id_usuario = ?', (id_usuario,)).fetchone()
-
-        if carteira_id_row:
-            carteira_id = carteira_id_row['id']
-            print(f"Carteira encontrada para o usuário {id_usuario}: {carteira_id}")
-
-            # Atualiza o saldo da carteira
-            conn.execute('UPDATE carteiras SET saldo = saldo + ? WHERE id = ?', (valor, carteira_id))
-            print(f"Saldo atualizado: {valor} adicionado à carteira {carteira_id}.")
-        else:
-            print(f"Nenhuma carteira encontrada para o usuário {id_usuario}. Criando uma nova.")
-            # Se não existir, cria a carteira
-            conn.execute('INSERT INTO carteiras (id_usuario, saldo) VALUES (?, ?)', (id_usuario, valor))
-            # Após a criação, você pode querer adicionar lógica para registrar a transação.
-
-        # Registra a transação
-        conn.execute('''
-            INSERT INTO transacoes (id_carteira, tipo, valor, detalhes)
-            VALUES (?, 'Distribuição de Prêmios', ?, 'Distribuição de prêmios do evento')
-        ''', (carteira_id_row['id'], valor))
-
-        conn.commit()
-
-def enviar_email_rejeicao(email_usuario, motivo_rejeicao, evento_id):
-    """
-    Função para enviar um e-mail ao usuário informando sobre a rejeição de um evento.
-    """
-
-    with sqlite3.connect(database_path) as conn:
-        conn.row_factory = sqlite3.Row
-        evento = conn.execute('SELECT id_criador, titulo FROM eventos WHERE id = ?', (evento_id,)).fetchone()
-        criador = conn.execute('SELECT email FROM usuarios WHERE id = ?', (evento['id_criador'],)).fetchone()
-            
-        # Configuração do servidor de e-mail
-        smtp_server = 'smtp.gmail.com'
-        port = 587
-        remetente = 'projetointegradorpython@gmail.com'
-        senha = 'vpql ekjt daeh thjk'
-
-        # Configuração da mensagem   
-        msg = MIMEMultipart()
-        msg['From'] = remetente
-        msg['To'] = email_usuario
-        msg['Subject'] = 'Rejeição de Aposta'
-
-        if criador and criador['email']:
-            email_usuario = criador['email']
-
-        # Adiciona o corpo da mensagem com UTF-8
-        corpo_mensagem = f"Ola, sua aposta '{evento['titulo']}' foi rejeitada pelo seguinte motivo: {motivo_rejeicao}"
-        msg.attach(MIMEText(corpo_mensagem, 'plain', 'utf-8'))
-
-        try:
-            # Tenta se conectar ao servidor SMTP
-            server = smtplib.SMTP(smtp_server, port)
-            server.starttls()
-            server.login(remetente, senha)
-
-            # Envia o e-mail
-            server.sendmail(remetente, email_usuario, msg.as_string())
-
-        except Exception as e:
-            print(f"Erro ao enviar email: {e}")
-    
-        finally:
-            # Fecha a conexão com o servidor
-            server.quit()
 
 
 if __name__ == '__main__':
