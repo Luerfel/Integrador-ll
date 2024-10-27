@@ -1,68 +1,75 @@
-// Função para manipular as ações dos eventos
-function handleEventAction(eventoId, acao) {
-    // Cria um objeto FormData para enviar os dados via POST
-    const formData = new FormData();
-    formData.append('evento_id', eventoId);
-    formData.append('acao', acao);
-
-    // Verifica se a ação é "confirmar" para manipular a confirmação do evento
-    if (acao === 'confirmar') {
-        // Envia a requisição para confirmar a ocorrência do evento
-        fetch('/acao_evento', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (response.ok) {
-                alert('Evento finalizado e prêmios distribuídos.');
-                location.reload(); // Recarrega a página após a ação
-            } else {
-                alert('Ocorreu um erro ao finalizar o evento.');
+function handleEventAction(eventId, action) {
+    /* Envia uma ação relacionada a um evento para o servidor e processa a resposta */
+    // Envia a requisição POST utilizando fetch
+    fetch('/acao_evento', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `evento_id=${eventId}&acao=${action}`
+    })
+    .then(response => {
+        if (response.ok) { // Verifica se a resposta foi bem-sucedida
+            // Remove o evento da lista após a ação ser bem-sucedida
+            const eventRow = document.getElementById(`event-${eventId}`);
+            if (eventRow) {
+                eventRow.remove();
             }
-        })
-        .catch(error => {
-            console.error('Erro ao enviar a requisição:', error);
-            alert('Erro ao enviar a requisição.');
-        });
-    } else {
-        // Envia a requisição para aprovar ou reprovar o evento
-        fetch('/acao_evento', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (response.ok) {
-                if (acao === 'aprovar') {
-                    alert('Evento aprovado com sucesso.');
-                } else {
-                    alert('Evento reprovado com sucesso.');
-                }
-                location.reload(); // Recarrega a página após a ação
-            } else {
-                alert('Ocorreu um erro ao processar a ação do evento.');
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao enviar a requisição:', error);
-            alert('Erro ao enviar a requisição.');
-        });
-    }
+        } else {
+            // Exibe uma mensagem de erro se a requisição falhar
+            alert('Ocorreu um erro ao processar a ação. Tente novamente.');
+        }
+    })
+    .catch(() => {
+        // Trata qualquer erro de rede ou outro erro ao processar a requisição
+        alert('Ocorreu um erro ao processar a ação. Tente novamente.');
+    });
 }
 
-// Função para abrir o modal de reprovação
+// Abrir o modal para justificar a reprovação
 function abrirModalReprovar(eventoId) {
-    document.getElementById('modalEventoId').value = eventoId; // Define o ID do evento no modal
-    document.getElementById('modalReprovar').style.display = 'block'; // Mostra o modal
+    const modal = document.getElementById('modalReprovar');
+    const eventoIdInput = document.getElementById('modalEventoId');
+    
+    eventoIdInput.value = eventoId;
+    modal.style.display = 'block';
 }
 
-// Fecha o modal ao clicar no botão de fechar
-document.querySelector('.close').addEventListener('click', function() {
-    document.getElementById('modalReprovar').style.display = 'none';
-});
+// Fechar o modal
+function fecharModalReprovar() {
+    const modal = document.getElementById('modalReprovar');
+    modal.style.display = 'none';
+}
 
-// Fecha o modal ao clicar fora dele
+// Fechar o modal ao clicar fora dele
 window.onclick = function(event) {
-    if (event.target == document.getElementById('modalReprovar')) {
-        document.getElementById('modalReprovar').style.display = 'none';
+    const modal = document.getElementById('modalReprovar');
+    if (event.target === modal) {
+        modal.style.display = 'none';
     }
+}
+
+// Fechar o modal ao clicar no botão de fechar
+document.querySelector('.close').onclick = fecharModalReprovar;
+
+// Submeter o formulário e remover o evento da tabela
+document.getElementById('formReprovarEvento').onsubmit = function(event) {
+    event.preventDefault();
+    const eventoId = document.getElementById('modalEventoId').value;
+
+    const formData = new FormData(this);
+    
+    fetch('/acao_evento', {
+        method: 'POST',
+        body: new URLSearchParams(formData)
+    }).then(response => {
+        if (response.ok) {
+            document.getElementById(`event-${eventoId}`).remove();
+            fecharModalReprovar();
+        } else {
+            alert('Erro ao reprovar o evento.');
+        }
+    }).catch(error => {
+        alert('Erro ao reprovar o evento.');
+    });
 };
