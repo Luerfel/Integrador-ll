@@ -3,13 +3,13 @@ from flask_mail import Mail, Message #pip install Flask-Mail
 import sqlite3
 import os
 from datetime import datetime,timedelta #pip install datetime
+import smtplib; #pip install secure-smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 app = Flask(__name__)
 app.secret_key = 'macaco'
 # Caminho absoluto para o banco de dados
 database_path = os.path.join(os.getcwd(), 'data/database.db')
-import smtplib; #pip install secure-smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 # Configuração do Flask-Mail
 app.config['MAIL_SERVER'] = 'smtp.seuprovedor.com'  # Exemplo: 'smtp.gmail.com'
@@ -1214,11 +1214,6 @@ def adicionar_credito_usuario(id_usuario, valor):
         ''', (carteira_id_row['id'], valor))
 
         conn.commit()
-
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-import sqlite3
 
 def enviar_email_rejeicao(email_usuario, motivo_rejeicao, evento_id):
     """

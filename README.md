@@ -37,7 +37,9 @@ Uma série de passos que explica como configurar o ambiente de desenvolvimento:
 3. **Instale as dependências do projeto:**
 
     ```bash
-    pip install -r requirements.txt
+     pip install secure-smtplib
+     pip install Flask-Mail
+     pip install datetime
     ```
 
 4. **Inicie o servidor Flask:**
