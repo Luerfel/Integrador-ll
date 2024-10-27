@@ -337,24 +337,6 @@ def eventos_por_categoria(categoria_id):
 
 "CADASTRO"
 
-
-
-def is_valid_email(email):
-    """
-Esta função verifica se um email contém os caracteres "@" e "." 
-nas posições corretas para ser considerado válido.
-
-Uso: Esta função é chamada durante o processo de cadastro para garantir que o email fornecido esteja em um formato minimamente aceitável.
-"""
-    if "@" in email and "." in email:
-        at_index = email.index("@")
-        dot_index = email.rindex(".")
-        # Verifica se o "@" não está no início ou no final, 
-        # e se o "." está depois do "@" e não no final.
-        if at_index > 0 and dot_index > at_index + 1 and dot_index < len(email) - 1:
-            return True
-    return False
-
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
     """
@@ -415,12 +397,25 @@ Uso: Esta função é chamada quando um usuário tenta se cadastrar na aplicaç�
     return render_template('cadastro.html', error_message=error_message)
 
 
+def is_valid_email(email):
+    """
+Esta função verifica se um email contém os caracteres "@" e "." 
+nas posições corretas para ser considerado válido.
+
+Uso: Esta função é chamada durante o processo de cadastro para garantir que o email fornecido esteja em um formato minimamente aceitável.
+"""
+    if "@" in email and "." in email:
+        at_index = email.index("@")
+        dot_index = email.rindex(".")
+        # Verifica se o "@" não está no início ou no final, 
+        # e se o "." está depois do "@" e não no final.
+        if at_index > 0 and dot_index > at_index + 1 and dot_index < len(email) - 1:
+            return True
+    return False
+
 "--------------------------------------------------------------------------------------------------------------------------------------------------------------"
 
 "moderador"
-
-
-
 @app.route('/moderador_dashboard', methods=['GET', 'POST'])
 def moderador_dashboard():
     """
@@ -569,27 +564,34 @@ def distribuir_premios(evento_id, opcao_vencedora):
     Função para distribuir prêmios aos usuários que apostaram na opção vencedora.
     """
     try:
+        print(f"Iniciando distribuição de prêmios para o evento {evento_id} com opção vencedora '{opcao_vencedora}'.")
         # Conecta ao banco de dados SQLite
         with sqlite3.connect(database_path) as conn:
             conn.row_factory = sqlite3.Row
 
             # Obtém o total arrecadado pelas apostas no evento
-            total_arrecadado = conn.execute('''
+            total_arrecadado_row = conn.execute('''
                 SELECT SUM(valor) AS total
                 FROM apostas
                 WHERE id_evento = ?
-            ''', (evento_id,)).fetchone()['total'] or 0
+            ''', (evento_id,)).fetchone()
+            total_arrecadado = total_arrecadado_row['total'] or 0
+
+            print(f"Total arrecadado para o evento {evento_id}: {total_arrecadado}")
 
             if total_arrecadado == 0:
                 print("Nenhum valor arrecadado para este evento.")
                 return 'Nenhum prêmio a ser distribuído.'
 
             # Obtém o total apostado na opção vencedora
-            total_apostado_vencedor = conn.execute('''
+            total_apostado_vencedor_row = conn.execute('''
                 SELECT SUM(valor) AS total
                 FROM apostas
                 WHERE id_evento = ? AND opcao = ?
-            ''', (evento_id, opcao_vencedora)).fetchone()['total'] or 0
+            ''', (evento_id, opcao_vencedora)).fetchone()
+            total_apostado_vencedor = total_apostado_vencedor_row['total'] or 0
+
+            print(f"Total apostado na opção vencedora '{opcao_vencedora}': {total_apostado_vencedor}")
 
             if total_apostado_vencedor == 0:
                 print("Nenhuma aposta na opção vencedora.")
@@ -603,6 +605,8 @@ def distribuir_premios(evento_id, opcao_vencedora):
                 GROUP BY id_usuario
             ''', (evento_id, opcao_vencedora)).fetchall()
 
+            print(f"Usuários vencedores encontrados: {len(usuarios_vencedores)}")
+
             # Distribui os prêmios proporcionalmente ao valor apostado por cada usuário
             for usuario in usuarios_vencedores:
                 id_usuario = usuario['id_usuario']
@@ -614,6 +618,11 @@ def distribuir_premios(evento_id, opcao_vencedora):
                 # Calcula o prêmio do usuário com base na proporção do total arrecadado
                 premio = proporcao * total_arrecadado
 
+                print(f"Distribuindo prêmio para usuário {id_usuario}:")
+                print(f"  Total apostado pelo usuário: {total_apostado_usuario}")
+                print(f"  Proporção da aposta: {proporcao}")
+                print(f"  Prêmio calculado: {premio}")
+
                 # Adiciona o prêmio na carteira do usuário
                 adicionar_credito_usuario(id_usuario, premio)
 
@@ -623,32 +632,42 @@ def distribuir_premios(evento_id, opcao_vencedora):
         print(f"Erro ao distribuir prêmios: {e}")
         return str(e)
 
+
 def adicionar_credito_usuario(id_usuario, valor):
     """
     Função para adicionar créditos à carteira do usuário.
     """
-    with sqlite3.connect(database_path) as conn:
-        conn.row_factory = sqlite3.Row
+    try:
+        with sqlite3.connect(database_path) as conn:
+            conn.row_factory = sqlite3.Row
 
-        # Obtém a carteira do usuário
-        carteira = conn.execute('SELECT id FROM carteiras WHERE id_usuario = ?', (id_usuario,)).fetchone()
+            print(f"Adicionando crédito de {valor} para o usuário {id_usuario}.")
 
-        if carteira:
-            carteira_id = carteira['id']
+            # Obtém a carteira do usuário
+            carteira = conn.execute('SELECT id FROM carteiras WHERE id_usuario = ?', (id_usuario,)).fetchone()
 
-            # Atualiza o saldo da carteira
-            conn.execute('UPDATE carteiras SET saldo = saldo + ? WHERE id = ?', (valor, carteira_id))
+            if carteira:
+                carteira_id = carteira['id']
+                print(f"Carteira encontrada: {carteira_id}")
 
-            # Registra a transação
-            conn.execute('''
-                INSERT INTO transacoes (id_carteira, tipo, valor, detalhes)
-                VALUES (?, 'Distribuição de Prêmios', ?, 'Prêmio distribuído do evento')
-            ''', (carteira_id, valor))
+                # Atualiza o saldo da carteira
+                conn.execute('UPDATE carteiras SET saldo = saldo + ? WHERE id = ?', (valor, carteira_id))
 
-            conn.commit()
-            print(f"Prêmio de {valor} adicionado à carteira do usuário {id_usuario}.")
-        else:
-            print(f"Carteira não encontrada para o usuário {id_usuario}.")
+                # Registra a transação
+                conn.execute('''
+                    INSERT INTO transacoes (id_carteira, tipo, valor, detalhes)
+                    VALUES (?, 'Distribuição de Prêmios', ?, 'Prêmio distribuído do evento')
+                ''', (carteira_id, valor))
+
+                conn.commit()
+                print(f"Prêmio de {valor} adicionado à carteira do usuário {id_usuario}.")
+            else:
+                print(f"Carteira não encontrada para o usuário {id_usuario}.")
+                raise Exception(f"Carteira não encontrada para o usuário {id_usuario}.")
+
+    except Exception as e:
+        print(f"Erro ao adicionar crédito para o usuário {id_usuario}: {e}")
+        raise e
 
 def enviar_email_rejeicao(email_usuario, motivo_rejeicao, evento_id):
     """
