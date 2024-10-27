@@ -571,32 +571,6 @@ def acao_evento():
         print(f"Erro ao processar ação: {e}")
         return str(e), 500
 
-
-def send_email_to_user(evento_id, motivo_rejeicao):
-    """
-    Envia um e-mail para o criador do evento informando sobre a rejeição.
-    """
-    with sqlite3.connect(database_path) as conn:
-        conn.row_factory = sqlite3.Row
-        evento = conn.execute('SELECT id_criador, titulo FROM eventos WHERE id = ?', (evento_id,)).fetchone()
-        criador = conn.execute('SELECT email FROM usuarios WHERE id = ?', (evento['id_criador'],)).fetchone()
-
-        if criador and criador['email']:
-            email_destinatario = criador['email']
-            assunto = f"Aposta Rejeitada: {evento['titulo']}"
-            corpo = f"Sua aposta foi rejeitada pelo seguinte motivo: {motivo_rejeicao}."
-
-            # Configura o e-mail a ser enviado
-            msg = Message(assunto, recipients=[email_destinatario])
-            msg.body = corpo
-
-            # Envia o e-mail usando Flask-Mail
-            try:
-                mail.send(msg)
-                print("Email enviado com sucesso!")
-            except Exception as e:
-                print(f"Erro ao enviar email: {e}")
-
 "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 "criar evento"
 
@@ -1060,56 +1034,6 @@ def adicionar_premio_na_carteira(id_usuario, valor_premio):
         conn.commit()
 
 
-def distribuir_premios(evento_id, opcao_vencedora):
-    """
-    Função para distribuir prêmios aos usuários que apostaram na opção vencedora.
-    """
-    try:
-        # Conecta ao banco de dados SQLite
-        with sqlite3.connect(database_path) as conn:
-            conn.row_factory = sqlite3.Row
-
-            # Obtém o total arrecadado pelas apostas no evento
-            total_arrecadado = conn.execute('''
-                SELECT SUM(valor) AS total
-                FROM apostas
-                WHERE id_evento = ?
-            ''', (evento_id,)).fetchone()['total'] or 0
-
-            print(f"Total arrecadado: {total_arrecadado}")
-
-            # Busca os usuários que apostaram na opção vencedora
-            usuarios_vencedores = conn.execute('''
-                SELECT id_usuario, SUM(valor) AS total_apostado
-                FROM apostas
-                WHERE id_evento = ? AND opcao = ?
-                GROUP BY id_usuario
-            ''', (evento_id, opcao_vencedora)).fetchall()
-
-            # Verifica se existem usuários vencedores
-            if not usuarios_vencedores:
-                print("Nenhum usuário apostou na opção vencedora.")
-                return 'Nenhum prêmio a distribuir.'
-
-            # Distribui os prêmios de acordo com o valor apostado por cada usuário
-            for usuario in usuarios_vencedores:
-                id_usuario = usuario['id_usuario']
-                total_apostado = usuario['total_apostado']
-
-                # Calcula a parte do prêmio para o usuário
-                premio = (total_apostado / total_arrecadado) * total_arrecadado if total_arrecadado > 0 else 0
-
-                print(f"Distribuindo prêmio de {premio} para o usuário {id_usuario}")
-
-                # Adiciona o prêmio na carteira do usuário
-                adicionar_credito_usuario(id_usuario, premio)
-
-        return 'Prêmios distribuídos com sucesso!'
-    except Exception as e:
-        print(f"Erro ao distribuir prêmios: {e}")
-        return str(e)
-
-    
 @app.route('/finalizar_evento', methods=['POST'])
 def finalizar_evento():
     """
@@ -1214,11 +1138,6 @@ def adicionar_credito_usuario(id_usuario, valor):
         ''', (carteira_id_row['id'], valor))
 
         conn.commit()
-
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-import sqlite3
 
 def enviar_email_rejeicao(email_usuario, motivo_rejeicao, evento_id):
     """
