@@ -1,5 +1,4 @@
 from flask import Flask, request, redirect, url_for, render_template, flash, get_flashed_messages, session, jsonify
-from flask_mail import Mail, Message #pip install Flask-Mail
 import sqlite3
 import os
 from datetime import datetime,timedelta #pip install datetime
@@ -11,18 +10,7 @@ import smtplib; #pip install secure-smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-# Configuração do Flask-Mail
-app.config['MAIL_SERVER'] = 'smtp.seuprovedor.com'  # Exemplo: 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = 'seu-email@exemplo.com'
-app.config['MAIL_PASSWORD'] = 'sua-senha'
-app.config['MAIL_DEFAULT_SENDER'] = 'seu-email@exemplo.com'
-app.config['MAIL_MAX_EMAILS'] = None
-app.config['MAIL_ASCII_ATTACHMENTS'] = False
 
-mail = Mail(app)
 
 
 def get_user_id():
@@ -439,26 +427,36 @@ def moderador_dashboard():
     Função para gerenciar a exibição do dashboard do moderador.
     Esta função lida com as requisições GET para exibir eventos e POST para finalizar eventos.
     """
-    # Se a requisição for POST, processa a finalização do evento e a distribuição de ganhos
+    # Se a requisição for POST, processa a finalização do evento e a distribuição de prêmios
     if request.method == 'POST':
         evento_id = request.form.get('evento_id')
-        if evento_id:
+        opcao_vencedora = request.form.get('opcao_vencedora')  # Deve vir do formulário enviado pelo moderador
+
+        if evento_id and opcao_vencedora:
             try:
                 # Conecte-se ao banco e atualize o status do evento
                 with sqlite3.connect(database_path) as conn:
                     cursor = conn.cursor()
+                    # Atualiza o status do evento para 'finalizado'
                     cursor.execute('UPDATE eventos SET status = ? WHERE id = ?', ('finalizado', evento_id))
+                    # Insere o resultado na tabela resultados_eventos
+                    cursor.execute('''
+                        INSERT INTO resultados_eventos (id_evento, resultado)
+                        VALUES (?, ?)
+                    ''', (evento_id, opcao_vencedora))
                     conn.commit()
 
-                    # Chame a lógica de distribuição de ganhos (ou adapte conforme necessário)
-                    distribuir_ganhos_result = distribuir_ganhos(evento_id)
-                    if distribuir_ganhos_result:
-                        flash("Evento finalizado e prêmios distribuídos com sucesso.", "success")
-                    else:
-                        flash("O evento foi finalizado, mas houve um problema ao distribuir os prêmios.", "error")
+                # Chama a função para distribuir prêmios
+                distribuir_premios_result = distribuir_premios(evento_id, opcao_vencedora)
+                if distribuir_premios_result:
+                    flash("Evento finalizado e prêmios distribuídos com sucesso.", "success")
+                else:
+                    flash("O evento foi finalizado, mas houve um problema ao distribuir os prêmios.", "error")
             except Exception as e:
                 print(f"Erro ao finalizar evento: {e}")
                 flash("Erro ao tentar finalizar o evento. Tente novamente.", "error")
+        else:
+            flash("Dados inválidos. Certifique-se de fornecer o ID do evento e a opção vencedora.", "error")
 
     # Processamento para exibir o dashboard com eventos filtrados
     view = request.args.get('view', 'pendentes')
@@ -468,46 +466,6 @@ def moderador_dashboard():
         eventos = conn.execute('SELECT * FROM eventos WHERE status = ?', (status_filter,)).fetchall()
 
     return render_template('area_moderador.html', eventos=eventos, view=view)
-
-def distribuir_ganhos(evento_id):
-                    """
-                    Função para distribuir prêmios aos usuários que apostaram na opção vencedora.
-                    """
-                    try:
-                        # Conecta ao banco de dados SQLite
-                        with sqlite3.connect(database_path) as conn:
-                            conn.row_factory = sqlite3.Row
-                
-                            # Obtém o total arrecadado pelas apostas no evento
-                            total_arrecadado = conn.execute('''
-                                SELECT SUM(valor) AS total
-                                FROM apostas
-                                WHERE id_evento = ?
-                            ''', (evento_id,)).fetchone()['total'] or 0
-                
-                            # Busca os usuários que apostaram na opção vencedora
-                            usuarios_vencedores = conn.execute('''
-                                SELECT id_usuario, SUM(valor) AS total_apostado
-                                FROM apostas
-                                WHERE id_evento = ? AND opcao = ?
-                                GROUP BY id_usuario
-                            ''', (evento_id, 'opcao_vencedora')).fetchall()
-                
-                            # Distribui os prêmios de acordo com o valor apostado por cada usuário
-                            for usuario in usuarios_vencedores:
-                                id_usuario = usuario['id_usuario']
-                                total_apostado = usuario['total_apostado']
-                
-                                # Calcula a parte do prêmio para o usuário
-                                premio = (total_apostado / total_arrecadado) * total_arrecadado if total_arrecadado > 0 else 0
-                
-                                # Adiciona o prêmio na carteira do usuário
-                                adicionar_credito_usuario(id_usuario, premio)
-                
-                        return 'Prêmios distribuídos com sucesso!'
-                    except Exception as e:
-                        print(f"Erro ao distribuir prêmios: {e}")
-                        return str(e)
 
 @app.route('/acao_evento', methods=['POST'])
 def acao_evento():
@@ -586,21 +544,22 @@ def finalizar_evento():
         # Conecta ao banco de dados SQLite
         with sqlite3.connect(database_path) as conn:
             conn.row_factory = sqlite3.Row
-            
+
             # Atualiza o status do evento para 'finalizado'
             conn.execute('UPDATE eventos SET status = "finalizado" WHERE id = ?', (evento_id,))
-            
-            # Insere o resultado na tabela de resultados_eventos
+
+            # Insere o resultado na tabela resultados_eventos
             conn.execute('''
-                INSERT INTO resultados_eventos (id_evento, opcao_vencedora) 
+                INSERT INTO resultados_eventos (id_evento, resultado)
                 VALUES (?, ?)
             ''', (evento_id, opcao_vencedora))
 
-            # Chama a função para distribuir prêmios
-            distribuir_premios(evento_id, opcao_vencedora)
-
             conn.commit()
-            return 'Evento finalizado com sucesso!', 200
+
+        # Chama a função para distribuir prêmios
+        distribuir_premios(evento_id, opcao_vencedora)
+
+        return 'Evento finalizado e prêmios distribuídos com sucesso!', 200
     except Exception as e:
         print(f"Erro ao finalizar o evento: {e}")
         return str(e), 500
@@ -621,6 +580,21 @@ def distribuir_premios(evento_id, opcao_vencedora):
                 WHERE id_evento = ?
             ''', (evento_id,)).fetchone()['total'] or 0
 
+            if total_arrecadado == 0:
+                print("Nenhum valor arrecadado para este evento.")
+                return 'Nenhum prêmio a ser distribuído.'
+
+            # Obtém o total apostado na opção vencedora
+            total_apostado_vencedor = conn.execute('''
+                SELECT SUM(valor) AS total
+                FROM apostas
+                WHERE id_evento = ? AND opcao = ?
+            ''', (evento_id, opcao_vencedora)).fetchone()['total'] or 0
+
+            if total_apostado_vencedor == 0:
+                print("Nenhuma aposta na opção vencedora.")
+                return 'Nenhum vencedor para este evento.'
+
             # Busca os usuários que apostaram na opção vencedora
             usuarios_vencedores = conn.execute('''
                 SELECT id_usuario, SUM(valor) AS total_apostado
@@ -629,17 +603,21 @@ def distribuir_premios(evento_id, opcao_vencedora):
                 GROUP BY id_usuario
             ''', (evento_id, opcao_vencedora)).fetchall()
 
-            # Distribui os prêmios de acordo com o valor apostado por cada usuário
+            # Distribui os prêmios proporcionalmente ao valor apostado por cada usuário
             for usuario in usuarios_vencedores:
                 id_usuario = usuario['id_usuario']
-                total_apostado = usuario['total_apostado']
+                total_apostado_usuario = usuario['total_apostado']
 
-                # Calcula a parte do prêmio para o usuário
-                premio = (total_apostado / total_arrecadado) * total_arrecadado if total_arrecadado > 0 else 0
+                # Calcula a proporção da aposta do usuário em relação ao total apostado na opção vencedora
+                proporcao = total_apostado_usuario / total_apostado_vencedor
+
+                # Calcula o prêmio do usuário com base na proporção do total arrecadado
+                premio = proporcao * total_arrecadado
 
                 # Adiciona o prêmio na carteira do usuário
                 adicionar_credito_usuario(id_usuario, premio)
 
+        print('Prêmios distribuídos com sucesso!')
         return 'Prêmios distribuídos com sucesso!'
     except Exception as e:
         print(f"Erro ao distribuir prêmios: {e}")
@@ -652,29 +630,25 @@ def adicionar_credito_usuario(id_usuario, valor):
     with sqlite3.connect(database_path) as conn:
         conn.row_factory = sqlite3.Row
 
-        # Verifica se a carteira existe
-        carteira_id_row = conn.execute('SELECT id FROM carteiras WHERE id_usuario = ?', (id_usuario,)).fetchone()
+        # Obtém a carteira do usuário
+        carteira = conn.execute('SELECT id FROM carteiras WHERE id_usuario = ?', (id_usuario,)).fetchone()
 
-        if carteira_id_row:
-            carteira_id = carteira_id_row['id']
-            print(f"Carteira encontrada para o usuário {id_usuario}: {carteira_id}")
+        if carteira:
+            carteira_id = carteira['id']
 
             # Atualiza o saldo da carteira
             conn.execute('UPDATE carteiras SET saldo = saldo + ? WHERE id = ?', (valor, carteira_id))
-            print(f"Saldo atualizado: {valor} adicionado à carteira {carteira_id}.")
+
+            # Registra a transação
+            conn.execute('''
+                INSERT INTO transacoes (id_carteira, tipo, valor, detalhes)
+                VALUES (?, 'Distribuição de Prêmios', ?, 'Prêmio distribuído do evento')
+            ''', (carteira_id, valor))
+
+            conn.commit()
+            print(f"Prêmio de {valor} adicionado à carteira do usuário {id_usuario}.")
         else:
-            print(f"Nenhuma carteira encontrada para o usuário {id_usuario}. Criando uma nova.")
-            # Se não existir, cria a carteira
-            conn.execute('INSERT INTO carteiras (id_usuario, saldo) VALUES (?, ?)', (id_usuario, valor))
-            # Após a criação, você pode querer adicionar lógica para registrar a transação.
-
-        # Registra a transação
-        conn.execute('''
-            INSERT INTO transacoes (id_carteira, tipo, valor, detalhes)
-            VALUES (?, 'Distribuição de Prêmios', ?, 'Distribuição de prêmios do evento')
-        ''', (carteira_id_row['id'], valor))
-
-        conn.commit()
+            print(f"Carteira não encontrada para o usuário {id_usuario}.")
 
 def enviar_email_rejeicao(email_usuario, motivo_rejeicao, evento_id):
     """
@@ -720,6 +694,7 @@ def enviar_email_rejeicao(email_usuario, motivo_rejeicao, evento_id):
         finally:
             # Fecha a conexão com o servidor
             server.quit()
+
 
 "-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 "criar evento"
