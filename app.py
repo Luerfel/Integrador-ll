@@ -47,7 +47,6 @@ que começa com '/static/' é acessada para carregar um recurso estático.
 "POST envia dados no corpo da requisição HTTP"
 "método GET, que envia os dados na URL"
 "--------------------------------------------------------------------------------------------------------------------------------------------------------------"
-
 "LOGIN"
 
 # Função para verificar as credenciais
@@ -77,7 +76,6 @@ Uso: Esta função é usada para validar as credenciais do usuário durante o pr
 
 # Rota principal (login)
 @app.route('/', methods=['GET', 'POST'])
-
 def home():
     """
 Esta função trata tanto requisições GET quanto POST na rota raiz ('/').
@@ -1059,8 +1057,5 @@ def adicionar_premio_na_carteira(id_usuario, valor_premio):
             cursor.execute('INSERT INTO carteiras (id_usuario, saldo) VALUES (?, ?)', (id_usuario, valor_premio))
 
         conn.commit()
-
-
-
 if __name__ == '__main__':
     app.run(debug=True)
