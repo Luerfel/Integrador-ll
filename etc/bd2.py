@@ -23,7 +23,7 @@ def insert_events(conn):
     conn.executemany('''
         INSERT INTO eventos (
             titulo, descricao, valor_cota, data_evento, data_inicio_apostas,
-            data_fim_apostas, status, id_criador
+            data_fim_apostas, status, id_criador2
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ''', events)
     conn.commit()
