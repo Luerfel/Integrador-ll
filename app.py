@@ -170,10 +170,21 @@ def area_usuario():
         cursor.execute('SELECT * FROM categorias_eventos')
         categorias = cursor.fetchall()
 
+        # Obter eventos disponíveis
+        cursor.execute('''
+            SELECT * FROM eventos
+            WHERE data_fim_apostas >= date('now')
+            AND data_evento > date('now')
+            AND status = 'aprovado'
+            ORDER BY data_evento ASC
+        ''')
+        eventos = cursor.fetchall()
+
         conn.close()
 
         return render_template('area_usuario.html', eventos_finalizando=eventos_finalizando,
-                               eventos_mais_apostados=eventos_mais_apostados, categorias=categorias)
+                               eventos_mais_apostados=eventos_mais_apostados, categorias=categorias,
+                               eventos=eventos)
     else:
         return redirect(url_for('login'))
     
@@ -602,33 +613,6 @@ def enviar_email_rejeicao(email_usuario, motivo_rejeicao, evento_id):
 
 @app.route('/criar_evento', methods=['GET', 'POST'])
 def criar_evento():
-    """
-    Esta função lida com a criação de um novo evento, tratando tanto requisições GET quanto POST na
-    rota '/criar_evento'. Apenas usuários autenticados e do tipo 'usuario' podem acessar essa rota.
-
-    - Se for uma requisição GET, a função carrega as categorias disponíveis e renderiza o formulário
-      de criação de evento.
-    - Se for uma requisição POST, a função coleta os dados do formulário, realiza validações e insere
-      o evento no banco de dados caso os dados sejam válidos.
-
-    Funcionalidades:
-    1. Verifica se o usuário está autenticado e se pertence ao tipo 'usuario'. Caso contrário, ele é
-       redirecionado para a página de login.
-    2. Na requisição POST:
-       - Coleta os dados do formulário de criação de evento (título, descrição, categoria, valor da cota, data).
-       - Valida os dados, verificando comprimento do título e descrição, valores numéricos e data.
-       - Define o período de apostas, com início no dia atual e término 1 dia antes da data do evento.
-       - Insere o evento na tabela 'eventos' e associa a categoria na tabela 'eventos_categorias'.
-       - Exibe mensagens de sucesso ou erro conforme o resultado da operação.
-    3. Na requisição GET, carrega as categorias disponíveis no banco de dados e exibe o formulário.
-
-    Retorno:
-    - Se for uma requisição GET: Renderiza a página 'criar_evento.html' com as categorias disponíveis.
-    - Se for uma requisição POST:
-       - Se os dados forem válidos: Insere o evento e redireciona para a mesma página com uma
-         mensagem de sucesso.
-       - Se houver erros: Exibe mensagens de erro e renderiza a página com os dados preenchidos.
-    """
     if 'logged_in' not in session or session['user_type'] != 'usuario':
         return redirect(url_for('login'))
 
@@ -679,8 +663,8 @@ def criar_evento():
         data_fim_apostas = (data_evento - timedelta(days=1)).date()
 
         # Verificar se o período de apostas é válido
-        if data_fim_apostas <= data_inicio_apostas:
-            flash("O período de apostas deve ser de pelo menos 1 dia antes do evento.", "error")
+        if data_fim_apostas < data_inicio_apostas:
+            flash("A data de término das apostas não pode ser anterior à data de início.", "error")
             return render_template('criar_evento.html', categorias=carregar_categorias(), form_data=request.form)
 
         # Inserindo os dados na tabela
@@ -728,6 +712,7 @@ def criar_evento():
 
     # Renderiza o formulário na página, passando as categorias
     return render_template('criar_evento.html', categorias=categorias)
+
 def carregar_categorias():
     """
     Esta função carrega as categorias de eventos do banco de dados para serem exibidas no formulário
