@@ -119,19 +119,20 @@
     <!-- Área de eventos disponíveis -->
     <h2>Eventos Disponíveis</h2>
     <div class="eventos-container">
-        {% for evento in eventos %}
-            <div class="evento-card">
-                <h3>{{ evento.titulo }}</h3>
-                <p>{{ evento.descricao }}</p>
-                <p>Data do evento: {{ evento.data_evento }}</p>
-
-                <!-- Botões para abrir o modal com aposta "Sim" ou "Não" -->
-                <button onclick="openModal('{{ evento.id }}', '{{ evento.titulo }}', 'sim')">Apostar Sim</button>
-                <button onclick="openModal('{{ evento.id }}', '{{ evento.titulo }}', 'nao')">Apostar Não</button>
-            </div>
+        {% if eventos %}
+            {% for evento in eventos %}
+                <div class="evento-card">
+                    <h3>{{ evento[1] }}</h3>
+                    <p>{{ evento[2] }}</p>
+                    <p>Data do Evento: {{ evento[4] }}</p>
+                    <!-- Outros detalhes do evento -->
+                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'sim')">Apostar Sim</button>
+                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'nao')">Apostar Não</button>
+                </div>
+            {% endfor %}
         {% else %}
             <p>Não há eventos disponíveis no momento.</p>
-        {% endfor %}
+        {% endif %}
     </div>
 </body>
 </html>
