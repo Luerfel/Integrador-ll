@@ -26,8 +26,6 @@ def get_user_id():
             return result[0]
     return None
 
-def obter_id_usuario():
-    return session.get('id_usuario')
 
 
 @app.route('/static/<path:path>')
@@ -287,6 +285,8 @@ def pesquisar_evento():
     return render_template('pesquisar_evento.html', eventos=eventos, query=query, categorias=categorias,
                            categoria_id=categoria_id, data=data, ordenacao=ordenacao, page=page, per_page=per_page)
 
+def obter_id_usuario():
+    return session.get('id_usuario')
 
 @app.route('/eventos_categoria/<int:categoria_id>')
 def eventos_por_categoria(categoria_id):
