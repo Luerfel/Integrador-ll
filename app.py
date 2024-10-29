@@ -2,13 +2,14 @@ from flask import Flask, request, redirect, url_for, render_template, flash, get
 import sqlite3
 import os
 from datetime import datetime,timedelta #pip install datetime
+import smtplib; #pip install secure-smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 app = Flask(__name__)
 app.secret_key = 'macaco'
 # Caminho absoluto para o banco de dados
 database_path = os.path.join(os.getcwd(), 'data/database.db')
-import smtplib; #pip install secure-smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 
 
