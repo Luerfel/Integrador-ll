@@ -616,6 +616,24 @@ def enviar_email_rejeicao(email_usuario, motivo_rejeicao, evento_id):
 
 @app.route('/criar_evento', methods=['GET', 'POST'])
 def criar_evento():
+    """
+    Lida com a rota '/criar_evento', permitindo que usuários autenticados do tipo 'usuario' criem um novo evento. Suporta métodos GET e POST para exibir e processar o formulário de criação de evento.
+
+    Funcionalidades principais:
+    - Verifica se o usuário está autenticado e é do tipo 'usuario'.
+    - No método POST:
+      - Recupera e valida os dados do formulário (título, descrição, categoria, valor da cota, data do evento).
+      - Calcula as datas de início e fim das apostas com base nas datas atuais e do evento.
+      - Insere o novo evento e sua categoria no banco de dados.
+      - Exibe mensagens de sucesso ou erro ao usuário.
+    - No método GET:
+      - Carrega as categorias disponíveis para serem exibidas no formulário.
+
+    Retorno:
+    - POST bem-sucedido: Redireciona com mensagem de sucesso.
+    - Erros de validação: Renderiza o formulário com mensagens de erro.
+    - GET: Renderiza o formulário de criação de evento com as categorias disponíveis.
+    """
     if 'logged_in' not in session or session['user_type'] != 'usuario':
         return redirect(url_for('login'))
 
