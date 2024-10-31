@@ -242,6 +242,8 @@ def pesquisar_evento():
         FROM eventos
         LEFT JOIN eventos_categorias ON eventos.id = eventos_categorias.id_evento
         WHERE eventos.status = 'aprovado'
+        AND eventos.data_evento >= date('now')
+
     '''
     params = []
 
@@ -326,13 +328,14 @@ def eventos_por_categoria(categoria_id):
 
     categoria_nome = categoria[0]
 
-    # Obter eventos da categoria
+    # Obter eventos da categoria com filtro de data
     cursor.execute('''
         SELECT eventos.*
         FROM eventos
         JOIN eventos_categorias ON eventos.id = eventos_categorias.id_evento
         WHERE eventos_categorias.id_categoria = ?
         AND eventos.status = 'aprovado'
+        AND eventos.data_evento >= date('now')
         ORDER BY eventos.data_evento ASC
     ''', (categoria_id,))
     eventos = cursor.fetchall()
