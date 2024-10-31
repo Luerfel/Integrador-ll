@@ -160,6 +160,7 @@ def area_usuario():
             FROM eventos
             LEFT JOIN apostas ON eventos.id = apostas.id_evento
             WHERE eventos.status = 'aprovado'
+            AND data_evento > date('now')
             GROUP BY eventos.id
             ORDER BY total_apostado DESC
             LIMIT 10
