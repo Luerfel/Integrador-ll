@@ -1052,6 +1052,25 @@ def apostar():
         return redirect(url_for('login'))
 
 def adicionar_premio_na_carteira(id_usuario, valor_premio):
+    """
+    Esta função adiciona um valor de prêmio à carteira de um usuário específico. Se a carteira não existir, a função pode criar uma nova, dependendo da lógica do sistema.
+
+    Funcionalidades:
+    1. Conecta-se ao banco de dados.
+    2. Verifica se a carteira do usuário existe:
+       - Se existir, atualiza o saldo existente somando o valor do prêmio.
+       - Se não existir, cria uma nova carteira para o usuário com o valor do prêmio.
+    3. Salva as alterações no banco de dados com um commit.
+
+    Uso: Esta função é chamada quando um usuário ganha um prêmio e o valor precisa ser adicionado à sua carteira.
+
+    Parâmetros:
+    - id_usuario: ID do usuário que receberá o prêmio.
+    - valor_premio: Valor do prêmio a ser adicionado à carteira do usuário.
+
+    Retorno:
+    - Nenhum retorno explícito. A função realiza operações no banco de dados.
+    """
     with sqlite3.connect(database_path) as conn:
         cursor = conn.cursor()
 
