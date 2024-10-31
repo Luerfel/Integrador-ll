@@ -160,6 +160,7 @@ def area_usuario():
             FROM eventos
             LEFT JOIN apostas ON eventos.id = apostas.id_evento
             WHERE eventos.status = 'aprovado'
+            AND data_evento > date('now')
             GROUP BY eventos.id
             ORDER BY total_apostado DESC
             LIMIT 10
@@ -242,6 +243,8 @@ def pesquisar_evento():
         FROM eventos
         LEFT JOIN eventos_categorias ON eventos.id = eventos_categorias.id_evento
         WHERE eventos.status = 'aprovado'
+        AND eventos.data_evento >= date('now')
+
     '''
     params = []
 
@@ -326,13 +329,14 @@ def eventos_por_categoria(categoria_id):
 
     categoria_nome = categoria[0]
 
-    # Obter eventos da categoria
+    # Obter eventos da categoria com filtro de data
     cursor.execute('''
         SELECT eventos.*
         FROM eventos
         JOIN eventos_categorias ON eventos.id = eventos_categorias.id_evento
         WHERE eventos_categorias.id_categoria = ?
         AND eventos.status = 'aprovado'
+        AND eventos.data_evento >= date('now')
         ORDER BY eventos.data_evento ASC
     ''', (categoria_id,))
     eventos = cursor.fetchall()
@@ -613,6 +617,24 @@ def enviar_email_rejeicao(email_usuario, motivo_rejeicao, evento_id):
 
 @app.route('/criar_evento', methods=['GET', 'POST'])
 def criar_evento():
+    """
+    Lida com a rota '/criar_evento', permitindo que usuários autenticados do tipo 'usuario' criem um novo evento. Suporta métodos GET e POST para exibir e processar o formulário de criação de evento.
+
+    Funcionalidades principais:
+    - Verifica se o usuário está autenticado e é do tipo 'usuario'.
+    - No método POST:
+      - Recupera e valida os dados do formulário (título, descrição, categoria, valor da cota, data do evento).
+      - Calcula as datas de início e fim das apostas com base nas datas atuais e do evento.
+      - Insere o novo evento e sua categoria no banco de dados.
+      - Exibe mensagens de sucesso ou erro ao usuário.
+    - No método GET:
+      - Carrega as categorias disponíveis para serem exibidas no formulário.
+
+    Retorno:
+    - POST bem-sucedido: Redireciona com mensagem de sucesso.
+    - Erros de validação: Renderiza o formulário com mensagens de erro.
+    - GET: Renderiza o formulário de criação de evento com as categorias disponíveis.
+    """
     if 'logged_in' not in session or session['user_type'] != 'usuario':
         return redirect(url_for('login'))
 
@@ -982,6 +1004,28 @@ def conectar_db():
 
 @app.route('/apostar', methods=['POST'])
 def apostar():
+    """
+    Esta função lida com a rota '/apostar' e permite que um usuário autenticado realize uma aposta em um evento específico. A aposta inclui a seleção de uma opção específica do evento.
+
+    Funcionalidades:
+    1. Verifica se o usuário está autenticado através da sessão.
+    2. Obtém os dados do formulário: ID do evento, valor da aposta e opção selecionada.
+    3. Conecta-se ao banco de dados para realizar as seguintes operações:
+       - Obtém o valor da cota do evento.
+       - Calcula o valor total da aposta multiplicando o valor da aposta pelo valor da cota.
+       - Verifica se o usuário possui saldo suficiente na carteira.
+       - Insere a aposta no banco de dados incluindo a opção selecionada.
+       - Atualiza o saldo da carteira do usuário subtraindo o valor total da aposta.
+    4. Retorna uma mensagem de sucesso ou erro ao usuário e redireciona para a área do usuário.
+
+    Uso: Esta função é chamada quando um usuário autenticado envia o formulário de aposta em um evento.
+
+    Retorno:
+    - Se a aposta for realizada com sucesso: Exibe uma mensagem de sucesso e redireciona para a área do usuário.
+    - Se o saldo for insuficiente: Exibe uma mensagem de erro e redireciona para a área do usuário.
+    - Se o evento não for encontrado: Retorna um erro 404.
+    - Se o usuário não estiver autenticado: Redireciona para a página de login.
+    """
     if 'logged_in' in session:
         user_id = get_user_id()
         evento_id = request.form['evento_id']
@@ -1027,6 +1071,25 @@ def apostar():
         return redirect(url_for('login'))
 
 def adicionar_premio_na_carteira(id_usuario, valor_premio):
+    """
+    Esta função adiciona um valor de prêmio à carteira de um usuário específico. Se a carteira não existir, a função pode criar uma nova, dependendo da lógica do sistema.
+
+    Funcionalidades:
+    1. Conecta-se ao banco de dados.
+    2. Verifica se a carteira do usuário existe:
+       - Se existir, atualiza o saldo existente somando o valor do prêmio.
+       - Se não existir, cria uma nova carteira para o usuário com o valor do prêmio.
+    3. Salva as alterações no banco de dados com um commit.
+
+    Uso: Esta função é chamada quando um usuário ganha um prêmio e o valor precisa ser adicionado à sua carteira.
+
+    Parâmetros:
+    - id_usuario: ID do usuário que receberá o prêmio.
+    - valor_premio: Valor do prêmio a ser adicionado à carteira do usuário.
+
+    Retorno:
+    - Nenhum retorno explícito. A função realiza operações no banco de dados.
+    """
     with sqlite3.connect(database_path) as conn:
         cursor = conn.cursor()
 
@@ -1042,5 +1105,7 @@ def adicionar_premio_na_carteira(id_usuario, valor_premio):
             cursor.execute('INSERT INTO carteiras (id_usuario, saldo) VALUES (?, ?)', (id_usuario, valor_premio))
 
         conn.commit()
+
+
 if __name__ == '__main__':
     app.run(debug=True)
