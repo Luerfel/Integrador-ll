@@ -147,7 +147,7 @@ def area_usuario():
         # Obter eventos com período de apostas finalizando hoje
         cursor.execute('''
             SELECT * FROM eventos
-            WHERE data_fim_apostas = date('now')
+            WHERE data_fim_apostas = date('today')
             AND status = 'aprovado'
             ORDER BY data_evento ASC
             LIMIT 10
@@ -167,19 +167,20 @@ def area_usuario():
         ''')
         eventos_mais_apostados = cursor.fetchall()
 
+        # Obter eventos disponíveis
+        cursor.execute('''
+            SELECT eventos.*, SUM(apostas.valor) as total_apostado
+            FROM eventos
+            LEFT JOIN apostas ON eventos.id = apostas.id_evento
+            WHERE eventos.status = 'aprovado'
+            GROUP BY eventos.id
+            ORDER BY data_fim_apostas DESC
+        ''')
+        eventos = cursor.fetchall()
+
         # Obter categorias
         cursor.execute('SELECT * FROM categorias_eventos')
         categorias = cursor.fetchall()
-
-        # Obter eventos disponíveis
-        cursor.execute('''
-            SELECT * FROM eventos
-            WHERE data_fim_apostas >= date('now')
-            AND data_evento > date('now')
-            AND status = 'aprovado'
-            ORDER BY data_evento ASC
-        ''')
-        eventos = cursor.fetchall()
 
         conn.close()
 
@@ -291,32 +292,26 @@ def pesquisar_evento():
                            categoria_id=categoria_id, data=data, ordenacao=ordenacao, page=page, per_page=per_page)
 
 
-@app.route('/eventos_categoria/<int:categoria_id>')
+@app.route('/eventos_categoria/<int:categoria_id>', methods=['GET', 'POST'])
 def eventos_por_categoria(categoria_id):
     """
-    Esta função trata requisições GET na rota '/eventos_categoria/<categoria_id>' e exibe os eventos
+    Esta função trata requisições na rota '/eventos_categoria/<categoria_id>' e exibe os eventos
     de uma categoria específica, determinada pelo ID da categoria fornecido na URL.
 
     Funcionalidades:
-    1. Obtém o nome da categoria com base no ID fornecido.
-    2. Caso a categoria não seja encontrada, retorna um erro 404 (categoria não encontrada).
-    3. Caso a categoria exista, busca os eventos associados a essa categoria no banco de dados e que
-       tenham o status 'aprovado'.
-    4. Renderiza a página 'eventos_categoria.html', exibindo os eventos da categoria e o nome da
-       categoria para o usuário.
-
-    Uso: Esta função é chamada quando o usuário acessa os eventos de uma categoria específica. A resposta
-    renderiza a página com os eventos da categoria.
+    - Obtém o nome da categoria com base no ID fornecido.
+    - Caso a categoria não seja encontrada, retorna um erro 404.
+    - Caso a categoria exista, busca os eventos associados a essa categoria no banco de dados e que tenham o status 'aprovado'.
+    - Renderiza a página 'eventos_categoria.html', exibindo os eventos da categoria para o usuário.
 
     Parâmetro de URL:
     - categoria_id: ID da categoria cujos eventos serão exibidos.
 
     Retorno:
-    - Se a categoria for encontrada: Renderiza a página 'eventos_categoria.html' com os eventos da
-      categoria.
+    - Se a categoria for encontrada: Renderiza a página 'eventos_categoria.html' com os eventos da categoria.
     - Se a categoria não for encontrada: Retorna uma mensagem de erro 404.
     """
-    conn = sqlite3.connect(database_path)
+    conn = sqlite3.connect('data/database.db')  # Atualize o caminho do banco de dados, se necessário
     cursor = conn.cursor()
 
     # Obter o nome da categoria
@@ -340,12 +335,63 @@ def eventos_por_categoria(categoria_id):
         ORDER BY eventos.data_evento ASC
     ''', (categoria_id,))
     eventos = cursor.fetchall()
-
     conn.close()
 
+    # Caso a requisição seja POST, processar aposta
+    if request.method == 'POST':
+        if 'logged_in' in session:
+            try:
+                user_id = session.get('user_id')
+                evento_id = request.form['evento_id']
+                valor_aposta = float(request.form['valor_aposta'])
+                opcao = request.form['aposta']
+
+                # Verificar se o valor da aposta é maior que zero
+                if valor_aposta <= 0:
+                    flash("Valor da aposta deve ser maior que zero.", 'error')
+                    return redirect(url_for('eventos_por_categoria', categoria_id=categoria_id))
+
+                with sqlite3.connect('data/database.db', timeout=5) as conn:
+                    cursor = conn.cursor()
+
+                    # Obter o valor da cota do evento
+                    cursor.execute('SELECT valor_cota FROM eventos WHERE id = ?', (evento_id,))
+                    valor_cota = cursor.fetchone()
+
+                    if valor_cota is not None:
+                        valor_cota = valor_cota[0]
+                        valor_total_aposta = valor_aposta * valor_cota
+
+                        # Verificar o saldo do usuário
+                        cursor.execute('SELECT saldo FROM carteiras WHERE id_usuario = ?', (user_id,))
+                        saldo = cursor.fetchone()
+
+                        if saldo is not None and saldo[0] >= valor_total_aposta:
+                            # Inserir a aposta
+                            cursor.execute('INSERT INTO apostas (id_evento, id_usuario, valor, opcao) VALUES (?, ?, ?, ?)',
+                                           (evento_id, user_id, valor_total_aposta, opcao))
+
+                            # Atualizar o saldo do usuário
+                            novo_saldo = saldo[0] - valor_total_aposta
+                            cursor.execute('UPDATE carteiras SET saldo = ? WHERE id_usuario = ?', (novo_saldo, user_id))
+
+                            # Commit da transação
+                            conn.commit()
+                            flash("Aposta realizada com sucesso!", 'success')
+                        else:
+                            flash("Saldo insuficiente para realizar a aposta.", 'error')
+                    else:
+                        flash("Evento não encontrado.", 'error')
+
+            except sqlite3.Error as e:
+                flash(f"Ocorreu um erro ao processar a aposta: {str(e)}", 'error')
+
+        else:
+            flash("Por favor, faça login para realizar uma aposta.", 'error')
+            return redirect(url_for('login'))
+
+    # Renderizar a página com eventos e nome da categoria
     return render_template('eventos_categoria.html', eventos=eventos, categoria_nome=categoria_nome)
-
-
 
 
 "CADASTRO"

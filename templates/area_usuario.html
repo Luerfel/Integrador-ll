@@ -121,10 +121,13 @@
     <div class="eventos-container">
         {% if eventos %}
             {% for evento in eventos %}
-                <div class="evento-card">
-                    <h3>{{ evento[1] }}</h3>
-                    <p>{{ evento[2] }}</p>
-                    <p>Data do Evento: {{ evento[4] }}</p>
+            <div class="evento-card">
+                <h3>{{ evento[1] }}</h3>
+                <p>{{ evento[2] }}</p>
+                <p>Data do Evento: {{ evento[4] }}</p>
+                <p>Período de Apostas: {{ evento[5] }} até {{ evento[6] }}</p>
+                <p>Total Apostado: R$ {{ '{:.2f}'.format(evento[-1] or 0) }}</p>
+                <p>Valor da Cota: R$ {{ '{:.2f}'.format(evento[3]) }}</p>
                     <!-- Outros detalhes do evento -->
                     <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'sim')">Apostar Sim</button>
                     <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'nao')">Apostar Não</button>

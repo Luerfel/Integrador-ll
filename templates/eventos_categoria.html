@@ -6,23 +6,36 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <h2>Eventos da Categoria: {{ categoria_nome }}</h2>
+    <h1>Eventos da Categoria: {{ categoria_nome }}</h1>
 
     <div class="eventos-container">
         {% if eventos %}
             {% for evento in eventos %}
                 <div class="evento-card">
-                    <h3>{{ evento[1] }}</h3> <!-- Título do evento -->
-                    <p>{{ evento[2] }}</p> <!-- Descrição do evento -->
+                    <h3>{{ evento[1] }}</h3>
+                    <p>{{ evento[2] }}</p>
                     <p>Data do Evento: {{ evento[4] }}</p>
                     <p>Valor da Cota: R$ {{ '{:.2f}'.format(evento[3]) }}</p>
-                    <!-- Botões para apostar (não implementados agora) -->
-                    <button disabled>Apostar Sim</button>
-                    <button disabled>Apostar Não</button>
+
+                    <!-- Formulário de aposta -->
+                    <form action="{{ url_for('eventos_por_categoria', categoria_id=categoria_id) }}" method="POST">
+                        <input type="hidden" name="evento_id" value="{{ evento[0] }}">
+
+                        <label for="valor_aposta">Valor da Aposta:</label>
+                        <input type="number" name="valor_aposta" min="1" required>
+
+                        <label for="aposta">Opção:</label>
+                        <select name="aposta" required>
+                            <option value="sim">Sim</option>
+                            <option value="nao">Não</option>
+                        </select>
+
+                        <button type="submit" class="btn-apostar">Apostar</button>
+                    </form>
                 </div>
             {% endfor %}
         {% else %}
-            <p>Nenhum evento disponível nesta categoria.</p>
+            <p>Não há eventos disponíveis nesta categoria.</p>
         {% endif %}
     </div>
 </body>
