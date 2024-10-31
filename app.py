@@ -985,6 +985,28 @@ def conectar_db():
 
 @app.route('/apostar', methods=['POST'])
 def apostar():
+    """
+    Esta função lida com a rota '/apostar' e permite que um usuário autenticado realize uma aposta em um evento específico. A aposta inclui a seleção de uma opção específica do evento.
+
+    Funcionalidades:
+    1. Verifica se o usuário está autenticado através da sessão.
+    2. Obtém os dados do formulário: ID do evento, valor da aposta e opção selecionada.
+    3. Conecta-se ao banco de dados para realizar as seguintes operações:
+       - Obtém o valor da cota do evento.
+       - Calcula o valor total da aposta multiplicando o valor da aposta pelo valor da cota.
+       - Verifica se o usuário possui saldo suficiente na carteira.
+       - Insere a aposta no banco de dados incluindo a opção selecionada.
+       - Atualiza o saldo da carteira do usuário subtraindo o valor total da aposta.
+    4. Retorna uma mensagem de sucesso ou erro ao usuário e redireciona para a área do usuário.
+
+    Uso: Esta função é chamada quando um usuário autenticado envia o formulário de aposta em um evento.
+
+    Retorno:
+    - Se a aposta for realizada com sucesso: Exibe uma mensagem de sucesso e redireciona para a área do usuário.
+    - Se o saldo for insuficiente: Exibe uma mensagem de erro e redireciona para a área do usuário.
+    - Se o evento não for encontrado: Retorna um erro 404.
+    - Se o usuário não estiver autenticado: Redireciona para a página de login.
+    """
     if 'logged_in' in session:
         user_id = get_user_id()
         evento_id = request.form['evento_id']
@@ -1045,5 +1067,7 @@ def adicionar_premio_na_carteira(id_usuario, valor_premio):
             cursor.execute('INSERT INTO carteiras (id_usuario, saldo) VALUES (?, ?)', (id_usuario, valor_premio))
 
         conn.commit()
+
+
 if __name__ == '__main__':
     app.run(debug=True)
