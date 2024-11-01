@@ -148,7 +148,7 @@ def area_usuario():
         # Obter eventos com período de apostas finalizando hoje
         cursor.execute('''
             SELECT * FROM eventos
-            WHERE data_fim_apostas = date('today')
+            WHERE DATE(data_fim_apostas) = DATE('now', 'localtime')
             AND status = 'aprovado'
             ORDER BY data_evento ASC
             LIMIT 10
