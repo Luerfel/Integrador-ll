@@ -612,7 +612,7 @@ def distribuir_premios(evento_id, resultado_evento, conn):
     except Exception as e:
         print(f"Erro ao distribuir prêmios: {e}")
 
-def enviar_email_rejeicao(email_usuario, motivo_rejeicao, evento_id):
+def enviar_email_rejeicao(motivo_rejeicao, evento_id):
     """
     Função para enviar um e-mail ao usuário informando sobre a rejeição de um evento.
     """
@@ -621,7 +621,10 @@ def enviar_email_rejeicao(email_usuario, motivo_rejeicao, evento_id):
         conn.row_factory = sqlite3.Row
         evento = conn.execute('SELECT id_criador, titulo FROM eventos WHERE id = ?', (evento_id,)).fetchone()
         criador = conn.execute('SELECT email FROM usuarios WHERE id = ?', (evento['id_criador'],)).fetchone()
-            
+        if criador and criador['email']:
+            email_usuario = criador['email']
+        else:
+            print("Email do usuário não encontrado.")    
         # Configuração do servidor de e-mail
         smtp_server = 'smtp.gmail.com'
         port = 587
