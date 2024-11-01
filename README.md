@@ -118,6 +118,3 @@ Feel free to fork this repository and make any changes or improvements. Pull req
 
 This project is open source and available under the [MIT License](LICENSE).
 
-## Contact
-
-For further questions, feel free to reach out.
