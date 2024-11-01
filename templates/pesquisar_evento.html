@@ -2,14 +2,20 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Resultado da Pesquisa</title>
+    <title>Pesquisar Evento</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
+    <!-- Barra Superior com o Botão "Minha Wallet" -->
+    <div class="top-bar">
+        <a href="{{ url_for('criar_evento') }}" class="wallet-button">Criar Evento</a>
+        <a href="{{ url_for('gerenciar_carteira') }}" class="wallet-button">Minha Wallet</a>
+    </div>
+
     <!-- Mecanismo de Busca -->
     <div class="search-container">
-        <form action="{{ url_for('pesquisar_evento') }}" method="GET">
-            <input type="text" name="query" placeholder="Buscar eventos..." value="{{ query }}">
+        <form action="{{ url_for('pesquisar_evento') }}" method="GET" target="_blank">
+            <input type="text" name="query" placeholder="Buscar eventos..." value="{{ query }}" required>
             <button type="submit">Buscar</button>
         </form>
     </div>
@@ -45,6 +51,17 @@
         </form>
     </div>
 
+    <!-- Exibir Mensagens Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashed-messages">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
     <!-- Resultados da Pesquisa -->
     <div class="eventos-container">
         {% if eventos %}
@@ -53,10 +70,16 @@
                     <h3>{{ evento[1] }}</h3> <!-- Título do evento -->
                     <p>{{ evento[2] }}</p> <!-- Descrição do evento -->
                     <p>Data do Evento: {{ evento[4] }}</p>
+                    <p>Período de Apostas: {{ evento[5] }} até {{ evento[6] }}</p>
                     <p>Valor da Cota: R$ {{ '{:.2f}'.format(evento[3]) }}</p>
-                    <!-- Botões para apostar (não implementados agora) -->
-                    <button disabled>Apostar Sim</button>
-                    <button disabled>Apostar Não</button>
+
+                    {% if session.get('logged_in') %}
+                        <!-- Botões para abrir o modal com aposta "Sim" ou "Não" -->
+                        <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'sim')">Apostar Sim</button>
+                        <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'nao')">Apostar Não</button>
+                    {% else %}
+                        <p>Você precisa estar logado para realizar uma aposta. <a href="{{ url_for('login') }}">Clique aqui para fazer login</a>.</p>
+                    {% endif %}
                 </div>
             {% endfor %}
         {% else %}
@@ -75,5 +98,62 @@
         {% endif %}
     </div>
 
+    <!-- Modal para definir valor da aposta -->
+    <div id="apostaModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Apostar em <span id="evento-titulo"></span></h2>
+            <form id="aposta-form" action="{{ url_for('apostar') }}" method="POST">
+                <input type="hidden" name="evento_id" id="evento-id">
+                <input type="hidden" name="aposta" id="aposta-tipo">
+
+                <label for="valor_aposta">Valor da Aposta:</label>
+                <input type="number" name="valor_aposta" id="valor_aposta" min="1" required>
+
+                <button type="submit" class="btn-confirmar">Confirmar Aposta</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script para controle do modal -->
+    <script>
+        function openModal(eventoId, eventoTitulo, apostaTipo) {
+            document.getElementById('evento-id').value = eventoId;
+            document.getElementById('evento-titulo').textContent = eventoTitulo;
+            document.getElementById('aposta-tipo').value = apostaTipo;
+            document.getElementById('apostaModal').style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById('apostaModal').style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('apostaModal')) {
+                closeModal();
+            }
+        }
+    </script>
+
+    <!-- Estilos para as mensagens flash (opcional) -->
+    <style>
+        .flashed-messages {
+            list-style-type: none;
+            padding: 0;
+        }
+        .flashed-messages li {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .flashed-messages li.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .flashed-messages li.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
 </body>
 </html>

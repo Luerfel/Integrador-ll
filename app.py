@@ -1060,63 +1060,96 @@ def apostar():
     Funcionalidades:
     1. Verifica se o usuário está autenticado através da sessão.
     2. Obtém os dados do formulário: ID do evento, valor da aposta e opção selecionada.
-    3. Conecta-se ao banco de dados para realizar as seguintes operações:
+    3. Valida os dados recebidos:
+       - Verifica se o valor da aposta é positivo.
+       - Verifica se a opção selecionada é válida ('sim' ou 'nao').
+    4. Conecta-se ao banco de dados para realizar as seguintes operações:
        - Obtém o valor da cota do evento.
        - Calcula o valor total da aposta multiplicando o valor da aposta pelo valor da cota.
        - Verifica se o usuário possui saldo suficiente na carteira.
        - Insere a aposta no banco de dados incluindo a opção selecionada.
        - Atualiza o saldo da carteira do usuário subtraindo o valor total da aposta.
-    4. Retorna uma mensagem de sucesso ou erro ao usuário e redireciona para a área do usuário.
+    5. Retorna uma mensagem de sucesso ou erro ao usuário e redireciona para a área do usuário.
 
     Uso: Esta função é chamada quando um usuário autenticado envia o formulário de aposta em um evento.
 
     Retorno:
     - Se a aposta for realizada com sucesso: Exibe uma mensagem de sucesso e redireciona para a área do usuário.
-    - Se o saldo for insuficiente: Exibe uma mensagem de erro e redireciona para a área do usuário.
-    - Se o evento não for encontrado: Retorna um erro 404.
+    - Se ocorrer um erro: Exibe uma mensagem de erro e redireciona para a área do usuário.
     - Se o usuário não estiver autenticado: Redireciona para a página de login.
     """
     if 'logged_in' in session:
         user_id = get_user_id()
-        evento_id = request.form['evento_id']
-        valor_aposta = float(request.form['valor_aposta'])
-        opcao = request.form['aposta']  # Obter a opção do formulário
+        evento_id = request.form.get('evento_id')
+        valor_aposta_str = request.form.get('valor_aposta')
+        opcao = request.form.get('aposta')
 
-        # Usar gerenciador de contexto para abrir a conexão
-        with sqlite3.connect(database_path, timeout=5) as conn:
-            cursor = conn.cursor()
-            
-            # Obter o valor da cota do evento
-            cursor.execute('SELECT valor_cota FROM eventos WHERE id = ?', (evento_id,))
-            valor_cota = cursor.fetchone()
+        # Validações iniciais
+        if not evento_id or not valor_aposta_str or not opcao:
+            flash("Dados incompletos no formulário.", "error")
+            return redirect(url_for('area_usuario'))
 
-            if valor_cota is not None:
-                valor_cota = valor_cota[0]
-                valor_total_aposta = valor_aposta * valor_cota
+        try:
+            valor_aposta = float(valor_aposta_str)
+            if valor_aposta <= 0:
+                flash("O valor da aposta deve ser positivo.", "error")
+                return redirect(url_for('area_usuario'))
+        except ValueError:
+            flash("Valor da aposta inválido.", "error")
+            return redirect(url_for('area_usuario'))
 
-                # Verificar o saldo do usuário
-                cursor.execute('SELECT saldo FROM carteiras WHERE id_usuario = ?', (user_id,))
-                saldo = cursor.fetchone()
+        if opcao not in ['sim', 'nao']:
+            flash("Opção de aposta inválida.", "error")
+            return redirect(url_for('area_usuario'))
 
-                if saldo is not None and saldo[0] >= valor_total_aposta:
-                    # Inserir a aposta, incluindo a opção
-                    cursor.execute('INSERT INTO apostas (id_evento, id_usuario, valor, opcao) VALUES (?, ?, ?, ?)',
-                                   (evento_id, user_id, valor_total_aposta, opcao))
-                    
-                    # Atualizar o saldo da carteira subtraindo o valor total da aposta
-                    novo_saldo = saldo[0] - valor_total_aposta
-                    cursor.execute('UPDATE carteiras SET saldo = ? WHERE id_usuario = ?', (novo_saldo, user_id))
-                    
-                    # Commit da transação
-                    conn.commit()
-                    message = "Aposta realizada com sucesso!"
+        try:
+            # Usar gerenciador de contexto para abrir a conexão
+            with sqlite3.connect(database_path, timeout=5) as conn:
+                cursor = conn.cursor()
+                
+                # Obter o valor da cota do evento
+                cursor.execute('SELECT valor_cota FROM eventos WHERE id = ?', (evento_id,))
+                resultado = cursor.fetchone()
+
+                if resultado is not None:
+                    valor_cota = resultado[0]
+                    valor_total_aposta = valor_aposta * valor_cota
+
+                    # Verificar o saldo do usuário
+                    cursor.execute('SELECT saldo FROM carteiras WHERE id_usuario = ?', (user_id,))
+                    saldo_result = cursor.fetchone()
+
+                    if saldo_result is not None:
+                        saldo = saldo_result[0]
+                        if saldo >= valor_total_aposta:
+                            # Inserir a aposta, incluindo a opção
+                            cursor.execute('INSERT INTO apostas (id_evento, id_usuario, valor, opcao) VALUES (?, ?, ?, ?)',
+                                           (evento_id, user_id, valor_total_aposta, opcao))
+                            
+                            # Atualizar o saldo da carteira subtraindo o valor total da aposta
+                            novo_saldo = saldo - valor_total_aposta
+                            cursor.execute('UPDATE carteiras SET saldo = ? WHERE id_usuario = ?', (novo_saldo, user_id))
+                            
+                            # Registrar a transação
+                            cursor.execute('''
+                                INSERT INTO transacoes (id_carteira, tipo, valor, detalhes)
+                                VALUES ((SELECT id FROM carteiras WHERE id_usuario = ?), 'debito', ?, ?)
+                            ''', (user_id, valor_total_aposta, f'Aposta no evento {evento_id}'))
+
+                            # Commit da transação
+                            conn.commit()
+                            flash("Aposta realizada com sucesso!", "success")
+                        else:
+                            flash("Saldo insuficiente para realizar a aposta.", "error")
+                    else:
+                        flash("Carteira não encontrada.", "error")
                 else:
-                    message = "Saldo insuficiente para realizar a aposta."
+                    flash("Evento não encontrado.", "error")
+        except Exception as e:
+            print(f"Erro ao processar a aposta: {e}")
+            flash("Ocorreu um erro ao processar sua aposta. Tente novamente mais tarde.", "error")
 
-                # Exibir mensagem para o usuário
-                return f"<script>alert('{message}'); window.location.href = '{url_for('area_usuario')}';</script>"
-            else:
-                return "Evento não encontrado", 404
+        return redirect(url_for('area_usuario'))
     else:
         return redirect(url_for('login'))
 
