@@ -15,7 +15,7 @@ app.secret_key = 'macaco'
 
 
 def get_user_id():
- #usamos para obter o id do usuario e usar na seassion
+ # usamos para obter o id do usuario e usar na seassion
     email = session.get('email')
     if email:
         conn = sqlite3.connect(database_path)
