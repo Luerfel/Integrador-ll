@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/area_usuario.css">
+    <title>Home</title>
+</head>
+<body>
+    <header class="main-header">
+    <div class="header-container">
+        <button id="menu-button" onclick="toggleSidebar()"">☰</button>
+        <img class="logo" src="/static/images/logo.png">
+
+        <!--Barra Lateral-->
+        <div id="sidebar" class="sidebar">
+            <ul>
+                <li>
+                    <img src="/static/images/icon_perfil.png" alt="Perfil" class="icon">
+                    <a href="#">Perfil</a>
+                </li>
+                <li>
+                    <img src="/static/images/icon_carteira.png" alt="Carteira" class="icon">
+                    <a href="#">Carteira</a>
+                </li>
+                <li>
+                    <img src="/static/images/icon_indique.png" alt="Indique e Ganhe" class="icon">
+                    <a href="#">Indique e Ganhe</a>
+                </li>
+                <li>
+                    <img src="/static/images/icon_duvidas.png" alt="Dúvidas Frequentes" class="icon">
+                    <a href="#">Dúvidas Frequentes</a>
+                </li>
+                <li>
+                    <img src="/static/images/icon_suporte.png" alt="Suporte ao Usuário" class="icon">
+                    <a href="#">Suporte ao Usuário</a>
+                </li>
+            </ul>
+        </div>      
+    </div>
+    <div class="button">
+        <a href="#" class="login">Entre</a>
+        <a href="#" class="cadastro">Cadastre-se</a>
+    </div>
+    </header>
+    <div class="search-bar">
+        <input type="text" placeholder="Pesquisar...">
+        <button class="search-button"></button>
+    </div>
+    <nav>
+        <div class="menu">
+            <ul>
+                <li>
+                    <a href="#"><img class="categoria" src="/static/images/futebol.png" alt="Futebol"></a>
+                </li>
+                <li>
+                    <a href="#"><img class="categoria" src="/static/images/eleicoes.png" alt="Eleições"></a>
+                </li>
+                <li>
+                    <a href="#"><img class="categoria" src="/static/images/bolsaDeValores.png" alt="Bolsa de Valores"></a>
+                </li>
+                <li>
+                    <a href="#"><img class="categoria" src="/static/images/olimpiadas.png" alt="Olimpíadas"></a>
+                </li>
+          </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section class="main">
+            <div class="banner"><img class="baner" src="/static/images/banner.png"></div>
+        </section>
+        <section class="actions">
+            <div class="betting-section">
+                <!-- Botão Mais Apostados -->
+                <div class="bet-button">
+                    <img src="/static/images/maisApostados.png" alt="Mais Apostados">
+                </div>
+        
+                <!-- Botão Criar Aposta -->
+                <div class="create-bet">
+                    <button>+</button>
+                    <p>Criar aposta</p>
+                </div>
+        
+                <!-- Botão Últimos Momentos -->
+                <div class="bet-button">
+                    <img src="/static/images/ultimosMomentos.png" alt="Últimos Momentos">
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <h2>WinBet</h2>
+                <ul class="social-media">
+                    <li><a href="#"><img src="/static/images/logoInsta.png" alt="Instagram">@empresaMtFoda</a></li>
+                    <li><a href="#"><img src="/static/images/logoFaceBook.png" alt="Facebook">EmpresaMtFoda</a></li>
+                    <li><a href="#"><img src="/static/images/logoTwitter.png" alt="Twitter">@empresaMtFodaOfc</a></li>
+                </ul>
+            </div>
+            <div class="footer-contact">
+                <h3>Entre em contato</h3>
+                <ul>
+                    <li>Email: <a href="mailto:suporteMtFoda@gmail.com">suporteMtFoda@gmail.com</a></li>
+                    <li>Telefone: <a href="tel:+554500000000">+55 (45) 0000-000</a></li>
+                    <li>Email Legal: <a href="mailto:problemasLegais@gmail.com">problemasLegais@gmail.com</a></li>
+                    <li>Reclamações: <a href="mailto:seuDinheiroENosso@gmail.com">seuDinheiroENosso@gmail.com</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Links úteis</h3>
+                <ul>
+                    <li><a href="#">Sobre nós</a></li>
+                    <li><a href="#">Política de privacidade</a></li>
+                    <li><a href="#">Dúvidas frequentes</a></li>
+                    <li><a href="#">Central de apoio</a></li>
+                    <li><a href="#">Questões legais</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+    <script src="static/js/area_usuario.js"></script>
+</body>
+</html>
