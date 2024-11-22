@@ -1,11 +1,14 @@
-/* Estilos básicos para a página */
 body {
-    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4; /* Cor de fundo padrão */
-}
+    font-family: Arial, sans-serif;
+    
+    /* Define um fundo gradiente escuro */
+    background: url('/static/images/bg.png') no-repeat center center fixed;
+    background-size: cover;
+    
 
+}
 header {
     background-color: #333; /* Cor de fundo do cabeçalho */
     color: white; /* Cor do texto no cabeçalho */
