@@ -1,13 +1,16 @@
+/* Corpo da página */
 body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #080E1A, #1A2240); /* Gradiente do fundo */
-    color: #fff; /* Texto padrão branco */
+    background: url('/static/images/bg.png') no-repeat center center fixed;
+    background-size: cover;
+    color: #fff; /* Cor do texto */
 }
 
+/* Cabeçalho */
 header {
-    background-color: #333;
+    background-color: #333; /* Fundo escuro */
     color: white;
     padding: 15px 20px;
     display: flex;
@@ -21,10 +24,7 @@ header h1 {
     font-size: 24px;
 }
 
-main {
-    padding: 20px;
-}
-
+/* Títulos */
 h2 {
     color: #fff;
     font-size: 20px;
@@ -33,34 +33,39 @@ h2 {
     margin-bottom: 20px;
 }
 
+/* Estilo da tabela */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
-    background-color: #1A2240; /* Fundo da tabela */
+    background-color: #13192E; /* Fundo escuro da tabela */
     border-radius: 10px;
-    overflow: hidden; /* Para manter bordas arredondadas */
-}
-
-table th, table td {
-    padding: 15px;
-    text-align: left;
-    color: #FFF;
+    overflow: hidden; /* Bordas arredondadas */
 }
 
 table th {
-    background-color: #333; /* Fundo do cabeçalho */
+    background-color: #242F51; /* Fundo do cabeçalho da tabela */
+    color: #FFF;
     text-transform: uppercase; /* Letras maiúsculas */
+    padding: 15px;
+    text-align: left;
+}
+
+table td {
+    padding: 15px;
+    color: #E0E0E0; /* Texto claro */
+    text-align: left;
 }
 
 table tr:nth-child(even) {
-    background-color: #2E3853; /* Fundo alternado */
+    background-color: #1A2240; /* Fundo alternado */
 }
 
 table tr:hover {
-    background-color: #4B5A8A; /* Realce ao passar o mouse */
+    background-color: #3A4568; /* Realce ao passar o mouse */
 }
 
+/* Botões */
 button {
     padding: 10px 15px;
     border: none;
@@ -68,50 +73,45 @@ button {
     cursor: pointer;
     font-size: 14px;
     font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.2s ease;
     text-transform: uppercase;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 button:hover {
     transform: scale(1.05); /* Efeito de aumento */
 }
 
-.approve-btn {
-    background-color: #4CAF50;
+/* Botões específicos */
+button.approve-btn {
+    background-color: #008CBA; /* Azul para confirmação */
     color: white;
 }
 
-.approve-btn:hover {
-    background-color: #45A049;
+button.approve-btn:hover {
+    background-color: #007BAA; /* Azul escuro ao passar o mouse */
 }
 
-.reject-btn {
-    background-color: #f44336;
+button.reject-btn {
+    background-color: #F44336; /* Vermelho para rejeição */
     color: white;
 }
 
-.reject-btn:hover {
-    background-color: #D32F2F;
+button.reject-btn:hover {
+    background-color: #D32F2F; /* Vermelho escuro ao passar o mouse */
 }
 
-.confirm-btn {
-    background-color: #008CBA;
+/* Botão de Aposta */
+button.bet-btn {
+    background-color: #4CAF50; /* Verde para apostar */
     color: white;
+    margin-top: 10px;
 }
 
-.confirm-btn:hover {
-    background-color: #007BAA;
+button.bet-btn:hover {
+    background-color: #45A049; /* Verde mais escuro */
 }
 
-.not-occurred-btn {
-    background-color: #f44336;
-    color: white;
-}
-
-.not-occurred-btn:hover {
-    background-color: #D32F2F;
-}
-
+/* Navegação */
 nav.menustrip {
     background-color: #333;
     padding: 15px;
