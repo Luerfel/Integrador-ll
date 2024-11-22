@@ -1,144 +1,150 @@
-/* Corpo da página */
+/* Estilos básicos para a página */
 body {
+    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
-    background: url('/static/images/bg.png') no-repeat center center fixed;
-    background-size: cover;
-    color: #fff; /* Cor do texto */
+    background-color: #f4f4f4; /* Cor de fundo padrão */
 }
 
-/* Cabeçalho */
 header {
-    background-color: #333; /* Fundo escuro */
-    color: white;
-    padding: 15px 20px;
+    background-color: #333; /* Cor de fundo do cabeçalho */
+    color: white; /* Cor do texto no cabeçalho */
+    padding: 10px 20px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Sombra no cabeçalho */
+    justify-content: space-between; /* Alinhamento horizontal dos itens no cabeçalho */
+    align-items: center; /* Alinhamento vertical dos itens no cabeçalho */
 }
 
 header h1 {
-    margin: 0;
-    font-size: 24px;
+    margin: 0; /* Remove a margem padrão do título */
 }
 
-/* Títulos */
+nav a {
+    color: white;
+    text-decoration: none; /* Remove o sublinhado dos links */
+}
+
+main {
+    padding: 20px;
+}
+
 h2 {
-    color: #fff;
-    font-size: 20px;
-    text-align: left;
-    font-weight: bold;
-    margin-bottom: 20px;
+    border-bottom: 2px solid #ccc; /* Linha inferior para destacar o título */
+    padding-bottom: 10px;
 }
 
-/* Estilo da tabela */
 table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: collapse; /* Remove espaços entre as células da tabela */
     margin-bottom: 20px;
-    background-color: #13192E; /* Fundo escuro da tabela */
-    border-radius: 10px;
-    overflow: hidden; /* Bordas arredondadas */
 }
 
-table th {
-    background-color: #242F51; /* Fundo do cabeçalho da tabela */
-    color: #FFF;
-    text-transform: uppercase; /* Letras maiúsculas */
-    padding: 15px;
+table, th, td {
+    border: 1px solid #ccc; /* Bordas da tabela e das células */
+}
+
+th, td {
+    padding: 10px;
     text-align: left;
 }
 
-table td {
-    padding: 15px;
-    color: #E0E0E0; /* Texto claro */
-    text-align: left;
-}
-
-table tr:nth-child(even) {
-    background-color: #1A2240; /* Fundo alternado */
-}
-
-table tr:hover {
-    background-color: #3A4568; /* Realce ao passar o mouse */
-}
-
-/* Botões */
 button {
-    padding: 10px 15px;
+    width: 100%; /* O botão ocupa toda a largura do contêiner */
+    padding: 10px;
+    background-color: #f0f0f0;
     border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-    text-transform: uppercase;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    border-radius: 5px; /* Bordas arredondadas */
+    cursor: pointer; /* Indicador de que o botão é clicável */
+    font-size: 16px;
+    font-weight: bold; /* Negrito para o texto do botão */
 }
 
 button:hover {
-    transform: scale(1.05); /* Efeito de aumento */
+    background-color: #6b6b6b; /* Cor de fundo ao passar o mouse */
 }
 
-/* Botões específicos */
-button.approve-btn {
+.approve-btn {
+    background-color: #4CAF50; /* Verde para aprovação */
+    color: white;
+}
+
+.reject-btn {
+    background-color: #f44336; /* Vermelho para rejeição */
+    color: white;
+}
+
+.confirm-btn {
     background-color: #008CBA; /* Azul para confirmação */
     color: white;
 }
 
-button.approve-btn:hover {
-    background-color: #007BAA; /* Azul escuro ao passar o mouse */
-}
-
-button.reject-btn {
-    background-color: #F44336; /* Vermelho para rejeição */
+.not-occurred-btn {
+    background-color: #f44336; /* Vermelho para indicar evento não ocorrido */
     color: white;
 }
 
-button.reject-btn:hover {
-    background-color: #D32F2F; /* Vermelho escuro ao passar o mouse */
-}
-
-/* Botão de Aposta */
-button.bet-btn {
-    background-color: #4CAF50; /* Verde para apostar */
-    color: white;
-    margin-top: 10px;
-}
-
-button.bet-btn:hover {
-    background-color: #45A049; /* Verde mais escuro */
-}
-
-/* Navegação */
+/* Estilo para o MenuStrip de navegação */
 nav.menustrip {
     background-color: #333;
-    padding: 15px;
+    padding: 10px;
+    text-align: center; /* Centraliza os itens do MenuStrip */
     margin-bottom: 20px;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
 }
 
 nav.menustrip ul {
-    list-style: none;
+    list-style-type: none; /* Remove marcadores da lista */
     padding: 0;
     margin: 0;
-    display: flex;
-    justify-content: center;
-    gap: 15px;
+}
+
+nav.menustrip ul li {
+    display: inline; /* Exibe os itens em linha */
+    margin-right: 15px;
 }
 
 nav.menustrip ul li a {
     color: white;
     text-decoration: none;
-    font-weight: bold;
+    font-weight: bold; /* Negrito para os links */
     padding: 10px 15px;
-    border-radius: 5px;
-    background-color: #555;
-    transition: background-color 0.3s ease;
+    border-radius: 5px; /* Bordas arredondadas nos links */
 }
 
+nav.menustrip ul li a.active,
 nav.menustrip ul li a:hover {
-    background-color: #4B5A8A;
+    background-color: #555; /* Cor de fundo dos links ativos ou com hover */
+}
+/* Adicione este código ao seu arquivo area_moderacao.css */
+.modal {
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
 }
