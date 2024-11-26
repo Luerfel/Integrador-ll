@@ -509,7 +509,7 @@ def acao_evento():
     evento_id = request.form.get('evento_id')
     acao = request.form.get('acao')
     motivo_rejeicao = request.form.get('motivo_rejeicao', '')
-    id_moderador = 1  # ID do moderador fixo ou pode ser passado via autenticação
+    id_moderador = 1  # ID do moderador fixo 
 
     # Mapeamento das ações para status e dados adicionais
     acao_map = {
