@@ -7,20 +7,24 @@ body {
 }
 
 header {
-    background-color: #333; /* Cor de fundo do cabeçalho */
+    background-color: #A2158B; /* Cor de fundo do cabeçalho */
     color: white; /* Cor do texto no cabeçalho */
     padding: 10px 20px;
     display: flex;
     justify-content: space-between; /* Alinhamento horizontal dos itens no cabeçalho */
     align-items: center; /* Alinhamento vertical dos itens no cabeçalho */
 }
-
+header .logo {
+    height: 50px; /* Ajuste o tamanho da logo conforme necessário */
+    width: auto; /* Mantém a proporção da imagem */
+    margin-left: auto; /* Empurra a logo para o canto direito */
+}
 header h1 {
     margin: 0; /* Remove a margem padrão do título */
 }
 
 nav a {
-    color: white;
+    color: #8A2BE2;
     text-decoration: none; /* Remove o sublinhado dos links */
 }
 
@@ -40,7 +44,7 @@ table {
 }
 
 table, th, td {
-    border: 1px solid #ccc; /* Bordas da tabela e das células */
+    border: 1px solid #8A2BE2; /* Bordas da tabela e das células */
 }
 
 th, td {
@@ -85,7 +89,7 @@ button:hover {
 
 /* Estilo para o MenuStrip de navegação */
 nav.menustrip {
-    background-color: #333;
+    background-color: #A2158B;
     padding: 10px;
     text-align: center; /* Centraliza os itens do MenuStrip */
     margin-bottom: 20px;

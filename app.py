@@ -629,7 +629,7 @@ def enviar_email_rejeicao(motivo_rejeicao, evento_id):
         smtp_server = 'smtp.gmail.com'
         port = 587
         remetente = 'projetointegradorpython@gmail.com'
-        senha = 'vpql ekjt daeh thjk'
+        senha = 'kdcl egfq eclk tyzh'
 
         # Configuração da mensagem   
         msg = MIMEMultipart()
