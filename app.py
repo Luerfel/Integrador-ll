@@ -509,7 +509,7 @@ def acao_evento():
     evento_id = request.form.get('evento_id')
     acao = request.form.get('acao')
     motivo_rejeicao = request.form.get('motivo_rejeicao', '')
-    id_moderador = 1  # ID do moderador fixo ou pode ser passado via autenticação
+    id_moderador = 1  # ID do moderador fixo 
 
     # Mapeamento das ações para status e dados adicionais
     acao_map = {
@@ -629,7 +629,7 @@ def enviar_email_rejeicao(motivo_rejeicao, evento_id):
         smtp_server = 'smtp.gmail.com'
         port = 587
         remetente = 'projetointegradorpython@gmail.com'
-        senha = 'vpql ekjt daeh thjk'
+        senha = 'kdcl egfq eclk tyzh'
 
         # Configuração da mensagem   
         msg = MIMEMultipart()
