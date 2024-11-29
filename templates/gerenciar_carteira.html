@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minha Carteira</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+
     <!-- Link para o arquivo de estilo CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <script>
-    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/carteira.css') }}"> 
+
     
 </head>
 <body>
@@ -17,8 +21,9 @@
 
         <!-- Exibir o saldo atual -->
         <div class="saldo-container">
-            <p><strong>Saldo disponível:</strong> R$ {{'%0.2f' % saldo }}</p>
+           <span class="saldo_total"> {{'%0.2f' % saldo }}</span></p>
         </div>
+        
 
         <!-- Botões de ação -->
         <div class="action-buttons">
