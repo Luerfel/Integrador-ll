@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS categorias_eventos (
 ''')
 
 # Inserindo as categorias na tabela
-categorias = ['olimpíada', 'catástrofes', 'eleições', 'bolsa de valores']
+categorias = ['olimpíada', 'futebol', 'eleições', 'bolsa de valores']
 
 for categoria in categorias:
     try:
