@@ -14,15 +14,6 @@ body {
     justify-content: center;
     align-items: center;
 }
-
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-}
-
 /* Estilo para o título de boas-vindas */
 h2 {
     color: #fff;
@@ -237,7 +228,7 @@ button:hover {
     margin: 10% auto;
     padding: 20px;
     border: 1px solid #888;
-    width: 400px;
+    width: 80% ;
     color: #fff;
     border-radius: 10px;
 }
@@ -451,16 +442,17 @@ button:hover {
     background-color: #ddd;
 }
 
-.wrapper {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+.btn-apostar {
+    background-color: #E600FF; /* Cor de fundo */
+    color: white; /* Cor do texto */
+    padding: 10px 20px; /* Espaçamento interno */
+    margin: 5px; /* Espaçamento externo */
+    border: none; /* Sem borda */
+    cursor: pointer; /* Cursor de ponteiro */
+    border-radius: 5px; /* Bordas arredondadas */
+    font-size: 16px; /* Tamanho da fonte */
 }
 
-.content {
-    flex: 1;
-    min-height: 100%;
-    padding-bottom: 50px; /* Altura do rodapé */
-    box-sizing: border-box;
+.btn-apostar:hover {
+    background-color: #E600FF; /* Cor de fundo ao passar o mouse */
 }
-

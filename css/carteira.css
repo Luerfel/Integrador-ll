@@ -1,0 +1,41 @@
+body {
+    background-color: #1a1a2e;
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif; /* Usando a fonte Orbitron */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    background-color: #0f0f1f;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.saldo {
+    font-size: 48px;  /* Aumentei o tamanho para mais destaque */
+    font-weight: bold;
+    color: #ffffff;
+    background: linear-gradient(135deg, #3a1a75, #9e44b3);
+    background-clip: text; /* Para aplicar o gradiente ao texto */
+    color: transparent;
+    padding: 10px;
+    border-radius: 8px;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);  /* Sombra para dar destaque */
+    letter-spacing: 2px;  /* Aumentando o espaçamento entre as letras */
+}
+
+.zeros {
+    color: #3a1a75; /* Cor dos zeros roxos */
+}
+.saldo-container{
+    font-size: 48px;
+    background-image: url('/static/images/bg.png');  
+}

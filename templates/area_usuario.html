@@ -1,86 +1,108 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
-    <title>Área do Usuário</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/area_usuario.css">
+
+    <title>Home</title>
+
 </head>
+
 <body>
-    <!-- Barra Superior com o Botão "Minha Wallet" -->
-    <div class="top-bar">
-        <a href="{{ url_for('criar_evento') }}" class="wallet-button">Criar Evento</a>
-        <a href="{{ url_for('gerenciar_carteira') }}" class="wallet-button">Minha Wallet</a>
+    <!-- Menu Lateral -->
+    <div id="sideMenu" class="side-menu">
+        <a href="javascript:void(0)" class="close-btn" onclick="closeMenu()">&times;</a>
+        <ul>
+            <li>
+                <img src="/static/images/icon_evento.png" alt="Novo Evento" class="icon">
+                <a href="{{ url_for('criar_evento') }}">Novo Evento</a>
+            </li>
+            <li>
+                <img src="/static/images/icon_carteira.png" alt="Carteira" class="icon">
+                <a href="{{ url_for('gerenciar_carteira') }}">Carteira</a>
+            </li>
+            <li>
+                <img src="/static/images/icon_indique.png" alt="Indique e Ganhe" class="icon">
+                <a href="#">Indique e Ganhe</a>
+            </li>
+            <li>
+                <img src="/static/images/icon_duvidas.png" alt="Dúvidas Frequentes" class="icon">
+                <a href="#">Dúvidas Frequentes</a>
+            </li>
+            <li>
+                <img src="/static/images/icon_suporte.png" alt="Suporte ao Usuário" class="icon">
+                <a href="#">Suporte ao Usuário</a>
+            </li>
+        </ul>
     </div>
 
-    <!-- Mecanismo de Busca -->
-    <div class="search-container">
+    <!-- Cabeçalho -->
+    <header class="main-header">
+        <div>
+            <img class="logo" src="/static/images/logo.png" alt="Logo" onclick="openMenu()">
+        </div>
+    </header>
+
+    <!-- Barra de Pesquisa -->
+    <div class="search-bar">
         <form action="{{ url_for('pesquisar_evento') }}" method="GET" target="_blank">
             <input type="text" name="query" placeholder="Buscar eventos..." required>
-            <button type="submit">Buscar</button>
+            <button class="search-button">Buscar</button>
         </form>
     </div>
-
-    <!-- Modal para definir valor da aposta -->
-    <div id="apostaModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>Apostar em <span id="evento-titulo"></span></h2>
-            <form id="aposta-form" action="{{ url_for('apostar') }}" method="POST">
-                <input type="hidden" name="evento_id" id="evento-id">
-                <input type="hidden" name="aposta" id="aposta-tipo">
-                
-                <label for="valor_aposta">Valor da Aposta:</label>
-                <input type="number" name="valor_aposta" id="valor_aposta" min="1" required>
-                
-                <button type="submit" class="btn-confirmar">Confirmar Aposta</button>
-            </form>
+    <br>
+    <br>
+    <!-- Menu -->
+    <nav>
+        <div class="menu">
+            <ul>
+                <li>
+                    <a href="{{ url_for('pesquisar_evento') }}?categoria=2"><img class="categoria" src="/static/images/futebol.png" alt="Futebol"></a>
+                    <a href="{{ url_for('pesquisar_evento') }}?categoria=3"><img class="categoria" src="/static/images/eleicoes.png" alt="Eleições"></a>
+                    <a href="{{ url_for('pesquisar_evento') }}?categoria=4"><img class="categoria" src="/static/images/bolsaDeValores.png" alt="Bolsa de Valores"></a>
+                    <a href="{{ url_for('pesquisar_evento') }}?categoria=1"><img class="categoria" src="/static/images/olimpiadas.png" alt="Olimpíadas"></a>
+                </li>
+            </ul>
         </div>
-    </div>
+    </nav>
 
-    <!-- Script para controle do modal -->
-    <script>
-        function openModal(eventoId, eventoTitulo, apostaTipo) {
-            document.getElementById('evento-id').value = eventoId;
-            document.getElementById('evento-titulo').textContent = eventoTitulo;
-            document.getElementById('aposta-tipo').value = apostaTipo;
-            document.getElementById('apostaModal').style.display = "block";
-        }
+    <!-- Conteúdo Principal -->
+    <main>
+        <section class="main">
+            <div class="banner">
+                <img class="baner" src="/static/images/banner.png" alt="Banner">
+            </div>
+        </section>
 
-        function closeModal() {
-            document.getElementById('apostaModal').style.display = "none";
-        }
-
-        window.onclick = function(event) {
-            if (event.target == document.getElementById('apostaModal')) {
-                closeModal();
-            }
-        }
-    </script>
-
-    <!-- Seção de Destaques: Eventos com Período de Apostas Finalizando -->
-    <div class="section">
-        <h2>Último Dia para Apostar</h2>
-        <div class="eventos-container">
-            {% for evento in eventos_finalizando %}
-                <div class="evento-card">
-                    <h3>{{ evento[1] }}</h3>
-                    <p>{{ evento[2] }}</p>
-                    <p>Data do Evento: {{ evento[4] }}</p>
-                    <p>Período de Apostas: {{ evento[5] }} até {{ evento[6] }}</p>
-                    <p>Valor da Cota: R$ {{ '{:.2f}'.format(evento[3]) }}</p>
-
-                    <!-- Botões para abrir o modal com aposta "Sim" ou "Não" -->
-                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'sim')">Apostar Sim</button>
-                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'nao')">Apostar Não</button>
+        <section class="actions">
+            <div class="betting-section">
+                <div class="bet-button">
+                   
+                    <div class="section">
+                        <h2>Último Dia para Apostar</h2>
+                        <div class="eventos-container">
+                            {% for evento in eventos_finalizando %}
+                                <div class="evento-card">
+                                    <h3>{{ evento[1] }}</h3>
+                                    <p>{{ evento[2] }}</p>
+                                    <p>Data do Evento: {{ evento[4] }}</p>
+                                    <p>Período de Apostas: {{ evento[5] }} até {{ evento[6] }}</p>
+                                    <p>Valor da Cota: R$ {{ '{:.2f}'.format(evento[3]) }}</p>
+                
+                                    <!-- Botões para abrir o modal com aposta "Sim" ou "Não" -->
+                                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'sim')">Apostar Sim</button>
+                                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'nao')">Apostar Não</button>
+                                </div>
+                            {% else %}
+                                <p>Nenhum evento disponível.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
-            {% else %}
-                <p>Nenhum evento disponível.</p>
-            {% endfor %}
-        </div>
-    </div>
-
-    <!-- Seção de Destaques: Eventos Mais Apostados -->
-    <div class="section">
+                <div class="create-bet">
+                     <div class="section">
         <h2>Eventos Mais Apostados</h2>
         <div class="eventos-container">
             {% for evento in eventos_mais_apostados %}
@@ -100,42 +122,105 @@
             {% endfor %}
         </div>
     </div>
-
-    <!-- Cards de Categorias -->
-    <div class="section">
-        <h2>Categorias</h2>
-        <div class="categorias-container">
-            {% for categoria in categorias %}
-                <div class="categoria-card">
-                    <h3>{{ categoria[1] }}</h3>
-                    <a href="{{ url_for('pesquisar_evento') }}?categoria={{ categoria[0] }}">Ver Eventos</a>
                 </div>
-            {% else %}
-                <p>Nenhuma categoria disponível.</p>
-            {% endfor %}
-        </div>
-    </div>
+                <div class="create-bet">
+                    
+                    <h2>Eventos Disponíveis</h2>
+                    <div class="eventos-container">
+                        {% if eventos %}
+                            {% for evento in eventos %}
+                            <div class="evento-card">
+                                <h3>{{ evento[1] }}</h3>
+                                <p>{{ evento[2] }}</p>
+                                <p>Data do Evento: {{ evento[4] }}</p>
+                                <p>Período de Apostas: {{ evento[5] }} até {{ evento[6] }}</p>
+                                <p>Total Apostado: R$ {{ '{:.2f}'.format(evento[-1] or 0) }}</p>
+                                <p>Valor da Cota: R$ {{ '{:.2f}'.format(evento[3]) }}</p>
+                                    <!-- Outros detalhes do evento -->
+                                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'sim')">Apostar Sim</button>
+                                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'nao')">Apostar Não</button>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>Não há eventos disponíveis no momento.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+
+    <!-- Seção de Destaques: Eventos Mais Apostados -->
+
+
     
     <!-- Área de eventos disponíveis -->
-    <h2>Eventos Disponíveis</h2>
-    <div class="eventos-container">
-        {% if eventos %}
-            {% for evento in eventos %}
-            <div class="evento-card">
-                <h3>{{ evento[1] }}</h3>
-                <p>{{ evento[2] }}</p>
-                <p>Data do Evento: {{ evento[4] }}</p>
-                <p>Período de Apostas: {{ evento[5] }} até {{ evento[6] }}</p>
-                <p>Total Apostado: R$ {{ '{:.2f}'.format(evento[-1] or 0) }}</p>
-                <p>Valor da Cota: R$ {{ '{:.2f}'.format(evento[3]) }}</p>
-                    <!-- Outros detalhes do evento -->
-                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'sim')">Apostar Sim</button>
-                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'nao')">Apostar Não</button>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p>Não há eventos disponíveis no momento.</p>
-        {% endif %}
-    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+     
+    <!-- Rodapé -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <h2>WinBet</h2>
+                <ul class="social-media">
+                    <li><a href="#"><img src="/static/images/logoInsta.png" alt="Instagram">@empresaMtFoda</a></li>
+                    <li><a href="#"><img src="/static/images/logoFaceBook.png" alt="Facebook">EmpresaMtFoda</a></li>
+                    <li><a href="#"><img src="/static/images/logoTwitter.png" alt="Twitter">@empresaMtFodaOfc</a></li>
+                </ul>
+            </div>
+            <div class="footer-contact">
+                <h3>Entre em contato</h3>
+                <ul>
+                    <li>Email: <a href="mailto:suporteMtFoda@gmail.com">suporteMtFoda@gmail.com</a></li>
+                    <li>Telefone: <a href="tel:+554500000000">+55 (45) 0000-000</a></li>
+                    <li>Email Legal: <a href="mailto:problemasLegais@gmail.com">problemasLegais@gmail.com</a></li>
+                    <li>Reclamações: <a href="mailto:seuDinheiroENosso@gmail.com">seuDinheiroENosso@gmail.com</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Links úteis</h3>
+                <ul>
+                    <li><a href="#">Sobre nós</a></li>
+                    <li><a href="#">Política de privacidade</a></li>
+                    <li><a href="#">Dúvidas frequentes</a></li>
+                    <li><a href="#">Central de apoio</a></li>
+                    <li><a href="#">Questões legais</a></li>
+                </ul>
+            </div>
+        </div>   
+    </footer>
+
+    <script src="/static/js/area_usuario.js"></script>
 </body>
+
 </html>

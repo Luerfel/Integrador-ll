@@ -1,0 +1,151 @@
+/* Estilos básicos para a página */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4; /* Cor de fundo padrão */
+}
+
+header {
+    background-color: #333; /* Cor de fundo do cabeçalho */
+    color: white; /* Cor do texto no cabeçalho */
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between; /* Alinhamento horizontal dos itens no cabeçalho */
+    align-items: center; /* Alinhamento vertical dos itens no cabeçalho */
+}
+
+header h1 {
+    margin: 0; /* Remove a margem padrão do título */
+}
+
+nav a {
+    color: white;
+    text-decoration: none; /* Remove o sublinhado dos links */
+}
+
+main {
+    padding: 20px;
+}
+
+h2 {
+    border-bottom: 2px solid #ccc; /* Linha inferior para destacar o título */
+    padding-bottom: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse; /* Remove espaços entre as células da tabela */
+    margin-bottom: 20px;
+}
+
+table, th, td {
+    border: 1px solid #ccc; /* Bordas da tabela e das células */
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+button {
+    width: 100%; /* O botão ocupa toda a largura do contêiner */
+    padding: 10px;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 5px; /* Bordas arredondadas */
+    cursor: pointer; /* Indicador de que o botão é clicável */
+    font-size: 16px;
+    font-weight: bold; /* Negrito para o texto do botão */
+}
+
+button:hover {
+    background-color: #6b6b6b; /* Cor de fundo ao passar o mouse */
+}
+
+.approve-btn {
+    background-color: #4CAF50; /* Verde para aprovação */
+    color: white;
+}
+
+.reject-btn {
+    background-color: #f44336; /* Vermelho para rejeição */
+    color: white;
+}
+
+.confirm-btn {
+    background-color: #008CBA; /* Azul para confirmação */
+    color: white;
+}
+
+.not-occurred-btn {
+    background-color: #f44336; /* Vermelho para indicar evento não ocorrido */
+    color: white;
+}
+
+/* Estilo para o MenuStrip de navegação */
+nav.menustrip {
+    background-color: #333;
+    padding: 10px;
+    text-align: center; /* Centraliza os itens do MenuStrip */
+    margin-bottom: 20px;
+}
+
+nav.menustrip ul {
+    list-style-type: none; /* Remove marcadores da lista */
+    padding: 0;
+    margin: 0;
+}
+
+nav.menustrip ul li {
+    display: inline; /* Exibe os itens em linha */
+    margin-right: 15px;
+}
+
+nav.menustrip ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold; /* Negrito para os links */
+    padding: 10px 15px;
+    border-radius: 5px; /* Bordas arredondadas nos links */
+}
+
+nav.menustrip ul li a.active,
+nav.menustrip ul li a:hover {
+    background-color: #555; /* Cor de fundo dos links ativos ou com hover */
+}
+/* Adicione este código ao seu arquivo area_moderacao.css */
+.modal {
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
