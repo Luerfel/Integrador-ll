@@ -442,4 +442,17 @@ button:hover {
     background-color: #ddd;
 }
 
+.btn-apostar {
+    background-color: #E600FF; /* Cor de fundo */
+    color: white; /* Cor do texto */
+    padding: 10px 20px; /* Espaçamento interno */
+    margin: 5px; /* Espaçamento externo */
+    border: none; /* Sem borda */
+    cursor: pointer; /* Cursor de ponteiro */
+    border-radius: 5px; /* Bordas arredondadas */
+    font-size: 16px; /* Tamanho da fonte */
+}
 
+.btn-apostar:hover {
+    background-color: #E600FF; /* Cor de fundo ao passar o mouse */
+}

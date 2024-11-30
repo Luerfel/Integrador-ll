@@ -464,11 +464,3 @@ button:hover {
     box-sizing: border-box;
 }
 
-footer {
-    height: 50px; /* Altura do rodapé */
-    background-color: #f1f1f1;
-    text-align: center;
-    line-height: 50px; /* Alinha o texto verticalmente */
-    font-size: 14px;
-    color: #666;
-}
