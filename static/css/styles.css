@@ -464,3 +464,6 @@ button:hover {
     box-sizing: border-box;
 }
 
+.no-events-message {
+    color: gray;
+}
