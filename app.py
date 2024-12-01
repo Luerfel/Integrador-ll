@@ -194,40 +194,22 @@ def area_usuario():
 
 
 "------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
-"PESQUISAR EVENTO"
+# Filtro personalizado para formatar datas
+@app.template_filter('formatdate')
+def format_date(value):
+    if not value:
+        return ""
+    try:
+        # Tenta converter a string para um objeto datetime
+        date_obj = datetime.strptime(value, '%Y-%m-%d')
+        # Retorna a data formatada como 'DD/MM/AAAA'
+        return date_obj.strftime('%d/%m/%Y')
+    except ValueError:
+        # Se ocorrer um erro na conversão, retorna o valor original
+        return value
+
 @app.route('/pesquisar_evento', methods=['GET'])
 def pesquisar_evento():
-    """
-    Esta função trata requisições GET na rota '/pesquisar_evento' e permite aos usuários pesquisar
-    eventos com base em uma consulta de texto (query), categoria, data e ordenação. A função também
-    suporta paginação para facilitar a navegação pelos resultados.
-
-    Funcionalidades:
-    1. Coleta os parâmetros da URL (query, categoria, data, ordenação e página) para aplicar os filtros
-       e configurar a paginação.
-    2. Realiza uma consulta SQL no banco de dados para buscar eventos que correspondam aos critérios
-       definidos:
-       - Se houver uma 'query', busca no título ou descrição do evento.
-       - Se houver uma categoria, filtra os eventos por categoria.
-       - Se houver uma data, filtra os eventos por data específica.
-       - Aplica a ordenação especificada (popularidade, valor de cota ou data do evento).
-    3. Implementa paginação para limitar os resultados a 10 eventos por página.
-    4. Busca as categorias de eventos disponíveis para serem exibidas como filtros na interface.
-
-    Uso: Esta função é chamada quando o usuário acessa a página de pesquisa de eventos e pode aplicar
-    filtros ou realizar buscas. A resposta renderiza a página 'pesquisar_evento.html' com os eventos
-    filtrados e os dados adicionais necessários para a interface de pesquisa.
-
-    Parâmetros de URL aceitos:
-    - query: String para busca no título ou descrição do evento.
-    - categoria: ID da categoria para filtrar os eventos.
-    - data: Data do evento para filtrar.
-    - ordenacao: Critério de ordenação (popularidade, valor_cota, data).
-    - page: Número da página para implementar a paginação.
-
-    Retorno:
-    - Renderiza a página 'pesquisar_evento.html' com os resultados da pesquisa, os eventos e as categorias.
-    """
     query = request.args.get('query', '')
     categoria_id = request.args.get('categoria', '')
     data = request.args.get('data', '')
@@ -246,7 +228,6 @@ def pesquisar_evento():
         LEFT JOIN eventos_categorias ON eventos.id = eventos_categorias.id_evento
         WHERE eventos.status = 'aprovado'
         AND eventos.data_evento >= date('now')
-
     '''
     params = []
 
@@ -262,8 +243,13 @@ def pesquisar_evento():
 
     # Aplicar filtro de data se houver
     if data:
-        sql += ' AND eventos.data_evento = ?'
-        params.append(data)
+        try:
+            # Verifica se a data está no formato correto 'YYYY-MM-DD'
+            datetime.strptime(data, '%Y-%m-%d')
+            sql += ' AND eventos.data_evento = ?'
+            params.append(data)
+        except ValueError:
+            flash('Formato de data inválido. Use AAAA-MM-DD.', 'error')
 
     # Aplicar ordenação
     if ordenacao:
@@ -291,108 +277,6 @@ def pesquisar_evento():
 
     return render_template('pesquisar_evento.html', eventos=eventos, query=query, categorias=categorias,
                            categoria_id=categoria_id, data=data, ordenacao=ordenacao, page=page, per_page=per_page)
-
-
-@app.route('/eventos_categoria/<int:categoria_id>', methods=['GET', 'POST'])
-def eventos_por_categoria(categoria_id):
-    """
-    Esta função trata requisições na rota '/eventos_categoria/<categoria_id>' e exibe os eventos
-    de uma categoria específica, determinada pelo ID da categoria fornecido na URL.
-
-    Funcionalidades:
-    - Obtém o nome da categoria com base no ID fornecido.
-    - Caso a categoria não seja encontrada, retorna um erro 404.
-    - Caso a categoria exista, busca os eventos associados a essa categoria no banco de dados e que tenham o status 'aprovado'.
-    - Renderiza a página 'eventos_categoria.html', exibindo os eventos da categoria para o usuário.
-
-    Parâmetro de URL:
-    - categoria_id: ID da categoria cujos eventos serão exibidos.
-
-    Retorno:
-    - Se a categoria for encontrada: Renderiza a página 'eventos_categoria.html' com os eventos da categoria.
-    - Se a categoria não for encontrada: Retorna uma mensagem de erro 404.
-    """
-    conn = sqlite3.connect('data/database.db')  # Atualize o caminho do banco de dados, se necessário
-    cursor = conn.cursor()
-
-    # Obter o nome da categoria
-    cursor.execute('SELECT nome FROM categorias_eventos WHERE id = ?', (categoria_id,))
-    categoria = cursor.fetchone()
-
-    if not categoria:
-        conn.close()
-        return 'Categoria não encontrada.', 404
-
-    categoria_nome = categoria[0]
-
-    # Obter eventos da categoria com filtro de data
-    cursor.execute('''
-        SELECT eventos.*
-        FROM eventos
-        JOIN eventos_categorias ON eventos.id = eventos_categorias.id_evento
-        WHERE eventos_categorias.id_categoria = ?
-        AND eventos.status = 'aprovado'
-        AND eventos.data_evento >= date('now')
-        ORDER BY eventos.data_evento ASC
-    ''', (categoria_id,))
-    eventos = cursor.fetchall()
-    conn.close()
-
-    # Caso a requisição seja POST, processar aposta
-    if request.method == 'POST':
-        if 'logged_in' in session:
-            try:
-                user_id = session.get('user_id')
-                evento_id = request.form['evento_id']
-                valor_aposta = float(request.form['valor_aposta'])
-                opcao = request.form['aposta']
-
-                # Verificar se o valor da aposta é maior que zero
-                if valor_aposta <= 0:
-                    flash("Valor da aposta deve ser maior que zero.", 'error')
-                    return redirect(url_for('eventos_por_categoria', categoria_id=categoria_id))
-
-                with sqlite3.connect('data/database.db', timeout=5) as conn:
-                    cursor = conn.cursor()
-
-                    # Obter o valor da cota do evento
-                    cursor.execute('SELECT valor_cota FROM eventos WHERE id = ?', (evento_id,))
-                    valor_cota = cursor.fetchone()
-
-                    if valor_cota is not None:
-                        valor_cota = valor_cota[0]
-                        valor_total_aposta = valor_aposta * valor_cota
-
-                        # Verificar o saldo do usuário
-                        cursor.execute('SELECT saldo FROM carteiras WHERE id_usuario = ?', (user_id,))
-                        saldo = cursor.fetchone()
-
-                        if saldo is not None and saldo[0] >= valor_total_aposta:
-                            # Inserir a aposta
-                            cursor.execute('INSERT INTO apostas (id_evento, id_usuario, valor, opcao) VALUES (?, ?, ?, ?)',
-                                           (evento_id, user_id, valor_total_aposta, opcao))
-
-                            # Atualizar o saldo do usuário
-                            novo_saldo = saldo[0] - valor_total_aposta
-                            cursor.execute('UPDATE carteiras SET saldo = ? WHERE id_usuario = ?', (novo_saldo, user_id))
-
-                            # Commit da transação
-                            conn.commit()
-                            flash("Aposta realizada com sucesso!", 'success')
-                        else:
-                            flash("Saldo insuficiente para realizar a aposta.", 'error')
-                    else:
-                        flash("Evento não encontrado.", 'error')
-
-            except sqlite3.Error as e:
-                flash(f"Ocorreu um erro ao processar a aposta: {str(e)}", 'error')
-
-        else:
-            flash("Por favor, faça login para realizar uma aposta.", 'error')
-            return redirect(url_for('login'))
-
-    # Renderizar a página com eventos e nome da categoria
-    return render_template('eventos_categoria.html', eventos=eventos, categoria_nome=categoria_nome)
 
 
 "CADASTRO"

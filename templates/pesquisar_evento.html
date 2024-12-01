@@ -14,7 +14,8 @@
 
     <!-- Mecanismo de Busca -->
     <div class="search-container">
-        <form action="{{ url_for('pesquisar_evento') }}" method="GET" target="_blank">
+        <!-- Removido o target="_blank" -->
+        <form action="{{ url_for('pesquisar_evento') }}" method="GET">
             <input type="text" name="query" placeholder="Buscar eventos..." value="{{ query }}" required>
             <button type="submit">Buscar</button>
         </form>
@@ -69,8 +70,9 @@
                 <div class="evento-card">
                     <h3>{{ evento[1] }}</h3> <!-- Título do evento -->
                     <p>{{ evento[2] }}</p> <!-- Descrição do evento -->
-                    <p>Data do Evento: {{ evento[4] }}</p>
-                    <p>Período de Apostas: {{ evento[5] }} até {{ evento[6] }}</p>
+                    <!-- Aplicado o filtro 'formatdate' nas datas -->
+                    <p>Data do Evento: {{ evento[4]|formatdate }}</p>
+                    <p>Período de Apostas: {{ evento[5]|formatdate }} até {{ evento[6]|formatdate }}</p>
                     <p>Valor da Cota: R$ {{ '{:.2f}'.format(evento[3]) }}</p>
 
                     {% if session.get('logged_in') %}
@@ -135,7 +137,6 @@
         }
     </script>
 
-    <!-- Estilos para as mensagens flash (opcional) -->
     <style>
         .flashed-messages {
             list-style-type: none;
