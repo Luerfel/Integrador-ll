@@ -13,6 +13,14 @@ function closeModal() {
     document.getElementById('modal').style.display = 'none';
 }
 
+function openMenu() {
+    document.getElementById("sideMenu").style.width = "250px";
+}
+
+function closeMenu() {
+    document.getElementById("sideMenu").style.width = "0";
+}
+
 document.getElementById('apostar-btn').addEventListener('click', function(event) {
     event.preventDefault(); // Previne o comportamento padrão
 
