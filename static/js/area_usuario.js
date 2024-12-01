@@ -1,3 +1,26 @@
+function openModal(eventoId, eventoNome, aposta) {
+    // Preencher os dados do modal com as informações do evento
+    document.getElementById('modal-evento-nome').innerText = `Apostar em ${eventoNome}`;
+    document.getElementById('modal-evento-id').value = eventoId;
+    document.getElementById('modal-aposta').value = aposta;
+
+    // Exibir o modal
+    document.getElementById('modal').style.display = 'block';
+}
+
+function closeModal() {
+    // Ocultar o modal
+    document.getElementById('modal').style.display = 'none';
+}
+
+function openMenu() {
+    document.getElementById("sideMenu").style.width = "250px";
+}
+
+function closeMenu() {
+    document.getElementById("sideMenu").style.width = "0";
+}
+
 document.getElementById('apostar-btn').addEventListener('click', function(event) {
     event.preventDefault(); // Previne o comportamento padrão
 
@@ -16,28 +39,5 @@ document.getElementById('apostar-btn').addEventListener('click', function(event)
     }
 
     // Se a validação passar, submete o formulário manualmente
-    document.getElementById('apostar-form').submit();
-});
-
-document.getElementById('form-aposta').addEventListener('submit', function(e) {
-    e.preventDefault();  // Previne o envio normal do formulário
-
-    // Obtém os dados do formulário
-    const formData = new FormData(this);
-
-    // Faz a requisição AJAX
-    fetch('/apostar', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Aqui você pode abrir a janela de sucesso
-            alert(data.message);  // Ou outra lógica para abrir a janela
-        } else {
-            alert(data.message);  // Exibe a mensagem de erro
-        }
-    })
-    .catch(error => console.error('Erro:', error));
+    document.getElementById('form-aposta').submit();
 });

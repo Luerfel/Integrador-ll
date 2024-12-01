@@ -1073,6 +1073,28 @@ def adicionar_premio_na_carteira(id_usuario, valor_premio):
 
         conn.commit()
 
+@app.route('/evento/<int:evento_id>', methods=['GET'])
+def get_evento(evento_id):
+    conn = sqlite3.connect(database_path)
+    cursor = conn.cursor()
+    cursor.execute('SELECT id, titulo, descricao, data_evento, data_inicio_apostas, data_fim_apostas, valor_cota FROM eventos WHERE id = ?', (evento_id,))
+    evento = cursor.fetchone()
+    conn.close()
+
+    if evento:
+        evento_data = {
+            'id': evento[0],
+            'titulo': evento[1],
+            'descricao': evento[2],
+            'data_evento': evento[3],
+            'data_inicio_apostas': evento[4],
+            'data_fim_apostas': evento[5],
+            'valor_cota': evento[6]
+        }
+        return jsonify(evento_data)
+    else:
+        return jsonify({'error': 'Evento não encontrado'}), 404
+
 
 if __name__ == '__main__':
     app.run(debug=True)
