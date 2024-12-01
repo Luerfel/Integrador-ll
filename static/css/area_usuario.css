@@ -307,4 +307,66 @@ body {
     color: #fff;
 }
 
+/* Estilos para o modal */
+.modal {
+    display: none; /* Oculto por padrão */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.9); /* Fundo preto com opacidade */
+}
 
+.modal-content {
+    background-color: #333; /* Fundo preto */
+    color: white; /* Texto branco */
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 30%; /* Largura menor */
+    text-align: center; /* Centralizar texto */
+}
+
+.close {
+    color: white;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#form-aposta label, #form-aposta input, #form-aposta button {
+    display: block;
+    margin: 10px auto;
+    width: 80%;
+}
+
+#form-aposta input, #form-aposta button {
+    padding: 10px;
+    font-size: 16px;
+}
+
+#form-aposta button {
+    background-color: rgb(255, 255, 255); /* Cor de fundo magenta */
+    color: rgb(11, 1, 1); /* Cor do texto */
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    font-size: 16px;
+    margin: 10px auto;
+    display: block;
+    width: 80%;
+}
+
+#form-aposta button:hover {
+    background-color: #ffffff; /* Cor de fundo ao passar o mouse */
+}

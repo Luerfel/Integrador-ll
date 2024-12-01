@@ -114,8 +114,8 @@
                     <p>Total Apostado: R$ {{ '{:.2f}'.format(evento[-1] or 0) }}</p>
                     <p>Valor da Cota: R$ {{ '{:.2f}'.format(evento[3]) }}</p>
 
-                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'sim')">Apostar Sim</button>
-                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'nao')">Apostar Não</button>
+                    <button class="btn-apostar" onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'sim')">Apostar Sim</button>
+                    <button class="btn-apostar" onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'nao')">Apostar Não</button>
                 </div>
             {% else %}
                 <p>Nenhum evento disponível.</p>
@@ -137,8 +137,8 @@
                                 <p>Total Apostado: R$ {{ '{:.2f}'.format(evento[-1] or 0) }}</p>
                                 <p>Valor da Cota: R$ {{ '{:.2f}'.format(evento[3]) }}</p>
                                     <!-- Outros detalhes do evento -->
-                                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'sim')">Apostar Sim</button>
-                                    <button onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'nao')">Apostar Não</button>
+                                    <button class="btn-apostar" onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'sim')">Apostar Sim</button>
+                                    <button class="btn-apostar" onclick="openModal('{{ evento[0] }}', '{{ evento[1] }}', 'nao')">Apostar Não</button>
                                 </div>
                             {% endfor %}
                         {% else %}
@@ -221,6 +221,23 @@
     </footer>
 
     <script src="/static/js/area_usuario.js"></script>
+
+<!-- Modal -->
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modal-evento-nome"></h2>
+        <form id="form-aposta" action="{{ url_for('apostar') }}" method="POST">
+            <input type="hidden" id="modal-evento-id" name="evento_id">
+            <input type="hidden" id="modal-aposta" name="aposta">
+            <label for="valor_aposta">Valor da Aposta:</label>
+            <input type="number" id="valor_aposta" name="valor_aposta" min="1" required>
+            <button type="submit" id="apostar-btn">Confirmar Aposta</button>
+            <p id="erro-mensagem" style="color: red;"></p>
+        </form>
+    </div>
+</div>
+
 </body>
 
 </html>

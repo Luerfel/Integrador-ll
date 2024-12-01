@@ -221,7 +221,7 @@ button:hover {
 
 /* Estilo para os modais */
 .modal {
-    display: none;
+    display: none; /* Oculto por padrão */
     position: fixed;
     z-index: 1;
     left: 0;
@@ -229,31 +229,58 @@ button:hover {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0,0,0,0.7);
+    background-color: rgba(0, 0, 0, 0.9); /* Fundo preto com opacidade */
 }
 
 .modal-content {
-    background-color: #080E1A;
-    margin: 10% auto;
+    background-color: #333; /* Fundo preto */
+    color: white; /* Texto branco */
+    margin: 15% auto;
     padding: 20px;
     border: 1px solid #888;
-    width: 400px;
-    color: #fff;
-    border-radius: 10px;
+    width: 30%; /* Largura menor */
+    text-align: center; /* Centralizar texto */
 }
 
 .close {
-    color: #aaa;
+    color: white;
     float: right;
-    font-size: 24px;
+    font-size: 28px;
     font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #bbb;
+    text-decoration: none;
     cursor: pointer;
 }
 
-.close:hover, .close:focus {
-    color: #fff;
-    text-decoration: none;
+#form-aposta label, #form-aposta input, #form-aposta button {
+    display: block;
+    margin: 10px auto;
+    width: 80%;
+}
+
+#form-aposta input, #form-aposta button {
+    padding: 10px;
+    font-size: 16px;
+}
+
+#form-aposta button {
+    background-color: magenta; /* Cor de fundo magenta */
+    color: white; /* Cor do texto */
+    border: none;
     cursor: pointer;
+    padding: 10px;
+    font-size: 16px;
+    margin: 10px auto;
+    display: block;
+    width: 80%;
+}
+
+#form-aposta button:hover {
+    background-color: #cc00cc; /* Cor de fundo ao passar o mouse */
 }
 
 /* Estilo para os campos de entrada */
