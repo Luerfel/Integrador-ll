@@ -40,8 +40,7 @@ document.getElementById('form-aposta').addEventListener('submit', function(e) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Aqui você pode abrir a janela de sucesso
-            alert(data.message);  // Ou outra lógica para abrir a janela
+            alert(data.message);  
         } else {
             alert(data.message);  // Exibe a mensagem de erro
         }
